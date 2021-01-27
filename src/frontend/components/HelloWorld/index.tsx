@@ -1,6 +1,11 @@
 import React from "react";
 
 export const HelloWorld = () => {
+  React.useEffect(() => {
+    fetch("/api/ping").then((res) =>
+      res.json().then((res) => console.log(res))
+    );
+  }, []);
   return (
     <>
       <h1>Hello World</h1>
