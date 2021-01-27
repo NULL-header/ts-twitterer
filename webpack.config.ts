@@ -7,7 +7,7 @@ const webpackConfig = (env: {
   production: any;
   development: any;
 }): webpack.Configuration => ({
-  entry: "./src/index.tsx",
+  entry: "./src/frontend/index.tsx",
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
   },
@@ -47,7 +47,7 @@ const webpackConfig = (env: {
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./src/index.html" }),
+    new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
     new webpack.DefinePlugin({
       "process.env.PRODUCTION": env.production || !env.development,
       "process.env.NAME": JSON.stringify(packageJSON.name),
