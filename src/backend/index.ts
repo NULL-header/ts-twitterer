@@ -1,6 +1,9 @@
 import express from "express";
+import fsOrigin from "fs";
 import { CONSTVALUE } from "./CONSTVALUE";
 import Twitter from "twitter";
+import { getSample } from "tests/sampleTweets/getSample";
+const fs = fsOrigin.promises;
 
 const app = express();
 const twitterApi = new Twitter({
@@ -24,6 +27,18 @@ app
         res.send(result);
       })
       .catch((err) => console.log(err));
+  })
+  .get("/api/sample", (req, res) => {
+    fs.readFile("tests/sampleTweets/sample.json", {
+      encoding: "utf-8",
+    })
+      .then((content) => {
+        res.send(JSON.parse(content));
+      })
+      .catch((_err) => {
+        const content = getSample(twitterApi);
+        res.send(content);
+      });
   });
 
 app.listen(3000);
