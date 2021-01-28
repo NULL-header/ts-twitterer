@@ -2,7 +2,7 @@ import React from "react";
 
 export const HelloWorld = () => {
   React.useEffect(() => {
-    fetch("/api/ping").then((res) =>
+    fetch("/api/tweets").then((res) =>
       res.json().then((res) => console.log(res))
     );
   }, []);
