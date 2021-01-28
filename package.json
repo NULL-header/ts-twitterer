@@ -4,8 +4,11 @@
   "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/twitter": "^1.7.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "source-map-loader": "^1.1.3"
+    "source-map-loader": "^1.1.3",
+    "twitter": "^1.7.1"
   },
   "scripts": {
     "start": "yarn build && yarn tsnode",
