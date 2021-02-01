@@ -5,6 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "@types/twitter": "^1.7.0",
+    "@types/webpack-dev-middleware": "^4.1.0",
+    "@types/webpack-hot-middleware": "^2.25.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "react-hooks-async": "^3.10.1",
@@ -12,7 +14,9 @@
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
     "twitter": "^1.7.1",
-    "use-reducer-async": "^2.0.1"
+    "use-reducer-async": "^2.0.1",
+    "webpack-dev-middleware": "^4.1.0",
+    "webpack-hot-middleware": "^2.25.0"
   },
   "scripts": {
     "start": "yarn build && yarn start:backend",
@@ -54,7 +58,7 @@
     "html-webpack-plugin": "^4.3.0",
     "immutability-helper": "^3.1.1",
     "jest": "^26.1.0",
-    "nodemon": "^2.0.4",
+    "nodemon": "^2.0.7",
     "prettier": "^2.0.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
