@@ -1,4 +1,5 @@
 import React from "react";
+import { TimeLine } from "..";
 
 export const HelloWorld = () => {
   React.useEffect(() => {
@@ -20,6 +21,7 @@ export const HelloWorld = () => {
       <p>
         process.env.VERSION:<b>{process.env.VERSION}</b>
       </p>
+      <TimeLine />
     </>
   );
 };
