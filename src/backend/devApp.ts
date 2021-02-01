@@ -9,6 +9,9 @@ const compiler = webpack(config);
 
 export const devApp = app
   .use(
-    webpackDevMiddleware(compiler, { publicPath: config.output?.publicPath })
+    webpackDevMiddleware(compiler, {
+      publicPath: config.output?.publicPath,
+      stats: "errors-only",
+    })
   )
   .use(webpackHotMiddleware(compiler));
