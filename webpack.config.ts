@@ -4,11 +4,13 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
+import "webpack-dev-server";
+
 const webpackConfig = (env: {
   production: any;
   development: any;
 }): webpack.Configuration => ({
-  entry: "./src/frontend/index.tsx",
+  entry: { app: ["./src/frontend/index.tsx"] },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.build.json" })],
@@ -16,8 +18,14 @@ const webpackConfig = (env: {
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
+    publicPath: "/public/",
   },
   devtool: "#inline-source-map",
+  devServer: {
+    contentBase: path.join(__dirname, "public"),
+    port: 8080,
+    host: "localhost",
+  },
   module: {
     rules: [
       {

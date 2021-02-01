@@ -27,7 +27,8 @@
     "build": "webpack --mode production --env.production --progress",
     "lint": "eslint src/*.ts*",
     "lint:fix": "eslint src/*.ts* --fix",
-    "dev": "webpack-dev-server --mode development --env.development --open --hot --progress"
+    "dev": "nodemon",
+    "dev:start":"yarn start:backend --develop"
   },
   "devDependencies": {
     "@testing-library/dom": "^7.24.3",
