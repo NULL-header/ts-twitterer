@@ -10,7 +10,10 @@ const webpackConfig = (env: {
   production: any;
   development: any;
 }): webpack.Configuration => ({
-  entry: { app: ["./src/frontend/index.tsx"] },
+  entry: [
+    "webpack-hot-middleware/client?reload=true&timeout=1000",
+    "./src/frontend/index.tsx",
+  ],
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.build.json" })],
@@ -18,13 +21,14 @@ const webpackConfig = (env: {
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
-    publicPath: "/public/",
+    publicPath: "/",
   },
   devtool: "#inline-source-map",
   devServer: {
-    contentBase: path.join(__dirname, "public"),
+    contentBase: "src/frontend",
     port: 8080,
     host: "localhost",
+    open: true,
   },
   module: {
     rules: [
@@ -66,6 +70,7 @@ const webpackConfig = (env: {
       "process.env.VERSION": JSON.stringify(packageJSON.version),
     }),
     new ForkTsCheckerWebpackPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
   ],
 });
 
