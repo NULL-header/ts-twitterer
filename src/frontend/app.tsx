@@ -1,4 +1,9 @@
 import React from "react";
-import { HelloWorld } from "./components/HelloWorld";
+import { Provider } from "./globalState";
+import { LoadContainer } from "./components";
 
-export const App = () => <HelloWorld />;
+export const App = () => (
+  <Provider>
+    <LoadContainer />
+  </Provider>
+);
