@@ -35,7 +35,7 @@
     "build": "webpack --mode production --env.production --progress",
     "lint": "eslint src/*.ts*",
     "lint:fix": "eslint src/*.ts* --fix",
-    "dev": "nodemon",
+    "dev": "ts-node-dev -r tsconfig-paths/register src/backend/index.ts",
     "dev:start": "yarn start:backend --develop"
   },
   "devDependencies": {
