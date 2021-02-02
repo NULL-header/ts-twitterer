@@ -3,3 +3,5 @@ yarn-error.log
 /public/*
 !/public/empty
 .env
+
+/tests/sampleTweets/sample.json

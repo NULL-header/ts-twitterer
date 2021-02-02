@@ -1,21 +1,14 @@
 import React from "react";
 
-interface Props {
-  content: string;
-  username: string;
-  userid: string;
-  iconUrl: string;
-}
-
-export const Tweet: React.FC<Props> = React.memo((props) => {
+export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
   return (
     <div>
-      <div>{props.iconUrl}</div>
+      <div>{props.tweet.iconUrl}</div>
       <div>
-        <span>{props.username}</span>
-        <span>{props.userid}</span>
+        <span>{props.tweet.username}</span>
+        <span>{props.tweet.userid}</span>
       </div>
-      <div>{props.content}</div>
+      <div>{props.tweet.content}</div>
     </div>
   );
 });
