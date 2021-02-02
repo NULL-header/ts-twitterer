@@ -2,11 +2,6 @@ import React from "react";
 import { TimeLine } from "..";
 
 export const HelloWorld = () => {
-  React.useEffect(() => {
-    fetch("/api/sample").then((res) =>
-      res.json().then((res) => console.log(res))
-    );
-  }, []);
   return (
     <>
       <h1>Hello World</h1>
