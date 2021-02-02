@@ -8,18 +8,7 @@ export const TimeLine: React.FC = React.memo((_props) => {
   return (
     <div>
       {isLoading && "Loading..."}
-      {tweets.length > 0 &&
-        tweets.map((e, i) => (
-          <Tweet
-            key={i}
-            {...{
-              content: e.content,
-              iconUrl: e.iconUrl,
-              userid: e.userid,
-              username: e.username,
-            }}
-          />
-        ))}
+      {tweets.length > 0 && tweets.map((e, i) => <Tweet key={i} tweet={e} />)}
     </div>
   );
 });
