@@ -15,12 +15,10 @@ type State = {
   newestTweetDataId: number;
 };
 
-type Action =
-  | { type: "MODIFY"; state: Partial<State> }
-  | { type: "ADD_TWEETS"; tweets: Tweet[]; lastTweetId: number };
+type Action = { type: "MODIFY"; state: Partial<State> };
 type AsyncAction =
   | { type: "LOAD_NEW_TWEETS" }
-  | { type: "GET_TWEETS" }
+  | { type: "GET_TWEETS"; callback?: () => void }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" };
@@ -31,14 +29,6 @@ const reducer: GlobalReducer = (state, action) => {
   switch (action.type) {
     case "MODIFY": {
       return { ...state, ...action.state };
-    }
-    case "ADD_TWEETS": {
-      return {
-        ...state,
-        tweets: [...state.tweets, ...action.tweets],
-        isLoadingTweets: false,
-        lastTweetId: action.lastTweetId,
-      };
     }
   }
 };
@@ -52,14 +42,28 @@ const makeTweet = (tweetData: any): Tweet => {
   } as any;
 };
 
+const getNewTweetData = async (lastNewestTweetDataId: number) => {
+  const tweetResponse = await fetch("/api/sample");
+  console.log({ tweetResponse });
+  const tweetData = (await tweetResponse.json()) as any[];
+  const lastIndexOldTweetData = tweetData.findIndex(
+    (e) => e.id === lastNewestTweetDataId
+  );
+  const newTweetData =
+    lastIndexOldTweetData < 0
+      ? tweetData
+      : tweetData.slice(lastIndexOldTweetData + 1);
+
+  return newTweetData;
+};
+
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async () => {
     const state = getState();
     const lastTweetId = state.lastTweetId;
     const oldTweets = state.tweets;
     dispatch({ type: "MODIFY", state: { isLoadingTweets: true } });
-    const newTweetCollection = await db.tweets.where("id").above(lastTweetId);
-    const newTweets = await newTweetCollection.toArray();
+    const newTweets = await db.tweets.where("id").above(lastTweetId).toArray();
     if (signal.aborted) return;
     else if (newTweets.length === 0) {
       dispatch({ type: "MODIFY", state: { isLoadingTweets: false } });
@@ -93,19 +97,10 @@ const asyncReducer: GlobalAsyncReducer = {
       },
     });
   },
-  GET_TWEETS: ({ dispatch, signal, getState }) => async () => {
+  GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
     const lastNewestTweetDataId = getState().newestTweetDataId;
     dispatch({ type: "MODIFY", state: { isGettingTweets: true } });
-    const tweetResponse = await fetch("/api/sample");
-    console.log({ tweetResponse });
-    const tweetData = (await tweetResponse.json()) as any[];
-    const lastIndexOldTweetData = tweetData.findIndex(
-      (e) => e.id === lastNewestTweetDataId
-    );
-    const newTweetData =
-      lastIndexOldTweetData < 0
-        ? tweetData
-        : tweetData.slice(lastIndexOldTweetData + 1);
+    const newTweetData = await getNewTweetData(lastNewestTweetDataId);
     // It is to lose no got tweet data without writing to db.
     if (newTweetData.length === 0) {
       if (signal.aborted) return;
@@ -124,6 +119,7 @@ const asyncReducer: GlobalAsyncReducer = {
         newestTweetDataId: nextNewestTweetDataId,
       },
     });
+    action.callback && action.callback();
   },
   DELETE_CACHE_TWEETS: ({ dispatch, signal }) => async () => {
     dispatch({ type: "MODIFY", state: { isDeletingTweets: true } });
