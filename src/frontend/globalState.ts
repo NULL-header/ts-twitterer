@@ -18,6 +18,7 @@ type State = {
 type Action = { type: "MODIFY"; state: Partial<State> };
 type AsyncAction =
   | { type: "LOAD_NEW_TWEETS" }
+  // this callback is to use dispatch continuously.
   | { type: "GET_TWEETS"; callback?: () => void }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
