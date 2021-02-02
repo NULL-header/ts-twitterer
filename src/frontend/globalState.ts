@@ -61,7 +61,7 @@ const getNewTweetData = async (lastNewestTweetDataId: number) => {
 };
 
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async () => {
+  LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
     const state = getState();
     const lastTweetId = state.lastTweetId;
     const oldTweets = state.tweets;
@@ -81,6 +81,7 @@ const asyncReducer: GlobalAsyncReducer = {
         isLoadingTweets: false,
       },
     });
+    action.callback && action.callback();
   },
   INITIALIZE: ({ dispatch, signal }) => async () => {
     dispatch({ type: "MODIFY", state: { isInitializing: true } });
