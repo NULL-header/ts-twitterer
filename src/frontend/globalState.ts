@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { Reducer, useEffect } from "react";
+import { Reducer, useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { db } from "./db";
 import { AsyncActionHandlers, useReducerAsync } from "use-reducer-async";
@@ -10,6 +10,7 @@ type State = {
   isInitializing?: boolean;
   isDeletingTweets: boolean;
   isDeletingConfigs: boolean;
+  isUpdatingTweets: boolean;
   tweets: Tweet[];
   lastTweetId: number;
   newestTweetDataId: number;
@@ -17,12 +18,13 @@ type State = {
 
 type Action = { type: "MODIFY"; state: Partial<State> };
 type AsyncAction =
-  | { type: "LOAD_NEW_TWEETS" }
   // this callback is to use dispatch continuously.
+  | { type: "LOAD_NEW_TWEETS"; callback?: () => void }
   | { type: "GET_TWEETS"; callback?: () => void }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
-  | { type: "DELETE_CACHE_CONFIG" };
+  | { type: "DELETE_CACHE_CONFIG" }
+  | { type: "UPDATE_TWEETS"; dispatch: Dispatch<Action | AsyncAction> };
 type GlobalReducer = Reducer<State, Action>;
 type GlobalAsyncReducer = AsyncActionHandlers<GlobalReducer, AsyncAction>;
 
@@ -139,6 +141,16 @@ const asyncReducer: GlobalAsyncReducer = {
   DELETE_CACHE_CONFIG: () => async () => {
     return;
   },
+  UPDATE_TWEETS: () => async (action) => {
+    action.dispatch({ type: "MODIFY", state: { isUpdatingTweets: true } });
+    await new Promise((resolve) =>
+      action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
+    );
+    await new Promise((resolve) =>
+      action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
+    );
+    action.dispatch({ type: "MODIFY", state: { isUpdatingTweets: false } });
+  },
 };
 
 const useValue = () => {
@@ -150,6 +162,7 @@ const useValue = () => {
       isGettingTweets: false,
       isDeletingTweets: false,
       isDeletingConfigs: false,
+      isUpdatingTweets: false,
       lastTweetId: 0,
       tweets: [],
       newestTweetDataId: 0,

@@ -12,10 +12,14 @@ export const UpdateButton: React.FC = React.memo((_props) => {
   const deleteTweet = React.useCallback(() => {
     dispatch({ type: "DELETE_CACHE_TWEETS" });
   }, [dispatch]);
+  const updateTweet = React.useCallback(() => {
+    dispatch({ type: "UPDATE_TWEETS", dispatch });
+  }, [dispatch]);
   return (
     <div>
       <button onClick={getTweets}>get tweets</button>
       <button onClick={showTweets}>show tweets</button>
+      <button onClick={updateTweet}>update tweets</button>
       <button onClick={deleteTweet}>delete tweets</button>
     </div>
   );
