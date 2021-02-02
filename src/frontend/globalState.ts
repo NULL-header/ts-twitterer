@@ -19,8 +19,8 @@ type State = {
 type Action = { type: "MODIFY"; state: Partial<State> };
 type AsyncAction =
   // this callback is to use dispatch continuously.
-  | { type: "LOAD_NEW_TWEETS"; callback?: () => void }
-  | { type: "GET_TWEETS"; callback?: () => void }
+  | { type: "LOAD_NEW_TWEETS"; callback?: (isSuccess: boolean) => void }
+  | { type: "GET_TWEETS"; callback?: (isSuccess: boolean) => void }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
@@ -63,6 +63,11 @@ const getNewTweetData = async (lastNewestTweetDataId: number) => {
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
     const state = getState();
+    const sendResult =
+      action.callback ||
+      ((_arg: boolean) => {
+        return;
+      });
     const lastTweetId = state.lastTweetId;
     const oldTweets = state.tweets;
     dispatch({ type: "MODIFY", state: { isLoadingTweets: true } });
@@ -70,6 +75,7 @@ const asyncReducer: GlobalAsyncReducer = {
     if (signal.aborted) return;
     else if (newTweets.length === 0) {
       dispatch({ type: "MODIFY", state: { isLoadingTweets: false } });
+      sendResult(false);
       return;
     }
     const nextLastTweetId = newTweets[newTweets.length - 1].id;
@@ -81,7 +87,7 @@ const asyncReducer: GlobalAsyncReducer = {
         isLoadingTweets: false,
       },
     });
-    action.callback && action.callback();
+    sendResult(true);
   },
   INITIALIZE: ({ dispatch, signal }) => async () => {
     dispatch({ type: "MODIFY", state: { isInitializing: true } });
@@ -103,12 +109,18 @@ const asyncReducer: GlobalAsyncReducer = {
   },
   GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
     const lastNewestTweetDataId = getState().newestTweetDataId;
+    const sendResult =
+      action.callback ||
+      ((_arg: boolean) => {
+        return;
+      });
     dispatch({ type: "MODIFY", state: { isGettingTweets: true } });
     const newTweetData = await getNewTweetData(lastNewestTweetDataId);
     // It is to lose no got tweet data without writing to db.
     if (newTweetData.length === 0) {
       if (signal.aborted) return;
       dispatch({ type: "MODIFY", state: { isGettingTweets: false } });
+      sendResult(false);
       return;
     }
     const tweets = newTweetData.map((e) => makeTweet(e));
@@ -123,7 +135,7 @@ const asyncReducer: GlobalAsyncReducer = {
         newestTweetDataId: nextNewestTweetDataId,
       },
     });
-    action.callback && action.callback();
+    sendResult(true);
   },
   DELETE_CACHE_TWEETS: ({ dispatch, signal }) => async () => {
     dispatch({ type: "MODIFY", state: { isDeletingTweets: true } });
@@ -146,12 +158,13 @@ const asyncReducer: GlobalAsyncReducer = {
   },
   UPDATE_TWEETS: () => async (action) => {
     action.dispatch({ type: "MODIFY", state: { isUpdatingTweets: true } });
-    await new Promise((resolve) =>
+    const isSuccessGetting = await new Promise((resolve) =>
       action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
     );
-    await new Promise((resolve) =>
-      action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
-    );
+    if (isSuccessGetting)
+      await new Promise((resolve) =>
+        action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
+      );
     action.dispatch({ type: "MODIFY", state: { isUpdatingTweets: false } });
   },
 };
