@@ -13,7 +13,7 @@ const webpackConfig = (env: {
 }): webpack.Configuration => ({
   entry: [
     "webpack-hot-middleware/client?reload=true&timeout=1000",
-    "./src/frontend/index.tsx",
+    "./src/frontend/index.dev.tsx",
   ],
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
