@@ -3,6 +3,7 @@ import { Reducer, useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { db } from "./db";
 import { AsyncActionHandlers, useReducerAsync } from "use-reducer-async";
+import { CONSTVALUE } from "./CONSTVALUE";
 
 type State = {
   isLoadingTweets: boolean;
@@ -46,7 +47,7 @@ const makeTweet = (tweetData: any): Tweet => {
 };
 
 const getNewTweetData = async (lastNewestTweetDataId: number) => {
-  const tweetResponse = await fetch("/api/sample");
+  const tweetResponse = await fetch(CONSTVALUE.GET_TWEETS_URL);
   console.log({ tweetResponse });
   const tweetData = (await tweetResponse.json()) as any[];
   const lastIndexOldTweetData = tweetData.findIndex(
