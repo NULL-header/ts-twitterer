@@ -13,6 +13,14 @@ const twitterApi = new Twitter({
   consumer_secret: CONSTVALUE.CONSUMER_TOKEN_SECRET,
 });
 
+const getLoopThree = (() => {
+  let i = 0;
+  return () => {
+    if (i === 3) i = 0;
+    return i++;
+  };
+})();
+
 export const router = express
   .Router()
   .use(express.static("public"))
@@ -34,7 +42,8 @@ export const router = express
       encoding: "utf-8",
     })
       .then((content) => {
-        res.send(JSON.parse(content));
+        const samples = JSON.parse(content) as any[];
+        res.send(samples[getLoopThree()]);
       })
       .catch((_err) => {
         const content = getSample(twitterApi);
