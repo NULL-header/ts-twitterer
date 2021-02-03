@@ -4,18 +4,18 @@ const tweetColumnsFirst = [
   "++id",
   "username",
   "userid",
-  "iconUrl",
+  "icon_url",
   "content",
   "created_at",
 ];
 
-const configColumnsFirst = ["id", "last_tweet_id"];
+const configColumnsFirst = ["id", "last_tweet_id", "newest_tweet_data_id"];
 
 const makeSchema = (columns: string[]) => columns.join(", ");
 
 class MyDB extends Dexie {
-  tweets!: Dexie.Table<Tweet, number>;
-  configs!: Dexie.Table<Config, 0>;
+  tweets!: Dexie.Table<TweetColumns, number>;
+  configs!: Dexie.Table<ConfigColumns, 0>;
   constructor() {
     super("ts-twitterer");
 
