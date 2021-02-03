@@ -4,12 +4,21 @@ import Twitter from "twitter";
 const fs = fsOrigin.promises;
 
 export const getSample = async (twitterApi: Twitter) => {
-  const tweets = await twitterApi.get("lists/statuses", {
+  const tweets = (await twitterApi.get("lists/statuses", {
     list_id: CONSTVALUE.SAMPLE_LIST_ID,
-  });
-  fs.writeFile("tests/sampleTweets/sample.json", JSON.stringify(tweets), {
-    encoding: "utf-8",
-  }).then(() => console.log("sample updated"));
+  })) as any[];
+  const tweetsSplitted = [
+    tweets.slice(0, 7),
+    tweets.slice(7, 14),
+    tweets.slice(14),
+  ];
+  fs.writeFile(
+    "tests/sampleTweets/sample.json",
+    JSON.stringify(tweetsSplitted),
+    {
+      encoding: "utf-8",
+    }
+  ).then(() => console.log("sample updated"));
   return tweets;
 };
 
