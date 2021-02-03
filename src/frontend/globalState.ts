@@ -154,9 +154,6 @@ const asyncReducer: GlobalAsyncReducer = {
       state: {
         isDeletingTweets: false,
         tweets: [],
-        // it is so bad, but it is needed for test.
-        // it will be removed on production.
-        newestTweetDataId: 0,
         lastTweetId: 0,
       },
     });
