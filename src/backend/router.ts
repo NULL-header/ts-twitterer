@@ -38,7 +38,7 @@ export const router = express
       .catch((err) => console.log(err));
   })
   .get("/api/sample", (req, res) => {
-    fs.readFile("tests/sampleTweets/sample.json", {
+    fs.readFile(CONSTVALUE.SAMPLE_FILE_PATH, {
       encoding: "utf-8",
     })
       .then((content) => {

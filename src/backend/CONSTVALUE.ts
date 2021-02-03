@@ -8,4 +8,6 @@ export const CONSTVALUE = {
   CONSUMER_TOKEN: process.env.CONSUMER_TOKEN as string,
   CONSUMER_TOKEN_SECRET: process.env.CONSUMER_TOKEN_SECRET as string,
   SAMPLE_LIST_ID: process.env.SAMPLE_LIST_ID as string,
+  PORT: (parseInt(process.env.port as string) || 3000) as number,
+  SAMPLE_FILE_PATH: process.cwd() + "tests/sampleTweets/sample.json",
 };
