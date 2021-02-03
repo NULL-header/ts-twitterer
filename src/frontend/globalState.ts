@@ -109,12 +109,19 @@ const asyncReducer: GlobalAsyncReducer = {
     });
   },
   GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
-    const lastNewestTweetDataId = getState().newestTweetDataId;
+    const {
+      newestTweetDataId: lastNewestTweetDataId,
+      isGettingTweets,
+    } = getState();
     const sendResult =
       action.callback ||
       ((_arg: boolean) => {
         return;
       });
+    if (isGettingTweets) {
+      sendResult(false);
+      return;
+    }
     dispatch({ type: "MODIFY", state: { isGettingTweets: true } });
     const newTweetData = await getNewTweetData(lastNewestTweetDataId);
     // It is to lose no got tweet data without writing to db.
