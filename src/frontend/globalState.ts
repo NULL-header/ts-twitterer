@@ -197,10 +197,19 @@ const asyncReducer: GlobalAsyncReducer = {
     sendResult(true);
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
-    adjustFlag("isDeletingTweets", args, async () => db.tweets.clear());
+    adjustFlag("isDeletingTweets", args, async () => {
+      await db.tweets.clear();
+      args.dispatch({ type: "MODIFY", state: { tweets: [] } });
+    });
   },
   DELETE_CACHE_CONFIG: (args) => async () => {
-    adjustFlag("isDeletingConfigs", args, async () => db.configs.clear());
+    adjustFlag("isDeletingConfigs", args, async () => {
+      await db.configs.clear();
+      args.dispatch({
+        type: "MODIFY",
+        state: { lastTweetId: 0, newestTweetDataId: 0 },
+      });
+    });
   },
   UPDATE_TWEETS: () => async (action) => {
     action.dispatch({ type: "MODIFY", state: { isUpdatingTweets: true } });
