@@ -1,10 +1,10 @@
 import { app } from "./app";
 import { devApp } from "./devApp";
+import { CONSTVALUE } from "./CONSTVALUE";
 
-const port = 3000;
 if (process.env.production) {
-  app.listen(port);
+  app.listen(CONSTVALUE.PORT);
 } else {
-  devApp.listen(port);
+  devApp.listen(CONSTVALUE.PORT);
   console.log("devMode");
 }
