@@ -68,7 +68,7 @@ const webpackConfig = (env: {
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
+    new HtmlWebpackPlugin({ template: "./src/frontend/index.dev.html" }),
     new webpack.DefinePlugin({
       "process.env.PRODUCTION": env.production || !env.development,
       "process.env.NAME": JSON.stringify(packageJSON.name),
@@ -78,6 +78,10 @@ const webpackConfig = (env: {
     new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
   ],
+  externals: {
+    react: "React",
+    "react-dom": "ReactDOM",
+  },
 });
 
 export default webpackConfig;
