@@ -1,5 +1,4 @@
 import React from "react";
-import { TimeLine } from "..";
 
 export const HelloWorld = () => {
   return (
@@ -16,7 +15,6 @@ export const HelloWorld = () => {
       <p>
         process.env.VERSION:<b>{process.env.VERSION}</b>
       </p>
-      <TimeLine />
     </>
   );
 };
