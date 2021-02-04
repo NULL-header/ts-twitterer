@@ -7,6 +7,7 @@ const tweetColumnsFirst = [
   "icon_url",
   "content",
   "created_at",
+  "*media",
 ];
 
 const configColumnsFirst = ["id", "last_tweet_id", "newest_tweet_data_id"];
