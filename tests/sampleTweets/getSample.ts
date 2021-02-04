@@ -18,7 +18,7 @@ export const getSample = async (twitterApi: Twitter) => {
       encoding: "utf-8",
     }
   ).then(() => console.log("sample updated"));
-  return tweets;
+  return tweetsSplitted;
 };
 
 if (require.main === module) {

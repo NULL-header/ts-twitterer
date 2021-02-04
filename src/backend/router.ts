@@ -48,6 +48,7 @@ export const router = express
         res.send(samples[getLoopThree()]);
       })
       .catch((_err) => {
+        console.log(_err);
         getSample(twitterApi).then((result) =>
           res.send(result[getLoopThree()])
         );
