@@ -3,6 +3,7 @@ import fsOrigin from "fs";
 import { CONSTVALUE } from "./CONSTVALUE";
 import Twitter from "twitter";
 import { getSample } from "tests/sampleTweets/getSample";
+import { getNewTweetLows } from "./util";
 
 const fs = fsOrigin.promises;
 
@@ -28,13 +29,14 @@ export const router = express
     res.send({ response: "pong!" });
   })
   .get("/api/tweets", (req, res) => {
-    console.log(CONSTVALUE);
-    twitterApi
-      .get("lists/statuses", { list_id: CONSTVALUE.SAMPLE_LIST_ID })
-      .then((result) => {
-        console.log(JSON.stringify(result));
-        res.send(result);
-      })
+    const { last_newest_tweet_data_id: lastNewestTweetDataIdQuery } = req.query;
+    const lastNewestTweetDataId = parseInt(
+      lastNewestTweetDataIdQuery as string
+    );
+    if (lastNewestTweetDataId == null)
+      res.status(400).send({ message: "pass last_newest_tweet_data_id" });
+    getNewTweetLows(lastNewestTweetDataId, twitterApi)
+      .then((result) => res.send(result))
       .catch((err) => console.log(err));
   })
   .get("/api/sample", (req, res) => {
@@ -46,7 +48,6 @@ export const router = express
         res.send(samples[getLoopThree()]);
       })
       .catch((_err) => {
-        const content = getSample(twitterApi);
-        res.send(content);
+        getSample(twitterApi).then((result) => res.send(result));
       });
   });
