@@ -48,6 +48,8 @@ export const router = express
         res.send(samples[getLoopThree()]);
       })
       .catch((_err) => {
-        getSample(twitterApi).then((result) => res.send(result));
+        getSample(twitterApi).then((result) =>
+          res.send(result[getLoopThree()])
+        );
       });
   });
