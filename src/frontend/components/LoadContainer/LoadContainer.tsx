@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "src/frontend/globalState";
+import { useSelector } from "src/src/frontend/globalState";
 import { HelloWorld } from "src/frontend/components/HelloWorld";
 
 export const LoadContainer: React.FC = React.memo((_props) => {

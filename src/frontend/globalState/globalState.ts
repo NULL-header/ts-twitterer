@@ -1,9 +1,10 @@
 /* eslint-disable camelcase */
 import { Reducer, useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
-import { db } from "./db";
+import { db } from "../db";
 import { AsyncActionHandlers, useReducerAsync } from "use-reducer-async";
-import { CONSTVALUE } from "./CONSTVALUE";
+import { loadNewTweets, loadOldTweets } from "./loadTweets";
+import { getTweetLows } from "./getTweetLows";
 
 type Flags = {
   isLoadingTweets: boolean;
@@ -40,37 +41,6 @@ const reducer: GlobalReducer = (state, action) => {
       return { ...state, ...action.state };
     }
   }
-};
-
-const makeTweet = (low: TweetColumns): Tweet => {
-  const {
-    content,
-    created_at: createdAt,
-    dataid,
-    userid,
-    username,
-    icon_url: iconUrl,
-    id,
-  } = low;
-  return {
-    content,
-    createdAt,
-    dataid,
-    username,
-    userid,
-    id,
-    iconUrl,
-  };
-};
-
-const getNewTweetData = async (lastNewestTweetDataId: number) => {
-  const tweetResponse = await fetch(
-    CONSTVALUE.GET_TWEETS_URL +
-      "?last_newest_tweet_data_id=" +
-      lastNewestTweetDataId.toString
-  );
-  console.log({ tweetResponse });
-  return (await tweetResponse.json()) as Tweet[];
 };
 
 const makeConfigLow = (state: State): ConfigColumns => {
@@ -113,19 +83,15 @@ const asyncReducer: GlobalAsyncReducer = {
       return;
     }
     adjustFlag("isLoadingTweets", { dispatch, signal }, async () => {
-      const newTweetLows = await db.tweets
-        .where("id")
-        .above(lastTweetId)
-        .toArray();
-      if (newTweetLows.length === 0) {
+      const tweets = await loadNewTweets(lastTweetId);
+      if (tweets.length === 0) {
         sendResult(false);
         return;
       }
-      const newTweets = newTweetLows.map((e) => makeTweet(e));
-      const nextLastTweetId = newTweets[newTweets.length - 1].id;
+      const nextLastTweetId = tweets[tweets.length - 1].id;
       sendResult(true);
       return {
-        tweets: [...oldTweets, ...newTweets],
+        tweets: [...oldTweets, ...tweets],
         lastTweetId: nextLastTweetId,
       };
     });
@@ -135,11 +101,7 @@ const asyncReducer: GlobalAsyncReducer = {
       const configsNullable = await db.configs.get(0);
       const configs =
         configsNullable || ({ last_tweet_id: 0 } as ConfigColumns);
-      const lastTweetLows = await db.tweets
-        .where("id")
-        .below(configs.last_tweet_id)
-        .toArray();
-      const lastTweets = lastTweetLows.map((e) => makeTweet(e));
+      const lastTweets = await loadOldTweets(configs.last_tweet_id);
       return {
         tweets: lastTweets,
         lastTweetId: configs.last_tweet_id,
@@ -157,7 +119,7 @@ const asyncReducer: GlobalAsyncReducer = {
       return;
     }
     adjustFlag("isGettingTweets", { dispatch, signal }, async () => {
-      const tweetLows = await getNewTweetData(lastNewestTweetDataId);
+      const tweetLows = await getTweetLows(lastNewestTweetDataId);
       if (tweetLows.length === 0) {
         sendResult(false);
         return;

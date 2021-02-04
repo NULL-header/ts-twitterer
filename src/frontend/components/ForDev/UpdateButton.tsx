@@ -1,5 +1,5 @@
 import React from "react";
-import { useUpdate } from "src/frontend/globalState";
+import { useUpdate } from "src/src/frontend/globalState";
 
 export const UpdateButton: React.FC = React.memo((_props) => {
   const dispatch = useUpdate();

@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "src/frontend/globalState";
+import { useSelector } from "src/src/frontend/globalState";
 import { Tweet } from "src/frontend/components";
 
 export const TimeLine: React.FC = React.memo((_props) => {
