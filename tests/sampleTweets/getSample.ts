@@ -1,12 +1,11 @@
 import fsOrigin from "fs";
 import { CONSTVALUE } from "src/backend/CONSTVALUE";
 import Twitter from "twitter";
+import { getNewTweetLows } from "src/backend/util";
 const fs = fsOrigin.promises;
 
 export const getSample = async (twitterApi: Twitter) => {
-  const tweets = (await twitterApi.get("lists/statuses", {
-    list_id: CONSTVALUE.SAMPLE_LIST_ID,
-  })) as any[];
+  const tweets = await getNewTweetLows(0, twitterApi);
   const tweetsSplitted = [
     tweets.slice(0, 7),
     tweets.slice(7, 14),
@@ -30,5 +29,5 @@ if (require.main === module) {
     consumer_secret: CONSTVALUE.CONSUMER_TOKEN_SECRET,
   });
   console.log("run getSample");
-  getSample(twitterApi);
+  getSample(twitterApi).catch((e) => console.log(e));
 }
