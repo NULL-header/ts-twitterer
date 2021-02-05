@@ -4,4 +4,4 @@ yarn-error.log
 !/public/empty
 .env
 
-/tests/sampleTweets/sample.json
+/tests/sampleTweets/sample*

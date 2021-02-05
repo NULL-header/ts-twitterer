@@ -26,7 +26,11 @@ type Action = { type: "MODIFY"; state: Partial<State> };
 type AsyncAction =
   // this callback is to use dispatch continuously.
   | { type: "LOAD_NEW_TWEETS"; callback?: (isSuccess: boolean) => void }
-  | { type: "GET_TWEETS"; callback?: (isSuccess: boolean) => void }
+  | {
+      type: "GET_TWEETS";
+      listId: string;
+      callback?: (isSuccess: boolean) => void;
+    }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
@@ -119,7 +123,10 @@ const asyncReducer: GlobalAsyncReducer = {
       return;
     }
     adjustFlag("isGettingTweets", { dispatch, signal }, async () => {
-      const tweetLows = await getTweetLows(lastNewestTweetDataId);
+      const tweetLows = await getTweetLows(
+        lastNewestTweetDataId,
+        action.listId
+      );
       if (tweetLows.length === 0) {
         sendResult(false);
         return;
@@ -140,20 +147,20 @@ const asyncReducer: GlobalAsyncReducer = {
   DELETE_CACHE_CONFIG: (args) => async () => {
     adjustFlag("isDeletingConfigs", args, async () => {
       await db.configs.clear();
-      return { lastTweetId: 0, newestTweetDataId: 0 };
+      return { lastTweetId: 0, newestTweetDataId: "" };
     });
   },
   UPDATE_TWEETS: (args) => async (action) => {
-    adjustFlag("isUpdatingTweets", args, async () => {
-      const isSuccessGetting = await new Promise((resolve) =>
-        action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
-      );
-      if (isSuccessGetting)
-        await new Promise((resolve) =>
-          action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
-        );
-      return undefined;
-    });
+    // adjustFlag("isUpdatingTweets", args, async () => {
+    //   const isSuccessGetting = await new Promise((resolve) =>
+    //     action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
+    //   );
+    //   if (isSuccessGetting)
+    //     await new Promise((resolve) =>
+    //       action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
+    //     );
+    //   return undefined;
+    // });
   },
   WRITE_CONFIG: (args) => async () => {
     const configLow = makeConfigLow(args.getState());
@@ -177,7 +184,7 @@ const useValue = () => {
       isWritingConfig: false,
       lastTweetId: 0,
       tweets: [],
-      newestTweetDataId: 0,
+      newestTweetDataId: "",
     } as State,
     asyncReducer
   );

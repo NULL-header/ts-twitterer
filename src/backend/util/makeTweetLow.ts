@@ -2,10 +2,9 @@
 import { makeMedia } from "./makeMedia";
 import { removeUrl } from "./removeUrl";
 export const makeTweetLow = (tweetData: any) => {
-  console.log(tweetData);
   const {
     full_text: contentData,
-    id: dataid,
+    id_str: dataid,
     created_at,
     user: { screen_name: userid, name: username, profile_image_url: icon_url },
     entities: { media: mediaData },
