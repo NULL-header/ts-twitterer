@@ -1,19 +1,19 @@
-import Twitter from "twitter";
-import { CONSTVALUE } from "../CONSTVALUE";
 import { makeTweetLow } from "./makeTweetLow";
+import { twitterApi } from "../twitterApi";
 
 export const getNewTweetLows = async (
-  lastNewestTweetDataId: number,
-  twitter: Twitter
+  lastNewestTweetDataId: string,
+  listId: string
 ) => {
-  const response = await twitter.get("lists/statuses", {
-    list_id: CONSTVALUE.SAMPLE_LIST_ID,
-    // include_rts: true,
-    tweet_mode: "extended",
-  });
-  console.log(
-    response.map((e: any) => e.entities.media).filter((e: any) => e)[0][0].sizes
-  );
+  console.log("getNew");
+  const response = (await twitterApi
+    .get("lists/statuses", {
+      list_id: listId,
+      // include_rts: true,
+      tweet_mode: "extended",
+    })
+    .catch((err) => console.log(err))) as any[];
+  console.log(response);
   const lastIndexOldTweetData = (response as any[]).findIndex(
     (e) => e.id === lastNewestTweetDataId
   );
