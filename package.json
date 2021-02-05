@@ -29,7 +29,6 @@
   "scripts": {
     "start": "yarn build && yarn start:backend",
     "start:backend": "yarn tsnode src/backend/index.ts",
-    "start:getSample": "yarn tsnode tests/sampleTweets/getSample.ts",
     "tsnode": "ts-node -r tsconfig-paths/register",
     "watch": "tsc -p tsconfig.json -w",
     "build": "webpack --mode production --env.production --progress",
