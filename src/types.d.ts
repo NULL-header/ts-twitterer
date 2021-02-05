@@ -13,7 +13,7 @@ interface MediaColumns {
 
 interface Tweet {
   id: number;
-  dataid: number;
+  dataid: string;
   username: string;
   userid: string;
   iconUrl: string;
@@ -24,7 +24,7 @@ interface Tweet {
 
 interface TweetColumns {
   id: number;
-  dataid: number;
+  dataid: string;
   username: string;
   userid: string;
   icon_url: string;
@@ -35,11 +35,11 @@ interface TweetColumns {
 
 interface Configs {
   lastTweetId: number;
-  newestTweetDataId: number;
+  newestTweetDataId: string;
 }
 
 interface ConfigColumns {
   id: 0;
   last_tweet_id: number;
-  newest_tweet_data_id: number;
+  newest_tweet_data_id: string;
 }
