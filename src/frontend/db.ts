@@ -9,6 +9,7 @@ const tweetColumnsFirst = [
   "created_at",
   "*media",
   "list_id",
+  "[id+list_id]",
 ];
 
 const configColumnsFirst = [
