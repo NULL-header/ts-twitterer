@@ -10,7 +10,12 @@ const tweetColumnsFirst = [
   "*media",
 ];
 
-const configColumnsFirst = ["id", "last_tweet_id", "newest_tweet_data_id"];
+const configColumnsFirst = [
+  "id",
+  "last_tweet_id",
+  "newest_tweet_data_id",
+  "*list_ids",
+];
 
 const makeSchema = (columns: string[]) => columns.join(", ");
 

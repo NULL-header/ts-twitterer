@@ -185,6 +185,7 @@ const useValue = () => {
       lastTweetId: 0,
       tweets: [],
       newestTweetDataId: "",
+      listIds: [],
     } as State,
     asyncReducer
   );
