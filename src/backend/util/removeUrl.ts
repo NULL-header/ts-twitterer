@@ -3,7 +3,9 @@ export const removeUrl = (
   contentData: string
 ) => {
   return indicesArray.reduce(
-    (a, [firstIndex, lastIndex]) => a.slice(0, firstIndex) + a.slice(lastIndex),
+    (a, [firstIndex, lastIndex]) =>
+      a.slice(0, firstIndex) +
+      (contentData.length - 1 === lastIndex ? "" : a.slice(lastIndex)),
     contentData
   );
 };
