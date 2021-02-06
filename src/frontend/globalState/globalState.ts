@@ -5,6 +5,7 @@ import { db } from "../db";
 import { AsyncActionHandlers, useReducerAsync } from "use-reducer-async";
 import { loadNewTweets, loadOldTweets } from "./loadTweets";
 import { getTweetLows } from "./getTweetLows";
+import { makeConfigs } from "./makeConfigs";
 
 type Flags = {
   isLoadingTweets: boolean;
@@ -17,7 +18,7 @@ type Flags = {
 };
 
 type AppData = {
-  tweets: Record<string, Tweet[]>;
+  tweetGroup: Record<string, Tweet[]>;
 };
 
 type State = Flags & Configs & AppData;
@@ -28,7 +29,6 @@ type AsyncAction =
   | { type: "LOAD_NEW_TWEETS"; callback?: (isSuccess: boolean) => void }
   | {
       type: "GET_TWEETS";
-      listId: string;
       callback?: (isSuccess: boolean) => void;
     }
   | { type: "INITIALIZE" }
@@ -49,12 +49,18 @@ const reducer: GlobalReducer = (state, action) => {
 
 const makeConfigLow = (state: State): ConfigColumns => {
   const {
-    lastTweetId: last_tweet_id,
-    newestTweetDataId: newest_tweet_data_id,
+    lastTweetIdGroup: last_tweet_id_group,
+    newestTweetDataIdGroup: newest_tweet_data_id_group,
     listIds: list_ids,
     currentList: current_list,
   } = state;
-  return { last_tweet_id, newest_tweet_data_id, id: 0, list_ids, current_list };
+  return {
+    last_tweet_id_group,
+    newest_tweet_data_id_group,
+    id: 0,
+    list_ids,
+    current_list,
+  };
 };
 
 const adjustFlag = async (
@@ -82,74 +88,114 @@ const makeSendResult = (
 
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
-    const { lastTweetId, tweets: oldTweets, isLoadingTweets } = getState();
+    const {
+      lastTweetIdGroup: oldLastTweetIdGroup,
+      tweetGroup: oldTweetGroup,
+      isLoadingTweets,
+      listIds,
+    } = getState();
     const sendResult = makeSendResult(signal, action.callback);
     if (isLoadingTweets) {
       sendResult(false);
       return;
     }
     adjustFlag("isLoadingTweets", { dispatch, signal }, async () => {
-      const tweets = await loadNewTweets(lastTweetId);
-      if (tweets.length === 0) {
-        sendResult(false);
-        return;
-      }
-      const nextLastTweetId = tweets[tweets.length - 1].id;
+      console.log("start load");
+      const tweetsArray = await Promise.all(
+        listIds.map((listId) =>
+          loadNewTweets(oldLastTweetIdGroup[listId], listId)
+        )
+      );
+      console.log({ tweetsArray });
+      let count = 0;
+      const { lastTweetIdGroup, tweetGroup } = listIds.reduce(
+        (a, listId, i) => {
+          const current = tweetsArray[i];
+          if (current.length === 0) {
+            a.tweetGroup[listId] = oldTweetGroup[listId];
+            a.lastTweetIdGroup[listId] = oldLastTweetIdGroup[listId];
+            return a;
+          }
+          count++;
+          a.tweetGroup[listId] = [...oldTweetGroup[listId], ...current];
+          a.lastTweetIdGroup[listId] = current[current.length - 1].id;
+          return a;
+        },
+        { tweetGroup: {}, lastTweetIdGroup: {} } as {
+          tweetGroup: Record<string, Tweet[]>;
+          lastTweetIdGroup: Record<string, number>;
+        }
+      );
       sendResult(true);
-      return {
-        tweets: [...oldTweets, ...tweets],
-        lastTweetId: nextLastTweetId,
-      };
+      return count === 0
+        ? {}
+        : {
+            tweetGroup,
+            lastTweetIdGroup,
+          };
     });
   },
   INITIALIZE: ({ dispatch, signal }) => async () => {
     adjustFlag("isInitializing", { dispatch, signal }, async () => {
-      const configsNullable = await db.configs.get(0);
-      const configs =
-        configsNullable || ({ last_tweet_id: 0 } as ConfigColumns);
-      const lastTweets = await loadOldTweets(configs.last_tweet_id);
-      return {
-        tweets: lastTweets,
-        lastTweetId: configs.last_tweet_id,
-      };
+      const configColumns = await db.configs.get(0);
+      if (configColumns == null) return;
+      const configs = makeConfigs(configColumns);
+      const oldTweetsArray = await Promise.all(
+        configs.listIds.map((listId) =>
+          loadOldTweets(configs.lastTweetIdGroup[listId], listId)
+        )
+      );
+      const oldTweetGroup = configs.listIds.reduce((a, listId, i) => {
+        a[listId] = oldTweetsArray[i];
+        return a;
+      }, {} as Record<string, Tweet[]>);
+      return { ...configs, tweetGroup: oldTweetGroup };
     });
   },
   GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
     const {
-      newestTweetDataId: lastNewestTweetDataId,
+      newestTweetDataIdGroup: lastNewestTweetDataIdGroup,
       isGettingTweets,
+      listIds,
     } = getState();
+    console.log({ lastNewestTweetDataIdGroup, isGettingTweets, listIds });
     const sendResult = makeSendResult(signal, action.callback);
-    if (isGettingTweets) {
+    if (isGettingTweets || listIds.length === 0) {
       sendResult(false);
       return;
     }
     adjustFlag("isGettingTweets", { dispatch, signal }, async () => {
-      const tweetLows = await getTweetLows(
-        lastNewestTweetDataId,
-        action.listId
+      const tweetLowsArray = await Promise.all(
+        listIds.map((listId) =>
+          getTweetLows(lastNewestTweetDataIdGroup[listId], listId)
+        )
       );
+      const tweetLows = tweetLowsArray.flat();
       if (tweetLows.length === 0) {
         sendResult(false);
         return;
       }
       console.log({ tweetLows });
       await db.tweets.bulkAdd(tweetLows as any);
-      const nextNewestTweetDataId = tweetLows[tweetLows.length - 1].dataid;
+      const newestTweetDataIdGroup = listIds.reduce((a, listId, i) => {
+        const current = tweetLowsArray[i];
+        a[listId] = current[current.length - 1].dataid;
+        return a;
+      }, {} as Record<string, string>);
       sendResult(true);
-      return { newestTweetDataId: nextNewestTweetDataId };
+      return { newestTweetDataIdGroup };
     });
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
     adjustFlag("isDeletingTweets", args, async () => {
       await db.tweets.clear();
-      return { tweets: [] };
+      return { tweetGroup: {} };
     });
   },
   DELETE_CACHE_CONFIG: (args) => async () => {
     adjustFlag("isDeletingConfigs", args, async () => {
       await db.configs.clear();
-      return { lastTweetId: 0, newestTweetDataId: "" };
+      return { lastTweetIdGroup: {}, newestTweetDataIdGroup: {} };
     });
   },
   UPDATE_TWEETS: (args) => async (action) => {
@@ -185,7 +231,7 @@ const useValue = () => {
       isUpdatingTweets: false,
       isWritingConfig: false,
       lastTweetIdGroup: {},
-      tweets: {},
+      tweetGroup: {},
       newestTweetDataIdGroup: {},
       listIds: [],
       currentList: "",
