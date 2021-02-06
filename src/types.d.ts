@@ -20,6 +20,7 @@ interface Tweet {
   content: string;
   createdAt: string;
   media?: Media[];
+  listId: string;
 }
 
 interface TweetColumns {
@@ -31,19 +32,20 @@ interface TweetColumns {
   content: string;
   created_at: string;
   media?: MediaColumns[];
+  list_id: string;
 }
 
 interface Configs {
-  lastTweetId: number;
-  newestTweetDataId: string;
+  lastTweetIdGroup: Record<string, number>;
+  newestTweetDataIdGroup: Record<string, string>;
   listIds: string[];
   currentList: string;
 }
 
 interface ConfigColumns {
   id: 0;
-  last_tweet_id: number;
-  newest_tweet_data_id: string;
+  last_tweet_id_group: Record<string, number>;
+  newest_tweet_data_id_group: Record<string, string>;
   list_ids: string[];
   current_list: string;
 }

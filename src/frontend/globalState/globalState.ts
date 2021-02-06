@@ -17,7 +17,7 @@ type Flags = {
 };
 
 type AppData = {
-  tweets: Tweet[];
+  tweets: Record<string, Tweet[]>;
 };
 
 type State = Flags & Configs & AppData;
@@ -184,9 +184,9 @@ const useValue = () => {
       isDeletingConfigs: false,
       isUpdatingTweets: false,
       isWritingConfig: false,
-      lastTweetId: 0,
-      tweets: [],
-      newestTweetDataId: "",
+      lastTweetIdGroup: {},
+      tweets: {},
+      newestTweetDataIdGroup: {},
       listIds: [],
       currentList: "",
     } as State,
