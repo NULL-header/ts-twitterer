@@ -51,8 +51,10 @@ const makeConfigLow = (state: State): ConfigColumns => {
   const {
     lastTweetId: last_tweet_id,
     newestTweetDataId: newest_tweet_data_id,
+    listIds: list_ids,
+    currentList: current_list,
   } = state;
-  return { last_tweet_id, newest_tweet_data_id, id: 0 };
+  return { last_tweet_id, newest_tweet_data_id, id: 0, list_ids, current_list };
 };
 
 const adjustFlag = async (
@@ -186,6 +188,7 @@ const useValue = () => {
       tweets: [],
       newestTweetDataId: "",
       listIds: [],
+      currentList: "",
     } as State,
     asyncReducer
   );
