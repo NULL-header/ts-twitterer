@@ -15,6 +15,7 @@ const configColumnsFirst = [
   "last_tweet_id",
   "newest_tweet_data_id",
   "*list_ids",
+  "current_list",
 ];
 
 const makeSchema = (columns: string[]) => columns.join(", ");

@@ -37,10 +37,13 @@ interface Configs {
   lastTweetId: number;
   newestTweetDataId: string;
   listIds: string[];
+  currentList: string;
 }
 
 interface ConfigColumns {
   id: 0;
   last_tweet_id: number;
   newest_tweet_data_id: string;
+  list_ids: string[];
+  current_list: string;
 }
