@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { makeMedia } from "./makeMedia";
 import { removeUrl } from "./removeUrl";
-export const makeTweetLow = (tweetData: any) => {
+export const makeTweetLow = (tweetData: any, listId: string) => {
   const {
     full_text: contentData,
     id_str: dataid,
@@ -26,6 +26,7 @@ export const makeTweetLow = (tweetData: any) => {
     userid,
     username,
     icon_url,
+    list_id: listId,
     media,
   } as const;
 };

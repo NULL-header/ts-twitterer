@@ -11,6 +11,7 @@ export const makeTweets = async (
       userid,
       dataid,
       username,
+      list_id: listId,
     } = e;
     const media: Media[] | undefined = mediaColumns
       ? mediaColumns.map((e) => {
@@ -18,6 +19,16 @@ export const makeTweets = async (
           return { mediaUrl, sizes, type: mediaType };
         })
       : undefined;
-    return { content, media, id, createdAt, iconUrl, userid, dataid, username };
+    return {
+      content,
+      media,
+      id,
+      createdAt,
+      iconUrl,
+      userid,
+      dataid,
+      username,
+      listId,
+    };
   });
 };
