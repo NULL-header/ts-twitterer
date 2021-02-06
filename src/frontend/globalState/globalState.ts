@@ -117,6 +117,7 @@ const asyncReducer: GlobalAsyncReducer = {
             return a;
           }
           count++;
+          console.log(oldTweetGroup);
           a.tweetGroup[listId] = [...oldTweetGroup[listId], ...current];
           a.lastTweetIdGroup[listId] = current[current.length - 1].id;
           return a;
@@ -199,16 +200,16 @@ const asyncReducer: GlobalAsyncReducer = {
     });
   },
   UPDATE_TWEETS: (args) => async (action) => {
-    // adjustFlag("isUpdatingTweets", args, async () => {
-    //   const isSuccessGetting = await new Promise((resolve) =>
-    //     action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
-    //   );
-    //   if (isSuccessGetting)
-    //     await new Promise((resolve) =>
-    //       action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
-    //     );
-    //   return undefined;
-    // });
+    adjustFlag("isUpdatingTweets", args, async () => {
+      const isSuccessGetting = await new Promise((resolve) =>
+        action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
+      );
+      if (isSuccessGetting)
+        await new Promise((resolve) =>
+          action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
+        );
+      return undefined;
+    });
   },
   WRITE_CONFIG: (args) => async () => {
     const configLow = makeConfigLow(args.getState());
