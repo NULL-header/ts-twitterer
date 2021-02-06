@@ -21,5 +21,5 @@ export const getNewTweetLows = async (
     lastIndexOldTweetData < 0
       ? response
       : response.slice(lastIndexOldTweetData + 1);
-  return newTweetData.map((e) => makeTweetLow(e));
+  return newTweetData.map((e) => makeTweetLow(e, listId));
 };
