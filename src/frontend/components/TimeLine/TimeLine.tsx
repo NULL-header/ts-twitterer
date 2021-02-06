@@ -5,12 +5,17 @@ import { useStyles } from "./style";
 
 export const TimeLine: React.FC = React.memo((_props) => {
   const isLoading = useSelector((state) => state.isLoadingTweets);
-  const tweets = useSelector((state) => state.tweets);
+  const currentList = useSelector((state) => state.currentList);
+  const tweetGroup = useSelector((state) => state.tweetGroup);
+  const tweets = tweetGroup[currentList];
+  console.log({ tweets, tweetGroup, currentList });
   const classes = useStyles();
   return (
     <div className={classes.root}>
       {isLoading && "Loading..."}
-      {tweets.length > 0 && tweets.map((e, i) => <Tweet key={i} tweet={e} />)}
+      {tweets != null &&
+        tweets.length > 0 &&
+        tweets.map((e, i) => <Tweet key={i} tweet={e} />)}
     </div>
   );
 });
