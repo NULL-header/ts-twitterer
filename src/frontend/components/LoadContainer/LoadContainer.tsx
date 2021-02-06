@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "src/src/frontend/globalState";
 import { HelloWorld } from "src/frontend/components/HelloWorld";
 import { useStyles } from "./style";
-import { TimeLine } from "..";
+import { TimeLine, Config, ListSelector } from "..";
 
 export const LoadContainer: React.FC = React.memo((_props) => {
   const state = useSelector((state) => state);
@@ -16,6 +16,8 @@ export const LoadContainer: React.FC = React.memo((_props) => {
       <div className={classes.root}>
         <HelloWorld />
         <TimeLine />
+        <ListSelector />
+        <Config />
       </div>
     );
 });
