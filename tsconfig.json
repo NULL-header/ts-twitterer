@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "lib": ["ES6", "DOM"],
+    "lib": ["ES6", "DOM","ES2019"],
     "types": ["node","jest"],
     "typeRoots": ["node_modules/@types"],
     "experimentalDecorators": true,
