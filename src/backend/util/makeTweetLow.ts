@@ -27,5 +27,5 @@ export const makeTweetLow = (tweetData: any, listId: string) => {
     icon_url,
     list_id: listId,
     media,
-  } as const;
+  } as TweetColumns;
 };

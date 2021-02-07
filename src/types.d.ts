@@ -1,15 +1,23 @@
 /* eslint-disable camelcase */
-interface Media {
-  mediaUrl: string;
-  type: string;
-  sizes: any;
-}
+type Media =
+  | {
+      mediaUrl: string[];
+      type: "photo";
+    }
+  | {
+      mediaUrl: string;
+      type: "animated_gif" | "video";
+    };
 
-interface MediaColumns {
-  media_url: string;
-  type: string;
-  sizes: any;
-}
+type MediaColumns =
+  | {
+      media_url: string[];
+      type: "photo";
+    }
+  | {
+      media_url: string;
+      type: "animated_gif" | "video";
+    };
 
 interface Tweet {
   id: number;
@@ -19,7 +27,7 @@ interface Tweet {
   iconUrl: string;
   content: string;
   createdAt: string;
-  media?: Media[];
+  media?: Media;
   listId: string;
 }
 
@@ -31,7 +39,7 @@ interface TweetColumns {
   icon_url: string;
   content: string;
   created_at: string;
-  media?: MediaColumns[];
+  media?: MediaColumns;
   list_id: string;
 }
 

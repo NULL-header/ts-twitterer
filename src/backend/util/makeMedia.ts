@@ -7,18 +7,11 @@ export const extractDataFromMedia = (mediaData: any[]) => {
     if (data) break;
   }
   return data;
-
-  // const indicesArray: [number, number][] = [];
-  // const media: any[] = [];
-  // mediaData.forEach((e, i) => {
-  //   const { indices, media_url, sizes, type: mediaType } = e;
-  //   indicesArray[i] = indices;
-  //   media[i] = { media_url, sizes, type: mediaType };
-  // });
-  // return { indicesArray, media };
 };
 
-type Maker = (mediaData: any[]) => any;
+type Maker = (
+  mediaData: any[]
+) => { indicesArray: [number, number][]; media: MediaColumns } | undefined;
 
 const makeFromVideo: Maker = (mediaData) => {
   const videoData = mediaData[0];
@@ -32,21 +25,21 @@ const makeFromVideo: Maker = (mediaData) => {
     return e.bitrate > a.bitrate ? e : a;
   }, variants[0]);
   return {
-    indicesArray: [indices],
-    media: { type: "video", media_url: largestVideo.url },
+    indicesArray: [indices as [number, number]],
+    media: { type: "video", media_url: largestVideo.url as string },
   };
 };
 
 const makeFromPhoto: Maker = (mediaData) => {
   if (mediaData[0].type !== "photo") return;
   const indicesArray: [number, number][] = [];
-  const media = { type: "photo", media_url: [] as string[] };
+  const media_url = [] as string[];
   mediaData.forEach((e, i) => {
-    const { indices, media_url } = e;
+    const { indices, media_url: url } = e;
     indicesArray[i] = indices;
-    media.media_url[i] = media_url;
+    media_url[i] = url;
   });
-  return { indicesArray, media };
+  return { indicesArray, media: { type: "photo", media_url } };
 };
 
 const makeFromGif: Maker = (mediaData) => {
