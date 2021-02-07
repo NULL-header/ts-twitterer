@@ -11,7 +11,7 @@ export const getSample = async (listId: string, fileBasePath: string) => {
   ];
   // fix up for any samples
   fs.writeFile(
-    fileBasePath + `adjusted-tweet-${listId}.json`,
+    fileBasePath + `${listId}.json`,
     JSON.stringify(tweetsSplitted),
     {
       encoding: "utf-8",

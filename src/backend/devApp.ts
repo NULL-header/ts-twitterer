@@ -58,3 +58,5 @@ export const devApp = app
           .catch((_err) => getSample(list_id_str, SAMPLE_BASE_PATH));
     res.send(sample[getLoopThree()]);
   });
+
+console.log(SAMPLE_BASE_PATH);
