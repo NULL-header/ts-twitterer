@@ -1,9 +1,8 @@
 import fsOrigin from "fs";
-import { getNewTweetLows } from "src/backend/util";
+import { getNewTweetLows } from ".";
 const fs = fsOrigin.promises;
 
 export const getSample = async (listId: string, fileBasePath: string) => {
-  console.log({ listId, fileBasePath });
   const tweets = await getNewTweetLows("", listId);
   const tweetsSplitted = [
     tweets.slice(0, 7),
@@ -12,7 +11,7 @@ export const getSample = async (listId: string, fileBasePath: string) => {
   ];
   // fix up for any samples
   fs.writeFile(
-    fileBasePath + `-${listId}.json`,
+    fileBasePath + `adjusted-tweet-${listId}.json`,
     JSON.stringify(tweetsSplitted),
     {
       encoding: "utf-8",
