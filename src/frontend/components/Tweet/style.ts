@@ -37,7 +37,7 @@ export const useStyles = makeStyles()({
     gridArea: "content",
     whiteSpace: "pre-line",
   },
-  image: {
-    gridArea: "image",
+  media: {
+    width: "100%",
   },
 });
