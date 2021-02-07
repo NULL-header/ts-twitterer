@@ -20,9 +20,12 @@
     "jsx": "react",
     "baseUrl": "./",
     "paths": {
-      "src/*":["*","src/*"]
-    }
+      "src/*":["*","src/*"],
+    },
   },
   "include": ["./**/*.ts*","./**/*.js"],
-  "exclude": ["node_modules","public"]
+  "exclude": ["node_modules","public"],
+  "ts-node":{
+      "files":true
+    }
   }

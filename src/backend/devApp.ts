@@ -6,13 +6,15 @@ import getConfigDev from "webpack.config.dev";
 import { app } from "./app";
 import { promises as fs } from "fs";
 import { CONSTVALUE } from "./CONSTVALUE";
-import { getSample } from "src/tests/sampleTweets/getSample";
+import { getSample } from "src/src/backend/util/getSample";
 
 const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
 
 const SAMPLE_BASE_PATH =
-  CONSTVALUE.SAMPLE_DIRECTORY + CONSTVALUE.SAMPLE_BASE_NAME;
+  CONSTVALUE.SAMPLE_DIRECTORY +
+  CONSTVALUE.SAMPLE_BASE_NAME +
+  "-adjusted-tweet-";
 
 const getLoopThree = (() => {
   let i = 0;
@@ -49,10 +51,12 @@ export const devApp = app
     const sample = forced_update
       ? await getSample(list_id_str, SAMPLE_BASE_PATH)
       : await fs
-          .readFile(SAMPLE_BASE_PATH + `-${list_id_str}.json`, {
+          .readFile(SAMPLE_BASE_PATH + `${list_id_str}.json`, {
             encoding: "utf-8",
           })
           .then((content) => JSON.parse(content))
           .catch((_err) => getSample(list_id_str, SAMPLE_BASE_PATH));
     res.send(sample[getLoopThree()]);
   });
+
+console.log(SAMPLE_BASE_PATH);

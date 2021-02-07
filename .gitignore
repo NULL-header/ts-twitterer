@@ -1,7 +1,8 @@
 node_modules
 yarn-error.log
 /public/*
-!/public/empty
+!/public/.empty
 .env
 
-/tests/sampleTweets/sample*
+/samples/*
+!/samples/.empty

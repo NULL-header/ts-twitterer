@@ -13,11 +13,8 @@ export const makeTweets = async (
       username,
       list_id: listId,
     } = e;
-    const media: Media[] | undefined = mediaColumns
-      ? mediaColumns.map((e) => {
-          const { media_url: mediaUrl, sizes, type: mediaType } = e;
-          return { mediaUrl, sizes, type: mediaType };
-        })
+    const media: Media | undefined = mediaColumns
+      ? { type: mediaColumns.type, mediaUrl: mediaColumns.media_url as any }
       : undefined;
     return {
       content,
