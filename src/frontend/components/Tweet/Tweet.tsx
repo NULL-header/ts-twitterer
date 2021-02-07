@@ -14,12 +14,13 @@ export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
         </div>
         <div className={classes.tweetContent}>{props.tweet.content}</div>
       </div>
-      <div className={classes.image}>
-        {props.tweet.media &&
-          props.tweet.media.map((e, i) => (
-            <img src={e.mediaUrl} alt={"image" + i} key={i}></img>
-          ))}
-      </div>
+      <div className={classes.image}>{makeImageElement(props.tweet)}</div>
     </div>
   );
 });
+
+const makeImageElement = (tweet: Tweet) => {
+  console.log(tweet);
+  if (tweet.media == null || tweet.media.type !== "photo") return;
+  return tweet.media.mediaUrl.map((e, i) => <img src={e} key={i} />);
+};
