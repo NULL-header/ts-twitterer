@@ -9,7 +9,7 @@ export const getNewTweetLows = async (
   const response = (await twitterApi
     .get("lists/statuses", {
       list_id: listId,
-      // include_rts: true,
+      include_rts: true,
       tweet_mode: "extended",
     })
     .catch((err) => console.log(err))) as any[];
