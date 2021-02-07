@@ -13,7 +13,6 @@ export const getNewTweetLows = async (
       tweet_mode: "extended",
     })
     .catch((err) => console.log(err))) as any[];
-  console.log(response);
   const lastIndexOldTweetData = (response as any[]).findIndex(
     (e) => e.id === lastNewestTweetDataId
   );

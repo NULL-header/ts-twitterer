@@ -53,10 +53,6 @@ export const devApp = app
             encoding: "utf-8",
           })
           .then((content) => JSON.parse(content))
-          .then((result) => {
-            console.log(result);
-            return result;
-          })
           .catch((_err) => getSample(list_id_str, SAMPLE_BASE_PATH));
     res.send(sample[getLoopThree()]);
   });
