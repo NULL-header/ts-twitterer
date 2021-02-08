@@ -12,5 +12,5 @@ export const getTweetLows = async (
       listId
   );
   console.log({ tweetResponse });
-  return (await tweetResponse.json()) as Tweet[];
+  return (await tweetResponse.json()) as TweetColumns[];
 };
