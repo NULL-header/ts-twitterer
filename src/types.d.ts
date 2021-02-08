@@ -19,7 +19,7 @@ type MediaColumns =
       type: "animated_gif" | "video";
     };
 
-interface Tweet {
+type Tweet = {
   id: number;
   dataid: string;
   username: string;
@@ -29,9 +29,17 @@ interface Tweet {
   createdAt: string;
   media?: Media;
   listId: string;
-}
+} & (
+  | {
+      isRetweeted: false;
+    }
+  | {
+      isRetweeted: true;
+      retweeterName: string;
+    }
+);
 
-interface TweetColumns {
+type TweetColumns = {
   id: number;
   dataid: string;
   username: string;
@@ -41,7 +49,15 @@ interface TweetColumns {
   created_at: string;
   media?: MediaColumns;
   list_id: string;
-}
+} & (
+  | {
+      is_retweeted: false;
+    }
+  | {
+      is_retweeted: true;
+      retweeter_name: string;
+    }
+);
 
 interface Configs {
   lastTweetIdGroup: Record<string, number>;

@@ -1,7 +1,22 @@
 /* eslint-disable camelcase */
 import { extractDataFromMedia } from "./makeMedia";
 import { removeUrl } from "./removeUrl";
-export const makeTweetLow = (tweetData: any, listId: string) => {
+
+export const makeTweetLow = (tweetData: any, listId: string): TweetColumns => {
+  let tweetLow: any;
+  if (tweetData.retweeted_status) {
+    tweetLow = extractData(tweetData.retweeted_status);
+    tweetLow.is_retweeted = true;
+    tweetLow.retweeter_name = tweetData.user.name;
+  } else {
+    tweetLow = extractData(tweetData);
+    tweetLow.is_retweeted = false;
+  }
+  tweetLow.list_id = listId;
+  return tweetLow;
+};
+
+const extractData = (tweetData: any) => {
   const {
     full_text: contentData,
     id_str: dataid,
@@ -25,7 +40,6 @@ export const makeTweetLow = (tweetData: any, listId: string) => {
     userid,
     username,
     icon_url,
-    list_id: listId,
     media,
-  } as TweetColumns;
+  };
 };
