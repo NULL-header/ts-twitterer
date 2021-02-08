@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector, useUpdate } from "src/frontend/globalState";
+import { useStyles } from "./style";
 
 export const Config: React.FC = React.memo(() => {
   const listIds = useSelector((state) => state.listIds);
@@ -10,6 +11,7 @@ export const Config: React.FC = React.memo(() => {
   const tweetGroup = useSelector((state) => state.tweetGroup);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const dispatch = useUpdate();
+  const classes = useStyles();
   const handleSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -31,12 +33,23 @@ export const Config: React.FC = React.memo(() => {
   );
   console.log({ listIds });
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>listIds</h3>
-      {listIds.map((e, i) => (
-        <div key={i}>{e}</div>
-      ))}
-      <input ref={inputRef}></input>
-    </form>
+    <div className={classes.root}>
+      <h2>Config</h2>
+      <hr className={classes.divider} />
+      <form onSubmit={handleSubmit}>
+        <h3>Ids of a list</h3>
+        <ul>
+          {listIds.map((e, i) => (
+            <li key={i}>{e}</li>
+          ))}
+          <li>
+            <input
+              ref={inputRef}
+              placeholder="write ids you wanna add any lists"
+            ></input>
+          </li>
+        </ul>
+      </form>
+    </div>
   );
 });
