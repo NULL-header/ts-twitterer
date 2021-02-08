@@ -7,9 +7,11 @@ const tweetColumnsFirst = [
   "icon_url",
   "content",
   "created_at",
-  "*media",
+  "media",
   "list_id",
   "[id+list_id]",
+  "is_retweeted",
+  "retweeter_name",
 ];
 
 const configColumnsFirst = [
