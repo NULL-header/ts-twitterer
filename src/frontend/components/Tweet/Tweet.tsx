@@ -2,10 +2,16 @@ import React from "react";
 import { useStyles } from "./style";
 
 export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
-  console.log(props.tweet.media);
+  console.log(props.tweet);
   const classes = useStyles();
   return (
     <div className={classes.root}>
+      {props.tweet.isRetweeted && (
+        <>
+          <div>{props.tweet.retweeterName + "さんがリツイート"}</div>
+          <hr />
+        </>
+      )}
       <div className={classes.tweetContainer}>
         <img src={props.tweet.iconUrl} className={classes.icon}></img>
         <div className={classes.user}>
