@@ -1,6 +1,4 @@
-export const makeTweets = async (
-  tweetLows: TweetColumns[]
-): Promise<Tweet[]> => {
+export const makeTweets = (tweetLows: TweetColumns[]): Tweet[] => {
   return tweetLows.map((e) => {
     const tweet = extractData(e);
     tweet.media = makeMedia(e.media);

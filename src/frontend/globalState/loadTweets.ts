@@ -6,24 +6,22 @@ export const loadNewTweets = async (
   lastTweetId: number,
   listId: string
 ): Promise<Tweet[]> => {
-  const newTweetLows = await db.tweets
+  const newTweets = await db.tweets
     .where("[id+list_id]")
     .between([lastTweetId + 1, listId], [Dexie.maxKey, listId])
-    .toArray();
+    .toArray(makeTweets);
   console.log("load new tweets");
-  console.log({ newTweetLows });
-  if (newTweetLows.length === 0) return [];
-  return makeTweets(newTweetLows);
+  console.log({ newTweets });
+  return newTweets;
 };
 
 export const loadOldTweets = async (
   lastTweetId: number,
   listId: string
 ): Promise<Tweet[]> => {
-  const newTweetLows = await db.tweets
+  const newTweets = await db.tweets
     .where("[id+list_id]")
     .between([Dexie.minKey, listId], [lastTweetId + 1, listId])
-    .toArray();
-  if (newTweetLows.length === 0) return [];
-  return makeTweets(newTweetLows);
+    .toArray(makeTweets);
+  return newTweets;
 };
