@@ -76,8 +76,5 @@ interface Configs {
 
 interface ConfigColumns {
   id: 0;
-  last_tweet_id_group: Record<string, number>;
-  newest_tweet_data_id_group: Record<string, string>;
-  list_ids: string[];
-  current_list: string;
+  last_data: Configs;
 }
