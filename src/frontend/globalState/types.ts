@@ -21,10 +21,10 @@ export type Action = { type: "MODIFY"; state: Partial<State> };
 export type AsyncDispatch = Dispatch<Action | AsyncAction>;
 
 export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
-  | { type: "LOAD_NEW_TWEETS" }
-  | {
-      type: "GET_TWEETS";
-    }
+  | { type: "LOAD_NEW_TWEETS_BASE" }
+  | { type: "LOAD_NEW_TWEETS"; dispatch: AsyncDispatch }
+  | { type: "GET_TWEETS_BASE" }
+  | { type: "GET_TWEETS"; dispatch: AsyncDispatch }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }

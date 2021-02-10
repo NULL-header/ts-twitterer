@@ -4,10 +4,10 @@ import { useUpdate } from "src/src/frontend/globalState";
 export const UpdateButton: React.FC = React.memo((_props) => {
   const dispatch = useUpdate();
   const getTweets = React.useCallback(() => {
-    dispatch({ type: "GET_TWEETS" });
+    dispatch({ type: "GET_TWEETS", dispatch });
   }, [dispatch]);
   const showTweets = React.useCallback(() => {
-    dispatch({ type: "LOAD_NEW_TWEETS" });
+    dispatch({ type: "LOAD_NEW_TWEETS", dispatch });
   }, [dispatch]);
   const deleteTweet = React.useCallback(() => {
     dispatch({ type: "DELETE_CACHE_TWEETS" });

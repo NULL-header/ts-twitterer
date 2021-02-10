@@ -30,6 +30,27 @@ interface ReducerArgs {
   getState: () => State;
 }
 
+const runWithCallback = async (
+  process: () => Promise<Partial<State> | undefined | void>,
+  callback: (arg: boolean) => void
+) => {
+  return await process().catch((err) => {
+    // eslint-disable-next-line standard/no-callback-literal
+    callback(false);
+    console.log(err);
+    return undefined;
+  });
+};
+
+const dispatchBlank = async (
+  process: () => Promise<void>,
+  callback?: (arg: boolean) => void
+) => {
+  const sendResult = makeSendResult(callback);
+  await runWithCallback(process, sendResult);
+  sendResult(true);
+};
+
 const adjustFlag = async (
   flagName: keyof Flags,
   { dispatch, signal, getState }: ReducerArgs,
@@ -39,22 +60,14 @@ const adjustFlag = async (
   const sendResult = makeSendResult(callback);
   const currentFlag = getState()[flagName];
   if (currentFlag) {
-    sendResult(true);
+    sendResult(false);
     return;
   }
   dispatch({ type: "MODIFY", state: { [flagName]: true } });
-  const result =
-    (await process()
-      .then((res) => {
-        sendResult(true);
-        return res;
-      })
-      .catch((err) => {
-        sendResult(false);
-        console.log(err);
-      })) || {};
+  const result = (await runWithCallback(process, sendResult)) || {};
   if (signal.aborted) return;
   dispatch({ type: "MODIFY", state: { ...result, [flagName]: false } });
+  sendResult(true);
 };
 
 const makeSendResult = (
@@ -65,13 +78,15 @@ const makeSendResult = (
   return callback;
 };
 
-const makeAsyncDispatch = (dispatch: AsyncDispatch) => {
+const makeAsyncDispatch = (
+  dispatch: AsyncDispatch
+): ((arg: AsyncAction) => Promise<boolean>) => {
   return (args: AsyncAction) =>
     new Promise((resolve) => dispatch({ callback: resolve, ...args }));
 };
 
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS: (args) => async (action) => {
+  LOAD_NEW_TWEETS_BASE: (args) => async (action) => {
     await adjustFlag(
       "isLoadingTweets",
       args,
@@ -79,16 +94,34 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback
     );
   },
+  LOAD_NEW_TWEETS: () => async (action) => {
+    await dispatchBlank(async () => {
+      const dispatch = makeAsyncDispatch(action.dispatch);
+      const isSuccessLoading = await dispatch({
+        type: "LOAD_NEW_TWEETS_BASE",
+      });
+      if (isSuccessLoading) await dispatch({ type: "WRITE_CONFIG" });
+    }, action.callback);
+  },
   INITIALIZE: (args) => async () => {
     await adjustFlag("isInitializing", args, async () => await initialize());
   },
-  GET_TWEETS: (args) => async (action) => {
+  GET_TWEETS_BASE: (args) => async (action) => {
     await adjustFlag(
       "isGettingTweets",
       args,
       async () => await getTweets(args.getState),
       action.callback
     );
+  },
+  GET_TWEETS: () => async (action) => {
+    await dispatchBlank(async () => {
+      const dispatch = makeAsyncDispatch(action.dispatch);
+      const isSuccessGetting = await dispatch({ type: "GET_TWEETS_BASE" });
+      console.log("get tweet");
+      console.log({ isSuccessGetting });
+      if (isSuccessGetting) await dispatch({ type: "WRITE_CONFIG" });
+    }, action.callback);
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
     await adjustFlag("isDeletingTweets", args, async () => {
@@ -105,17 +138,30 @@ const asyncReducer: GlobalAsyncReducer = {
   UPDATE_TWEETS: (args) => async (action) => {
     await adjustFlag("isUpdatingTweets", args, async () => {
       const dispatch = makeAsyncDispatch(action.dispatch);
-      const isSuccessGetting = await dispatch({ type: "GET_TWEETS" });
-      if (isSuccessGetting) await dispatch({ type: "LOAD_NEW_TWEETS" });
+      console.log("start updating");
+      const isSuccessGetting = await dispatch({
+        type: "GET_TWEETS",
+        dispatch: action.dispatch,
+      });
+      console.log({ isSuccessGetting });
+      if (isSuccessGetting)
+        await dispatch({ type: "LOAD_NEW_TWEETS", dispatch: action.dispatch });
+      console.log("finish updating");
       return undefined;
     });
   },
-  WRITE_CONFIG: (args) => async () => {
+  WRITE_CONFIG: (args) => async (action) => {
     const configLow = makeConfigColumns(args.getState());
-    await adjustFlag("isWritingConfig", args, async () => {
-      await db.configs.put(configLow);
-      return undefined;
-    });
+    await adjustFlag(
+      "isWritingConfig",
+      args,
+      async () => {
+        await db.configs.put(configLow);
+        console.log("config written");
+        return undefined;
+      },
+      action.callback
+    );
   },
 };
 
