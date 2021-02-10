@@ -15,7 +15,7 @@ export const Config: React.FC = React.memo(() => {
   const handleSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (inputRef.current == null) return;
+      if (inputRef.current == null || listIds.length > 2) return;
       const listId = inputRef.current.value;
       if (listId.length === 0) return;
       dispatch({
