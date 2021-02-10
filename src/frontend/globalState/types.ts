@@ -18,18 +18,19 @@ type AppData = {
 export type State = Flags & Configs & AppData;
 
 export type Action = { type: "MODIFY"; state: Partial<State> };
-type AsyncAction =
-  // this callback is to use dispatch continuously.
-  | { type: "LOAD_NEW_TWEETS"; callback?: (isSuccess: boolean) => void }
+export type AsyncDispatch = Dispatch<Action | AsyncAction>;
+
+export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
+  | { type: "LOAD_NEW_TWEETS" }
   | {
       type: "GET_TWEETS";
-      callback?: (isSuccess: boolean) => void;
     }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
-  | { type: "UPDATE_TWEETS"; dispatch: Dispatch<Action | AsyncAction> }
-  | { type: "WRITE_CONFIG" };
+  | { type: "UPDATE_TWEETS"; dispatch: AsyncDispatch }
+  | { type: "WRITE_CONFIG" }
+);
 export type GlobalReducer = Reducer<State, Action>;
 export type GlobalAsyncReducer = AsyncActionHandlers<
   GlobalReducer,
