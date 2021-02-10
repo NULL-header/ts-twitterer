@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector, useUpdate } from "src/frontend/globalState";
 import { useStyles } from "./style";
+import { CONSTVALUE } from "../../CONSTVALUE";
 
 export const Config: React.FC = React.memo(() => {
   const listIds = useSelector((state) => state.listIds);
@@ -15,7 +16,8 @@ export const Config: React.FC = React.memo(() => {
   const handleSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (inputRef.current == null || listIds.length > 2) return;
+      if (inputRef.current == null || listIds.length >= CONSTVALUE.LIST_LIMIT)
+        return;
       const listId = inputRef.current.value;
       if (listId.length === 0) return;
       dispatch({
