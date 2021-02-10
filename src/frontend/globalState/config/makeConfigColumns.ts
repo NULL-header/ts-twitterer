@@ -1,14 +1,4 @@
-/* eslint-disable camelcase */
-import { db } from "../db";
-import { State } from "./types";
-
-export const loadConfigs = async () => {
-  const dataNullable = await db.configs.get(0);
-  if (dataNullable != null) {
-    return dataNullable.last_data;
-  }
-  return undefined;
-};
+import { State } from "../types";
 
 export const makeConfigColumns = (state: State): ConfigColumns => {
   const {
