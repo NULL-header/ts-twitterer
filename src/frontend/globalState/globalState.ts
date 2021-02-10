@@ -3,15 +3,17 @@ import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { db } from "../db";
 import { useReducerAsync } from "use-reducer-async";
-import { loadNewTweets, loadOldTweets } from "./loadTweets";
-import { getTweetLows } from "./getTweetLows";
-import { loadConfigs, makeConfigColumns } from "./configs";
+import { getTweets, loadNewTweetGroup } from "./tweets";
+import { makeConfigColumns } from "./config";
+import { initialize } from "./initialize";
 import {
   State,
   Flags,
   Action,
   GlobalAsyncReducer,
   GlobalReducer,
+  AsyncDispatch,
+  AsyncAction,
 } from "./types";
 
 const reducer: GlobalReducer = (state, action) => {
@@ -22,13 +24,35 @@ const reducer: GlobalReducer = (state, action) => {
   }
 };
 
+interface ReducerArgs {
+  dispatch: Dispatch<Action>;
+  signal: AbortSignal;
+  getState: () => State;
+}
+
 const adjustFlag = async (
   flagName: keyof Flags,
-  { dispatch, signal }: { dispatch: Dispatch<Action>; signal: AbortSignal },
-  process: () => Promise<Partial<State> | undefined>
+  { dispatch, signal, getState }: ReducerArgs,
+  process: () => Promise<Partial<State> | undefined>,
+  callback?: (arg: boolean) => void
 ) => {
+  const sendResult = makeSendResult(signal, callback);
+  const currentFlag = getState()[flagName];
+  if (currentFlag) {
+    sendResult(true);
+    return;
+  }
   dispatch({ type: "MODIFY", state: { [flagName]: true } });
-  const result = (await process()) || {};
+  const result =
+    (await process()
+      .then((res) => {
+        sendResult(true);
+        return res;
+      })
+      .catch((err) => {
+        sendResult(false);
+        console.log(err);
+      })) || {};
   if (signal.aborted) return;
   dispatch({ type: "MODIFY", state: { ...result, [flagName]: false } });
 };
@@ -45,105 +69,30 @@ const makeSendResult = (
   };
 };
 
+const makeAsyncDispatch = (dispatch: AsyncDispatch) => {
+  return (args: AsyncAction) =>
+    new Promise((resolve) => dispatch({ callback: resolve, ...args }));
+};
+
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
-    const {
-      lastTweetIdGroup: oldLastTweetIdGroup,
-      tweetGroup: oldTweetGroup,
-      isLoadingTweets,
-      listIds,
-    } = getState();
-    const sendResult = makeSendResult(signal, action.callback);
-    if (isLoadingTweets) {
-      sendResult(false);
-      return;
-    }
-    adjustFlag("isLoadingTweets", { dispatch, signal }, async () => {
-      console.log("start load");
-      const tweetsArray = await Promise.all(
-        listIds.map((listId) =>
-          loadNewTweets(oldLastTweetIdGroup[listId], listId)
-        )
-      );
-      console.log({ tweetsArray });
-      let count = 0;
-      const { lastTweetIdGroup, tweetGroup } = listIds.reduce(
-        (a, listId, i) => {
-          const current = tweetsArray[i];
-          if (current.length === 0) {
-            a.tweetGroup[listId] = oldTweetGroup[listId];
-            a.lastTweetIdGroup[listId] = oldLastTweetIdGroup[listId];
-            return a;
-          }
-          count++;
-          console.log(oldTweetGroup);
-          a.tweetGroup[listId] = [...oldTweetGroup[listId], ...current];
-          a.lastTweetIdGroup[listId] = current[current.length - 1].id;
-          return a;
-        },
-        { tweetGroup: {}, lastTweetIdGroup: {} } as {
-          tweetGroup: Record<string, Tweet[]>;
-          lastTweetIdGroup: Record<string, number>;
-        }
-      );
-      sendResult(true);
-      return count === 0
-        ? {}
-        : {
-            tweetGroup,
-            lastTweetIdGroup,
-          };
-    });
+  LOAD_NEW_TWEETS: (args) => async (action) => {
+    adjustFlag(
+      "isLoadingTweets",
+      args,
+      async () => await loadNewTweetGroup(args.getState),
+      action.callback
+    );
   },
-  INITIALIZE: ({ dispatch, signal }) => async () => {
-    adjustFlag("isInitializing", { dispatch, signal }, async () => {
-      const config = await loadConfigs();
-      if (config == null) return;
-      const oldTweetsArray = await Promise.all(
-        config.listIds.map((listId) =>
-          loadOldTweets(config.lastTweetIdGroup[listId], listId)
-        )
-      );
-      const oldTweetGroup = config.listIds.reduce((a, listId, i) => {
-        a[listId] = oldTweetsArray[i];
-        return a;
-      }, {} as Record<string, Tweet[]>);
-      return { ...config, tweetGroup: oldTweetGroup };
-    });
+  INITIALIZE: (args) => async () => {
+    adjustFlag("isInitializing", args, async () => await initialize());
   },
-  GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
-    const {
-      newestTweetDataIdGroup: lastNewestTweetDataIdGroup,
-      isGettingTweets,
-      listIds,
-    } = getState();
-    console.log({ lastNewestTweetDataIdGroup, isGettingTweets, listIds });
-    const sendResult = makeSendResult(signal, action.callback);
-    if (isGettingTweets || listIds.length === 0) {
-      sendResult(false);
-      return;
-    }
-    adjustFlag("isGettingTweets", { dispatch, signal }, async () => {
-      const tweetLowsArray = await Promise.all(
-        listIds.map((listId) =>
-          getTweetLows(lastNewestTweetDataIdGroup[listId], listId)
-        )
-      );
-      const tweetLows = tweetLowsArray.flat();
-      if (tweetLows.length === 0) {
-        sendResult(false);
-        return;
-      }
-      console.log({ tweetLows });
-      await db.tweets.bulkAdd(tweetLows as any);
-      const newestTweetDataIdGroup = listIds.reduce((a, listId, i) => {
-        const current = tweetLowsArray[i];
-        a[listId] = current[current.length - 1].dataid;
-        return a;
-      }, {} as Record<string, string>);
-      sendResult(true);
-      return { newestTweetDataIdGroup };
-    });
+  GET_TWEETS: (args) => async (action) => {
+    adjustFlag(
+      "isGettingTweets",
+      args,
+      async () => await getTweets(args.getState),
+      action.callback
+    );
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
     adjustFlag("isDeletingTweets", args, async () => {
@@ -159,13 +108,9 @@ const asyncReducer: GlobalAsyncReducer = {
   },
   UPDATE_TWEETS: (args) => async (action) => {
     adjustFlag("isUpdatingTweets", args, async () => {
-      const isSuccessGetting = await new Promise((resolve) =>
-        action.dispatch({ type: "GET_TWEETS", callback: resolve as any })
-      );
-      if (isSuccessGetting)
-        await new Promise((resolve) =>
-          action.dispatch({ type: "LOAD_NEW_TWEETS", callback: resolve as any })
-        );
+      const dispatch = makeAsyncDispatch(action.dispatch);
+      const isSuccessGetting = await dispatch({ type: "GET_TWEETS" });
+      if (isSuccessGetting) await dispatch({ type: "LOAD_NEW_TWEETS" });
       return undefined;
     });
   },
