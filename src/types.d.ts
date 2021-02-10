@@ -59,11 +59,19 @@ type TweetColumns = {
     }
 );
 
+interface Limit {
+  limitRate: number;
+  remaining: number;
+}
+
+type LimitData = Record<"lists", Limit>;
+
 interface Configs {
   lastTweetIdGroup: Record<string, number>;
   newestTweetDataIdGroup: Record<string, string>;
   listIds: string[];
   currentList: string;
+  limitData: LimitData;
 }
 
 interface ConfigColumns {
