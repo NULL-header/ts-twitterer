@@ -1,5 +1,5 @@
 import { makeTweetLow } from "./makeTweetLow";
-import { twitterApi } from "../twitterApi";
+import { twitterApi } from "src/backend/twitterApi";
 
 export const getNewTweetLows = async (
   lastNewestTweetDataId: string,
