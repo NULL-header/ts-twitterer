@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import express from "express";
-import { getNewTweetLows } from "./util";
+import { getNewTweetLows, getRateLimit } from "./util";
 
 export const router = express
   .Router()
@@ -8,7 +8,7 @@ export const router = express
   .get("/api/ping", (req, res) => {
     res.send({ response: "pong!" });
   })
-  .get("/api/tweets", (req, res) => {
+  .get("/api/tweets", async (req, res) => {
     const { last_newest_tweet_data_id, list_id } = req.query as Record<
       string,
       string
@@ -22,7 +22,13 @@ export const router = express
       res.status(400).send({ message: "pass list_id of number" });
       return;
     }
-    getNewTweetLows(last_newest_tweet_data_id, list_id)
-      .then((result) => res.send(result))
-      .catch((err) => console.log(err));
+    const tweetLows = await getNewTweetLows(
+      last_newest_tweet_data_id,
+      list_id
+    ).catch((err) => console.log(err));
+    res.send(tweetLows);
+  })
+  .get("/api/limit_rate", async (req, res) => {
+    const response = await getRateLimit().catch((err) => console.log(err));
+    res.send(response);
   });

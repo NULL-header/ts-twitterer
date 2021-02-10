@@ -19,6 +19,10 @@ const tabButtons: TabButton[] = [
     name: "CONFIG",
     Component: () => <div>config</div>,
   },
+  {
+    name: "DATA",
+    Component: () => <div>data</div>,
+  },
 ];
 
 export const SideBar: React.FC<Props> = React.memo((props) => {

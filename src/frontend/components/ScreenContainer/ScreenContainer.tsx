@@ -1,9 +1,9 @@
 import React, { useReducer, Reducer, Dispatch } from "react";
-import { TimeLine, Config, ListSelector } from "..";
+import { TimeLine, Config, ListSelector, Data } from "..";
 import { SideBar } from "./SideBar";
 import { useStyles } from "./style";
 
-export type TabNames = "TIMELINE" | "CONFIG";
+export type TabNames = "TIMELINE" | "CONFIG" | "DATA";
 
 type Action = { type: "CHANGE_TAB"; tab: TabNames };
 
@@ -18,6 +18,7 @@ interface State {
 const screens: Screens = {
   TIMELINE: TimeLine,
   CONFIG: Config,
+  DATA: Data,
 } as const;
 
 const initValue: State = {
