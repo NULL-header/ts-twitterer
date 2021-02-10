@@ -1,43 +1,18 @@
 /* eslint-disable camelcase */
-import { Reducer, useEffect, Dispatch } from "react";
+import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { db } from "../db";
-import { AsyncActionHandlers, useReducerAsync } from "use-reducer-async";
+import { useReducerAsync } from "use-reducer-async";
 import { loadNewTweets, loadOldTweets } from "./loadTweets";
 import { getTweetLows } from "./getTweetLows";
-import { makeConfigs } from "./makeConfigs";
-
-type Flags = {
-  isLoadingTweets: boolean;
-  isGettingTweets: boolean;
-  isInitializing?: boolean;
-  isDeletingTweets: boolean;
-  isDeletingConfigs: boolean;
-  isUpdatingTweets: boolean;
-  isWritingConfig: boolean;
-};
-
-type AppData = {
-  tweetGroup: Record<string, Tweet[]>;
-};
-
-type State = Flags & Configs & AppData;
-
-type Action = { type: "MODIFY"; state: Partial<State> };
-type AsyncAction =
-  // this callback is to use dispatch continuously.
-  | { type: "LOAD_NEW_TWEETS"; callback?: (isSuccess: boolean) => void }
-  | {
-      type: "GET_TWEETS";
-      callback?: (isSuccess: boolean) => void;
-    }
-  | { type: "INITIALIZE" }
-  | { type: "DELETE_CACHE_TWEETS" }
-  | { type: "DELETE_CACHE_CONFIG" }
-  | { type: "UPDATE_TWEETS"; dispatch: Dispatch<Action | AsyncAction> }
-  | { type: "WRITE_CONFIG" };
-type GlobalReducer = Reducer<State, Action>;
-type GlobalAsyncReducer = AsyncActionHandlers<GlobalReducer, AsyncAction>;
+import { loadConfigs, makeConfigColumns } from "./configs";
+import {
+  State,
+  Flags,
+  Action,
+  GlobalAsyncReducer,
+  GlobalReducer,
+} from "./types";
 
 const reducer: GlobalReducer = (state, action) => {
   switch (action.type) {
@@ -45,22 +20,6 @@ const reducer: GlobalReducer = (state, action) => {
       return { ...state, ...action.state };
     }
   }
-};
-
-const makeConfigLow = (state: State): ConfigColumns => {
-  const {
-    lastTweetIdGroup: last_tweet_id_group,
-    newestTweetDataIdGroup: newest_tweet_data_id_group,
-    listIds: list_ids,
-    currentList: current_list,
-  } = state;
-  return {
-    last_tweet_id_group,
-    newest_tweet_data_id_group,
-    id: 0,
-    list_ids,
-    current_list,
-  };
 };
 
 const adjustFlag = async (
@@ -138,19 +97,18 @@ const asyncReducer: GlobalAsyncReducer = {
   },
   INITIALIZE: ({ dispatch, signal }) => async () => {
     adjustFlag("isInitializing", { dispatch, signal }, async () => {
-      const configColumns = await db.configs.get(0);
-      if (configColumns == null) return;
-      const configs = makeConfigs(configColumns);
+      const config = await loadConfigs();
+      if (config == null) return;
       const oldTweetsArray = await Promise.all(
-        configs.listIds.map((listId) =>
-          loadOldTweets(configs.lastTweetIdGroup[listId], listId)
+        config.listIds.map((listId) =>
+          loadOldTweets(config.lastTweetIdGroup[listId], listId)
         )
       );
-      const oldTweetGroup = configs.listIds.reduce((a, listId, i) => {
+      const oldTweetGroup = config.listIds.reduce((a, listId, i) => {
         a[listId] = oldTweetsArray[i];
         return a;
       }, {} as Record<string, Tweet[]>);
-      return { ...configs, tweetGroup: oldTweetGroup };
+      return { ...config, tweetGroup: oldTweetGroup };
     });
   },
   GET_TWEETS: ({ dispatch, signal, getState }) => async (action) => {
@@ -212,7 +170,7 @@ const asyncReducer: GlobalAsyncReducer = {
     });
   },
   WRITE_CONFIG: (args) => async () => {
-    const configLow = makeConfigLow(args.getState());
+    const configLow = makeConfigColumns(args.getState());
     adjustFlag("isWritingConfig", args, async () => {
       await db.configs.put(configLow);
       return undefined;

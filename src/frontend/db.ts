@@ -14,13 +14,7 @@ const tweetColumnsFirst = [
   "retweeter_name",
 ];
 
-const configColumnsFirst = [
-  "id",
-  "last_tweet_id",
-  "newest_tweet_data_id",
-  "*list_ids",
-  "current_list",
-];
+const configColumnsFirst = ["id", "last_data"];
 
 const makeSchema = (columns: string[]) => columns.join(", ");
 
