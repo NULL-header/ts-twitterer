@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import express from "express";
-import { getNewTweetLows } from "./util";
+import { getNewTweetLows, getRateLimit } from "./util";
 
 export const router = express
   .Router()
@@ -27,4 +27,8 @@ export const router = express
       list_id
     ).catch((err) => console.log(err));
     res.send(tweetLows);
+  })
+  .get("/api/limit_rate", async (req, res) => {
+    const response = await getRateLimit().catch((err) => console.log(err));
+    res.send(response);
   });
