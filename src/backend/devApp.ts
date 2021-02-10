@@ -6,7 +6,7 @@ import getConfigDev from "webpack.config.dev";
 import { app } from "./app";
 import { promises as fs } from "fs";
 import { CONSTVALUE } from "./CONSTVALUE";
-import { getSample } from "src/src/backend/util/getSample";
+import { getSample } from "src/backend/util";
 
 const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
