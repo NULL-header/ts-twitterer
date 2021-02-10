@@ -3,6 +3,7 @@ import { useStyles } from "./style";
 
 export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
   console.log(props.tweet);
+  const username = makeUsername(props.tweet.username);
   const classes = useStyles();
   return (
     <div className={classes.root}>
@@ -15,7 +16,7 @@ export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
       <div className={classes.tweetContainer}>
         <img src={props.tweet.iconUrl} className={classes.icon}></img>
         <div className={classes.user}>
-          <div>{props.tweet.username}</div>
+          <div>{username}</div>
           <div>{"@" + props.tweet.userid}</div>
         </div>
         <div className={classes.tweetContent}>{props.tweet.content}</div>
@@ -40,4 +41,8 @@ const makeMediaElement = (tweet: Tweet, className: string) => {
       return;
     }
   }
+};
+
+const makeUsername = (username: string) => {
+  return username.length > 20 ? username.slice(0, 21) + "…" : username;
 };
