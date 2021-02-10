@@ -236,6 +236,7 @@ const useValue = () => {
       newestTweetDataIdGroup: {},
       listIds: [],
       currentList: "",
+      limitData: { lists: { limitRate: 0, remaining: 0 } },
     } as State,
     asyncReducer
   );
