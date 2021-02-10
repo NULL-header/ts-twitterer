@@ -36,7 +36,7 @@ const adjustFlag = async (
   process: () => Promise<Partial<State> | undefined>,
   callback?: (arg: boolean) => void
 ) => {
-  const sendResult = makeSendResult(signal, callback);
+  const sendResult = makeSendResult(callback);
   const currentFlag = getState()[flagName];
   if (currentFlag) {
     sendResult(true);
@@ -58,15 +58,11 @@ const adjustFlag = async (
 };
 
 const makeSendResult = (
-  signal: AbortSignal,
   callback: (isSucess: boolean) => void = (_arg: boolean) => {
     return;
   }
 ) => {
-  return (arg: boolean) => {
-    if (signal.aborted) return;
-    callback(arg);
-  };
+  return callback;
 };
 
 const makeAsyncDispatch = (dispatch: AsyncDispatch) => {
@@ -76,7 +72,7 @@ const makeAsyncDispatch = (dispatch: AsyncDispatch) => {
 
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS: (args) => async (action) => {
-    adjustFlag(
+    await adjustFlag(
       "isLoadingTweets",
       args,
       async () => await loadNewTweetGroup(args.getState),
@@ -84,10 +80,10 @@ const asyncReducer: GlobalAsyncReducer = {
     );
   },
   INITIALIZE: (args) => async () => {
-    adjustFlag("isInitializing", args, async () => await initialize());
+    await adjustFlag("isInitializing", args, async () => await initialize());
   },
   GET_TWEETS: (args) => async (action) => {
-    adjustFlag(
+    await adjustFlag(
       "isGettingTweets",
       args,
       async () => await getTweets(args.getState),
@@ -95,19 +91,19 @@ const asyncReducer: GlobalAsyncReducer = {
     );
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
-    adjustFlag("isDeletingTweets", args, async () => {
+    await adjustFlag("isDeletingTweets", args, async () => {
       await db.tweets.clear();
       return { tweetGroup: {} };
     });
   },
   DELETE_CACHE_CONFIG: (args) => async () => {
-    adjustFlag("isDeletingConfigs", args, async () => {
+    await adjustFlag("isDeletingConfigs", args, async () => {
       await db.configs.clear();
       return { lastTweetIdGroup: {}, newestTweetDataIdGroup: {} };
     });
   },
   UPDATE_TWEETS: (args) => async (action) => {
-    adjustFlag("isUpdatingTweets", args, async () => {
+    await adjustFlag("isUpdatingTweets", args, async () => {
       const dispatch = makeAsyncDispatch(action.dispatch);
       const isSuccessGetting = await dispatch({ type: "GET_TWEETS" });
       if (isSuccessGetting) await dispatch({ type: "LOAD_NEW_TWEETS" });
@@ -116,7 +112,7 @@ const asyncReducer: GlobalAsyncReducer = {
   },
   WRITE_CONFIG: (args) => async () => {
     const configLow = makeConfigColumns(args.getState());
-    adjustFlag("isWritingConfig", args, async () => {
+    await adjustFlag("isWritingConfig", args, async () => {
       await db.configs.put(configLow);
       return undefined;
     });
