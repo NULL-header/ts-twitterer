@@ -6,7 +6,7 @@ import getConfigDev from "webpack.config.dev";
 import { app } from "./app";
 import { promises as fs } from "fs";
 import { CONSTVALUE } from "./CONSTVALUE";
-import { getSample } from "src/backend/util";
+import { getSample, getSampleRate } from "src/backend/util";
 
 const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
@@ -57,6 +57,8 @@ export const devApp = app
           .then((content) => JSON.parse(content))
           .catch((_err) => getSample(list_id_str, SAMPLE_BASE_PATH));
     res.send(sample[getLoopThree()]);
+  })
+  .get("sample/rate", async (_req, res) => {
+    const result = await getSampleRate();
+    res.send(result);
   });
-
-console.log(SAMPLE_BASE_PATH);
