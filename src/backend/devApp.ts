@@ -4,17 +4,10 @@ import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import getConfigDev from "webpack.config.dev";
 import { app } from "./app";
-import { promises as fs } from "fs";
-import { CONSTVALUE } from "./CONSTVALUE";
-import { getSample, getSampleRate } from "src/backend/util";
+import { getSampleTweet, getSampleRate } from "src/backend/util";
 
 const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
-
-const SAMPLE_BASE_PATH =
-  CONSTVALUE.SAMPLE_DIRECTORY +
-  CONSTVALUE.SAMPLE_BASE_NAME +
-  "-adjusted-tweet-";
 
 const getLoopThree = (() => {
   let i = 0;
@@ -23,6 +16,9 @@ const getLoopThree = (() => {
     return i++;
   };
 })();
+
+const getBoolean = (arg: string | undefined) =>
+  arg == null ? false : Boolean(arg);
 
 export const devApp = app
   .use(
@@ -34,31 +30,40 @@ export const devApp = app
   .use(webpackHotMiddleware(compiler))
   .get("/api/sample", async (req, res) => {
     const {
-      list_id_str,
-      forced_update,
-      last_newest_tweet_data_id,
+      list_id_str: listId,
+      forced_update: forcedUpdate,
+      last_newest_tweet_data_id: lastNewestTweetDataId,
     } = req.query as Record<string, string>;
+    const doesUpdate = getBoolean(forcedUpdate);
     console.log(req.query);
-    if (last_newest_tweet_data_id == null) {
+    if (lastNewestTweetDataId == null) {
       res
         .status(400)
         .send({ message: "pass last_newest_tweet_data_id as number" });
+      return;
     }
-    if (list_id_str == null) {
+    if (listId == null) {
       res.status(400).send({ message: "pass list_id of number" });
       return;
     }
-    const sample = forced_update
-      ? await getSample(list_id_str, SAMPLE_BASE_PATH)
-      : await fs
-          .readFile(SAMPLE_BASE_PATH + `${list_id_str}.json`, {
-            encoding: "utf-8",
-          })
-          .then((content) => JSON.parse(content))
-          .catch((_err) => getSample(list_id_str, SAMPLE_BASE_PATH));
-    res.send(sample[getLoopThree()]);
+    const result = await getSampleTweet(
+      {
+        getter: [listId],
+        maker: [listId, lastNewestTweetDataId],
+      },
+      doesUpdate,
+      listId.toString()
+    );
+    const resultSplitted = [
+      result.slice(0, 7),
+      result.slice(7, 14),
+      result.slice(14),
+    ];
+    res.send(resultSplitted[getLoopThree()]);
   })
-  .get("sample/rate", async (_req, res) => {
-    const result = await getSampleRate();
+  .get("sample/rate", async (req, res) => {
+    const { forced_update: forcedUpdate } = req.query as Record<string, string>;
+    const doesUpdate = getBoolean(forcedUpdate);
+    const result = await getSampleRate({ getter: [], maker: [] }, doesUpdate);
     res.send(result);
   });
