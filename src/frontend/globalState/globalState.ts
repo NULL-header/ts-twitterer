@@ -16,6 +16,7 @@ import {
   AsyncDispatch,
   AsyncAction,
 } from "./types";
+import { CONSTVALUE } from "../CONSTVALUE";
 
 const reducer: GlobalReducer = (state, action) => {
   switch (action.type) {
@@ -145,7 +146,9 @@ const asyncReducer: GlobalAsyncReducer = {
       const isSuccessGetting = await dispatch({ type: "GET_TWEETS_BASE" });
       console.log("get tweet");
       console.log({ isSuccessGetting });
-      if (isSuccessGetting) await dispatch({ type: "WRITE_CONFIG" });
+      const isSuccessRate = await dispatch({ type: "GET_RATE" });
+      if (isSuccessGetting || isSuccessRate)
+        await dispatch({ type: "WRITE_CONFIG" });
     }, action.callback);
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
@@ -205,6 +208,17 @@ const asyncReducer: GlobalAsyncReducer = {
       const isSucessToggling = await dispatch({ type: "TOGGLE_THEME_BASE" });
       if (isSucessToggling) await dispatch({ type: "WRITE_CONFIG" });
     }, action.callback);
+  },
+  GET_RATE: (args) => async (action) => {
+    await manageDispatch(
+      args,
+      async () => {
+        const response = await fetch(CONSTVALUE.GET_RATE_URL);
+        const limitData = (await response.json()) as LimitData;
+        return { limitData };
+      },
+      action.callback
+    );
   },
 };
 

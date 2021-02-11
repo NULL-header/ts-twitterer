@@ -32,6 +32,7 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "WRITE_CONFIG" }
   | { type: "TOGGLE_THEME_BASE" }
   | { type: "TOGGLE_THEME"; dispatch: AsyncDispatch }
+  | { type: "GET_RATE" }
 );
 export type GlobalReducer = Reducer<State, Action>;
 export type GlobalAsyncReducer = AsyncActionHandlers<
