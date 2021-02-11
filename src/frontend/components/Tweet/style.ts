@@ -1,13 +1,13 @@
 import { makeStyles } from "src/frontend/theme";
 
-export const useStyles = makeStyles()({
+export const useStyles = makeStyles()((theme) => ({
   root: {
-    color: "lightgrey",
+    color: theme.color.primary,
     padding: 10,
     height: "100%",
     borderStyle: "solid",
     borderWidth: 3,
-    borderColor: "lightgrey",
+    borderColor: theme.color.primary,
     borderBottomStyle: "none",
   },
   tweetContainer: {
@@ -40,4 +40,4 @@ export const useStyles = makeStyles()({
   media: {
     width: "100%",
   },
-});
+}));

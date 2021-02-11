@@ -33,6 +33,10 @@ export const Config: React.FC = React.memo(() => {
     },
     [dispatch, lastTweetIdGroup, listIds, newestTweetDataIdGroup, tweetGroup]
   );
+  const toggleTheme = React.useCallback(() => {
+    dispatch({ type: "TOGGLE_THEME", dispatch });
+  }, [dispatch]);
+
   console.log({ listIds });
   return (
     <div className={classes.root}>
@@ -52,6 +56,8 @@ export const Config: React.FC = React.memo(() => {
           </li>
         </ul>
       </form>
+      <h3>Toggle Theme</h3>
+      <button onClick={toggleTheme}>here</button>
     </div>
   );
 });

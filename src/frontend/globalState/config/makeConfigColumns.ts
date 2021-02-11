@@ -7,6 +7,7 @@ export const makeConfigColumns = (state: State): ConfigColumns => {
     limitData,
     listIds,
     newestTweetDataIdGroup,
+    themename,
   } = state as Configs;
   return {
     id: 0,
@@ -16,6 +17,7 @@ export const makeConfigColumns = (state: State): ConfigColumns => {
       limitData,
       listIds,
       newestTweetDataIdGroup,
+      themename,
     },
   };
 };
