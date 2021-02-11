@@ -1,2 +1,3 @@
-export * from "./getTweetSample";
-export * from "./getRateLimit";
+export { getNewTweetLows } from "./getTweet";
+export { getRateLimit } from "./getRateLimit";
+export * from "./sampleGetter";

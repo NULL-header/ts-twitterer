@@ -1,2 +1,1 @@
-export { getRateLimit } from "./getRateLimit";
-export { getSampleRate } from "./getSampleRate";
+export { getRateLimit, makeLimitData, getRateLimitData } from "./getRateLimit";
