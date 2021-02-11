@@ -76,6 +76,7 @@ const webpackConfig = (env: {
       "process.env.getTweetsUrl": JSON.stringify(
         env.development ? "/api/sample" : "/api/tweets"
       ),
+      "process.env.getRateUrl": JSON.stringify("/sample/rate"),
     }),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
