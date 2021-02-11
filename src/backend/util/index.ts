@@ -1,2 +1,2 @@
-export * from "./getTweetSample";
+export * from "./getTweet";
 export * from "./getRateLimit";
