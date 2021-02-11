@@ -52,6 +52,21 @@ const dispatchBlank = async (
   sendResult(true);
 };
 
+const manageDispatch = async (
+  { dispatch, signal }: ReducerArgs,
+  process: () => Promise<Partial<State> | undefined>,
+  callback?: (arg: boolean) => void
+) => {
+  const sendResult = makeSendResult(callback);
+  const result = await runWithCallback(process, sendResult);
+  if (signal.aborted || result == null) {
+    sendResult(false);
+    return;
+  }
+  dispatch({ type: "MODIFY", state: result });
+  sendResult(true);
+};
+
 const adjustFlag = async (
   flagName: keyof Flags,
   { dispatch, signal, getState }: ReducerArgs,
@@ -84,6 +99,15 @@ const makeAsyncDispatch = (
 ): ((arg: AsyncAction) => Promise<boolean>) => {
   return (args: AsyncAction) =>
     new Promise((resolve) => dispatch({ callback: resolve, ...args }));
+};
+
+const reverseThemename: Record<Themenames, Themenames> = {
+  dark: "light",
+  light: "dark",
+};
+
+const toggleThemename = (themename: Themenames) => {
+  return reverseThemename[themename];
 };
 
 const asyncReducer: GlobalAsyncReducer = {
@@ -165,6 +189,23 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback
     );
   },
+  TOGGLE_THEME_BASE: (args) => async (action) => {
+    await manageDispatch(
+      args,
+      async () => {
+        const { themename } = args.getState();
+        return { themename: toggleThemename(themename) };
+      },
+      action.callback
+    );
+  },
+  TOGGLE_THEME: () => async (action) => {
+    await dispatchBlank(async () => {
+      const dispatch = makeAsyncDispatch(action.dispatch);
+      const isSucessToggling = await dispatch({ type: "TOGGLE_THEME_BASE" });
+      if (isSucessToggling) await dispatch({ type: "WRITE_CONFIG" });
+    }, action.callback);
+  },
 };
 
 const useValue = () => {
@@ -184,6 +225,7 @@ const useValue = () => {
       listIds: [],
       currentList: "",
       limitData: { lists: { limitRate: 0, remaining: 0 } },
+      themename: "dark",
     } as State,
     asyncReducer
   );
