@@ -1,1 +1,1 @@
-export * from "./createMakeStyles";
+export * from "./createTheme";

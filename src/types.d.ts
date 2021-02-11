@@ -66,12 +66,15 @@ interface Limit {
 
 type LimitData = Record<"lists", Limit>;
 
+type Themenames = "light" | "dark";
+
 interface Configs {
   lastTweetIdGroup: Record<string, number>;
   newestTweetDataIdGroup: Record<string, string>;
   listIds: string[];
   currentList: string;
   limitData: LimitData;
+  themename: import("./frontend/theme").themenames;
 }
 
 interface ConfigColumns {

@@ -1,11 +1,11 @@
 import { makeStyles } from "src/frontend/theme";
-export const useStyles = makeStyles()({
+export const useStyles = makeStyles()((theme) => ({
   root: {
     borderStyle: "none solid",
-    borderColor: "lightgrey",
+    borderColor: theme.color.primary,
     padding: 10,
   },
   divider: {
-    color: "lightgrey",
+    color: theme.color.primary,
   },
-});
+}));

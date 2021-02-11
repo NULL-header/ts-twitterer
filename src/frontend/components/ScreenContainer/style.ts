@@ -1,8 +1,8 @@
 import { makeStyles } from "src/frontend/theme";
-export const useStyles = makeStyles()({
+export const useStyles = makeStyles()((theme) => ({
   "@global": {
     body: {
-      backgroundColor: "grey",
+      backgroundColor: theme.color.secondary,
       margin: 0,
     },
     h2: {
@@ -12,4 +12,4 @@ export const useStyles = makeStyles()({
   root: {
     display: "flex",
   },
-});
+}));
