@@ -12,7 +12,7 @@ export const TimeLine: React.FC = React.memo((_props) => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      {isLoading && "Loading..."}
+      {tweets == null && isLoading && "Loading..."}
       {tweets != null &&
         tweets.length > 0 &&
         tweets.map((e, i) => <Tweet key={i} tweet={e} />)}

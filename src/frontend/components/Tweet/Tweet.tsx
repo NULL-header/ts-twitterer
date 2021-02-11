@@ -21,7 +21,7 @@ export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
         </div>
         <div className={classes.tweetContent}>{props.tweet.content}</div>
       </div>
-      <div>{makeMediaElement(props.tweet, classes.media)}</div>
+      {makeMediaElement(props.tweet, classes.media)}
     </div>
   );
 });
@@ -30,9 +30,13 @@ const makeMediaElement = (tweet: Tweet, className: string) => {
   if (tweet.media == null) return;
   switch (tweet.media.type) {
     case "photo": {
-      return tweet.media.mediaUrl.map((e, i) => (
-        <img src={e} key={i} className={className} />
-      ));
+      return (
+        <div>
+          {tweet.media.mediaUrl.map((e, i) => (
+            <img src={e} key={i} className={className} />
+          ))}
+        </div>
+      );
     }
     case "animated_gif": {
       return;
