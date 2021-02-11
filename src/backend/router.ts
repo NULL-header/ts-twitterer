@@ -8,7 +8,7 @@ export const router = express
   .get("/api/ping", (req, res) => {
     res.send({ response: "pong!" });
   })
-  .get("/api/tweets", async (req, res) => {
+  .get("/api/tweet", async (req, res) => {
     const { last_newest_tweet_data_id, list_id } = req.query as Record<
       string,
       string
@@ -28,7 +28,7 @@ export const router = express
     ).catch((err) => console.log(err));
     res.send(tweetLows);
   })
-  .get("/api/limit_rate", async (req, res) => {
+  .get("/api/rate", async (req, res) => {
     const response = await getRateLimit().catch((err) => console.log(err));
     res.send(response);
   });

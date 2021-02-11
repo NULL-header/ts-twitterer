@@ -28,7 +28,7 @@ export const devApp = app
     })
   )
   .use(webpackHotMiddleware(compiler))
-  .get("/api/sample", async (req, res) => {
+  .get("/sample/tweet", async (req, res) => {
     const {
       list_id_str: listId,
       forced_update: forcedUpdate,
