@@ -1,2 +1,2 @@
 export * from "./getNewTweetLows";
-export * from "./getSample";
+export * from "./getSampleTweet";
