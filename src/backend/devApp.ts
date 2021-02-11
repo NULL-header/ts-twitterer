@@ -61,7 +61,7 @@ export const devApp = app
     ];
     res.send(resultSplitted[getLoopThree()]);
   })
-  .get("sample/rate", async (req, res) => {
+  .get("/sample/rate", async (req, res) => {
     const { forced_update: forcedUpdate } = req.query as Record<string, string>;
     const doesUpdate = getBoolean(forcedUpdate);
     const result = await getSampleRate({ getter: [], maker: [] }, doesUpdate);
