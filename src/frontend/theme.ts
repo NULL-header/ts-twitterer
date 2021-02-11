@@ -1,5 +1,29 @@
-import { createMakeStyles } from "./util";
+import { CSSProperties } from "react";
+import { createTheme } from "./util";
 
-const makeStyles = createMakeStyles();
+interface Theme {
+  color: {
+    primary: CSSProperties["color"];
+    secondary: CSSProperties["color"];
+  };
+}
 
-export { makeStyles };
+const light: Theme = {
+  color: {
+    primary: "black",
+    secondary: "white",
+  },
+};
+
+const dark: Theme = {
+  color: {
+    primary: "lightgrey",
+    secondary: "grey",
+  },
+};
+
+export const themes = { light, dark };
+
+export type themenames = keyof typeof themes;
+
+export const { ThemeProvider, makeStyles } = createTheme(themes);
