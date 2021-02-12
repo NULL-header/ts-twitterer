@@ -27,3 +27,17 @@ export const deleteCacheTweets = async (getState: () => State) => {
   await promise;
   return { tweetGroup, lastTweetIdGroup, newestTweetDataIdGroup };
 };
+
+export const deleteCacheConfig = async () => {
+  const promise = db.configs.clear();
+  const initValue = {
+    currentList: "",
+    limitData: { lists: { limitRate: 0, remaining: 0 } },
+    listIds: [] as string[],
+    themename: "dark",
+    lastTweetIdGroup: {},
+    newestTweetDataIdGroup: {},
+  } as Configs;
+  await promise;
+  return initValue;
+};
