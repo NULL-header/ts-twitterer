@@ -6,7 +6,7 @@ import { useReducerAsync } from "use-reducer-async";
 import { getTweets, loadNewTweetGroup } from "./tweets";
 import { makeConfigColumns } from "./config";
 import { initialize } from "./initialize";
-import { deleteCacheTweets } from "./delete";
+import { deleteCacheTweets, deleteCacheConfig } from "./delete";
 import {
   State,
   Flags,
@@ -158,11 +158,13 @@ const asyncReducer: GlobalAsyncReducer = {
       async () => await deleteCacheTweets(args.getState)
     );
   },
-  DELETE_CACHE_CONFIG: (args) => async () => {
-    await adjustFlag("isDeletingConfigs", args, async () => {
-      await db.configs.clear();
-      return { lastTweetIdGroup: {}, newestTweetDataIdGroup: {} };
-    });
+  DELETE_CACHE_CONFIG: (args) => async (action) => {
+    await adjustFlag(
+      "isDeletingConfigs",
+      args,
+      async () => await deleteCacheConfig(),
+      action.callback
+    );
   },
   UPDATE_TWEETS: (args) => async (action) => {
     await adjustFlag("isUpdatingTweets", args, async () => {
