@@ -6,6 +6,7 @@ import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import "webpack-dev-server";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import DotEnvPlugin from "dotenv-webpack";
 
 const webpackConfig = (env: {
   production: any;
@@ -25,16 +26,6 @@ const webpackConfig = (env: {
     publicPath: "/",
   },
   devtool: "#inline-source-map",
-  devServer: {
-    contentBase: "src/frontend",
-    port: 3000,
-    // host: "localhost",
-    host: "0.0.0.0",
-    open: true,
-    hotOnly: true,
-    noInfo: true,
-    clientLogLevel: "error",
-  },
   module: {
     rules: [
       {
@@ -79,6 +70,7 @@ const webpackConfig = (env: {
     new ForkTsCheckerWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
+    new DotEnvPlugin(),
   ],
   externals: {
     react: "React",
