@@ -30,5 +30,11 @@ module.exports = {
     "import/no-extraneous-dependencies": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/quotes": "off",
+    "@typescript-eslint/return-await": "off",
+    camelcase: "off",
+    "consistent-return": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "react/prop-types": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
   },
 };
