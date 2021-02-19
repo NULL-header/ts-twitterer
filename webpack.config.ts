@@ -4,7 +4,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-import UglifyJsPlugin from "uglifyjs-webpack-plugin";
+import DotEnvPlugin from "dotenv-webpack";
 
 const webpackConfig = (env: {
   production: any;
@@ -13,29 +13,31 @@ const webpackConfig = (env: {
   entry: { app: ["./src/frontend/index.tsx"] },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
-    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.build.json" })],
+    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any]
   },
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
-    publicPath: "/",
+    publicPath: "/"
   },
+  cache: {
+    type: "filesystem",
+    buildDependencies: {
+      config: [__filename]
+    }
+  },
+  target: "web",
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: {
-          // transpileOnly: true,
-          configFile: path.resolve(__dirname, "./tsconfig.build.json"),
+          configFile: path.resolve(__dirname, "./tsconfig.json")
         },
-        exclude: /public/,
-      },
-      {
-        test: /\.html$/,
-        loader: "html-loader",
-      },
-    ],
+        exclude: /public/
+      }
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
@@ -44,17 +46,15 @@ const webpackConfig = (env: {
       "process.env.NAME": JSON.stringify(packageJSON.name),
       "process.env.VERSION": JSON.stringify(packageJSON.version),
       "process.env.getTweetsUrl": JSON.stringify("/api/tweet"),
-      "process.env.getRateUrl": JSON.stringify("/api/rate"),
+      "process.env.getRateUrl": JSON.stringify("/api/rate")
     }),
     new ForkTsCheckerWebpackPlugin(),
+    new DotEnvPlugin()
   ],
   externals: {
     react: "React",
-    "react-dom": "ReactDOM",
-  },
-  optimization: {
-    minimizer: [new UglifyJsPlugin()],
-  },
+    "react-dom": "ReactDOM"
+  }
 });
 
 export default webpackConfig;

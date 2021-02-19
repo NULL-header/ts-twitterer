@@ -1,8 +1,8 @@
 import React from "react";
-import { useSelector, useUpdate } from "src/frontend/globalState";
+import { useSelector, useUpdate } from "frontend/globalState";
 
 export const ListSelector: React.FC = React.memo(() => {
-  const listIds = useSelector((state) => state.listIds);
+  const listIds = useSelector(state => state.listIds);
   const dispatch = useUpdate();
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {

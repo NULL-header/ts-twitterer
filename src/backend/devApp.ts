@@ -4,7 +4,7 @@ import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import getConfigDev from "webpack.config.dev";
 import { app } from "./app";
-import { getSampleTweet, getSampleRate } from "src/backend/util";
+import { getSampleTweet, getSampleRate } from "backend/util";
 
 const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
@@ -23,8 +23,8 @@ const getBoolean = (arg: string | undefined) =>
 export const devApp = app
   .use(
     webpackDevMiddleware(compiler, {
-      publicPath: config.output?.publicPath,
-      stats: "errors-only",
+      publicPath: config.output?.publicPath as string,
+      stats: "errors-only"
     })
   )
   .use(webpackHotMiddleware(compiler))
@@ -32,7 +32,7 @@ export const devApp = app
     const {
       list_id_str: listId,
       forced_update: forcedUpdate,
-      last_newest_tweet_data_id: lastNewestTweetDataId,
+      last_newest_tweet_data_id: lastNewestTweetDataId
     } = req.query as Record<string, string>;
     const doesUpdate = getBoolean(forcedUpdate);
     console.log(req.query);
@@ -49,7 +49,7 @@ export const devApp = app
     const result = await getSampleTweet(
       {
         getter: [listId],
-        maker: [listId, lastNewestTweetDataId],
+        maker: [listId, lastNewestTweetDataId]
       },
       doesUpdate,
       listId.toString()
@@ -57,7 +57,7 @@ export const devApp = app
     const resultSplitted = [
       result.slice(0, 7),
       result.slice(7, 14),
-      result.slice(14),
+      result.slice(14)
     ];
     res.send(resultSplitted[getLoopThree()]);
   })
