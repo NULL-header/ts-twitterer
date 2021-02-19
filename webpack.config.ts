@@ -4,7 +4,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-import "webpack-dev-server";
+import UglifyJsPlugin from "uglifyjs-webpack-plugin";
 
 const webpackConfig = (env: {
   production: any;
@@ -18,13 +18,7 @@ const webpackConfig = (env: {
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
-    publicPath: "/public/",
-  },
-  devtool: "#inline-source-map",
-  devServer: {
-    contentBase: path.join(__dirname, "public"),
-    port: 8080,
-    host: "localhost",
+    publicPath: "/",
   },
   module: {
     rules: [
@@ -41,21 +35,6 @@ const webpackConfig = (env: {
         test: /\.html$/,
         loader: "html-loader",
       },
-      {
-        test: /\.css$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: { url: false },
-          },
-        ],
-      },
-      {
-        test: /\.js/,
-        enforce: "pre",
-        loader: "source-map-loader",
-      },
     ],
   },
   plugins: [
@@ -64,9 +43,18 @@ const webpackConfig = (env: {
       "process.env.PRODUCTION": env.production || !env.development,
       "process.env.NAME": JSON.stringify(packageJSON.name),
       "process.env.VERSION": JSON.stringify(packageJSON.version),
+      "process.env.getTweetsUrl": JSON.stringify("/api/tweet"),
+      "process.env.getRateUrl": JSON.stringify("/api/rate"),
     }),
     new ForkTsCheckerWebpackPlugin(),
   ],
+  externals: {
+    react: "React",
+    "react-dom": "ReactDOM",
+  },
+  optimization: {
+    minimizer: [new UglifyJsPlugin()],
+  },
 });
 
 export default webpackConfig;
