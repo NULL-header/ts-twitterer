@@ -2,9 +2,9 @@ import path from "path";
 import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
-import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
+import packageJSON from "./package.json";
 
 const webpackConfig = (env: {
   production: any;
@@ -13,18 +13,20 @@ const webpackConfig = (env: {
   entry: { app: ["./src/frontend/index.tsx"] },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
-    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any]
+    plugins: [
+      new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any,
+    ],
   },
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
-    publicPath: "/"
+    publicPath: "/",
   },
   cache: {
     type: "filesystem",
     buildDependencies: {
-      config: [__filename]
-    }
+      config: [__filename],
+    },
   },
   target: "web",
   module: {
@@ -33,11 +35,11 @@ const webpackConfig = (env: {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: {
-          configFile: path.resolve(__dirname, "./tsconfig.json")
+          configFile: path.resolve(__dirname, "./tsconfig.json"),
         },
-        exclude: /public/
-      }
-    ]
+        exclude: /public/,
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
@@ -46,15 +48,15 @@ const webpackConfig = (env: {
       "process.env.NAME": JSON.stringify(packageJSON.name),
       "process.env.VERSION": JSON.stringify(packageJSON.version),
       "process.env.getTweetsUrl": JSON.stringify("/api/tweet"),
-      "process.env.getRateUrl": JSON.stringify("/api/rate")
+      "process.env.getRateUrl": JSON.stringify("/api/rate"),
     }),
     new ForkTsCheckerWebpackPlugin(),
-    new DotEnvPlugin()
+    new DotEnvPlugin(),
   ],
   externals: {
     react: "React",
-    "react-dom": "ReactDOM"
-  }
+    "react-dom": "ReactDOM",
+  },
 });
 
 export default webpackConfig;

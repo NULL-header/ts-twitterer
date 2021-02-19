@@ -21,7 +21,7 @@
       "backend/*": ["*", "src/backend/*"]
     }
   },
-  "include": ["./**/*.ts*", "./**/*.js"],
+  "include": ["./**/*.ts*", "./**/*.js", "./*.js", "./*.ts", "./.*.js"],
   "exclude": ["node_modules", "public"],
   "ts-node": {
     "files": true
