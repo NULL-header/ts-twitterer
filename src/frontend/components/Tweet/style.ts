@@ -1,6 +1,6 @@
-import { makeStyles } from "src/frontend/theme";
+import { makeStyles } from "frontend/theme";
 
-export const useStyles = makeStyles()((theme) => ({
+export const useStyles = makeStyles()(theme => ({
   root: {
     color: theme.color.primary,
     padding: 10,
@@ -8,7 +8,7 @@ export const useStyles = makeStyles()((theme) => ({
     borderStyle: "solid",
     borderWidth: 3,
     borderColor: theme.color.primary,
-    borderBottomStyle: "none",
+    borderBottomStyle: "none"
   },
   tweetContainer: {
     display: "grid",
@@ -18,26 +18,26 @@ export const useStyles = makeStyles()((theme) => ({
         "icon user"
         "icon content"
         ". content"
-      `,
+      `
   },
   icon: {
-    gridArea: "icon",
+    gridArea: "icon"
   },
   user: {
     gridArea: "user",
-    display: "flex",
+    display: "flex"
   },
   username: {
-    gridArea: "username",
+    gridArea: "username"
   },
   userid: {
-    gridArea: "userid",
+    gridArea: "userid"
   },
   tweetContent: {
     gridArea: "content",
-    whiteSpace: "pre-line",
+    whiteSpace: "pre-line"
   },
   media: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));

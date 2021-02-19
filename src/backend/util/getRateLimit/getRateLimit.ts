@@ -1,4 +1,4 @@
-import { twitterApi } from "src/backend/twitterApi";
+import { twitterApi } from "backend/twitterApi";
 
 export const getRateLimit = async (): Promise<LimitData> => {
   const response = await getRateLimitData();
@@ -7,13 +7,13 @@ export const getRateLimit = async (): Promise<LimitData> => {
 
 export const getRateLimitData = async () => {
   return await twitterApi.get("application/rate_limit_status", {
-    resources: "lists",
+    resources: "lists"
   });
 };
 
 export const makeLimitData = (response: any): LimitData => {
   const {
-    resources: { lists },
+    resources: { lists }
   } = response;
   const listsLimit = lists["/lists/statuses"];
   const { limit, remaining } = listsLimit;

@@ -1,12 +1,12 @@
 import React from "react";
-import { useSelector } from "src/src/frontend/globalState";
-import { Tweet } from "src/frontend/components";
+import { useSelector } from "src/frontend/globalState";
+import { Tweet } from "frontend/components";
 import { useStyles } from "./style";
 
-export const TimeLine: React.FC = React.memo((_props) => {
-  const isLoading = useSelector((state) => state.isLoadingTweets);
-  const currentList = useSelector((state) => state.currentList);
-  const tweetGroup = useSelector((state) => state.tweetGroup);
+export const TimeLine: React.FC = React.memo(_props => {
+  const isLoading = useSelector(state => state.isLoadingTweets);
+  const currentList = useSelector(state => state.currentList);
+  const tweetGroup = useSelector(state => state.tweetGroup);
   const tweets = tweetGroup[currentList];
   console.log({ tweets, tweetGroup, currentList });
   const classes = useStyles();
