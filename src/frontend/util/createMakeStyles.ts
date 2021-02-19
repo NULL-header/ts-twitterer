@@ -14,20 +14,19 @@ type BranchArg<Styles, Props> = Props extends undefined
 export const createMakeStyles = <
   UserTheming extends Theming<any> | undefined = undefined
 >(
-  theming?: UserTheming
-) => <Props extends Record<string, any> | undefined = undefined>(
-  _props?: Props
-) => <Styles extends Record<string, any>>(
+  theming?: UserTheming,
+) => <Props extends Record<string, any> | undefined = undefined>(_?: Props) => <
+  Styles extends Record<string, any>
+>(
   styles: UserTheming extends undefined
     ? MassJSS<Styles, Props>
     :
         | MassJSS<Styles, Props>
         | ((
-            theme: UserTheming extends Theming<infer Theme> ? Theme : never
-          ) => MassJSS<Styles, Props>)
-) => {
-  return createUseStyles<UserTheming>(styles as any, { theming }) as BranchArg<
+            theme: UserTheming extends Theming<infer Theme> ? Theme : never,
+          ) => MassJSS<Styles, Props>),
+) =>
+  createUseStyles<UserTheming>(styles as any, { theming }) as BranchArg<
     Styles,
     Props
   >;
-};

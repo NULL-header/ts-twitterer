@@ -1,21 +1,22 @@
 import React from "react";
-import { useSelector } from "src/frontend/globalState";
-import { Tweet } from "frontend/components";
+import { useTracked } from "src/frontend/globalState";
+import { Tweet } from "../Tweet";
 import { useStyles } from "./style";
 
-export const TimeLine: React.FC = React.memo(_props => {
-  const isLoading = useSelector(state => state.isLoadingTweets);
-  const currentList = useSelector(state => state.currentList);
-  const tweetGroup = useSelector(state => state.tweetGroup);
-  const tweets = tweetGroup[currentList];
+export const TimeLine: React.FC = React.memo(() => {
+  const [state] = useTracked();
+  const { isLoadingTweets, currentList, tweetGroup } = state;
+  const tweets = React.useMemo(
+    () =>
+      tweetGroup[currentList].map((e) => <Tweet key={e.dataid} tweet={e} />),
+    [tweetGroup, currentList],
+  );
   console.log({ tweets, tweetGroup, currentList });
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      {tweets == null && isLoading && "Loading..."}
-      {tweets != null &&
-        tweets.length > 0 &&
-        tweets.map((e, i) => <Tweet key={i} tweet={e} />)}
+      {isLoadingTweets && "Loading..."}
+      {tweets.length > 0 && tweets}
     </div>
   );
 });

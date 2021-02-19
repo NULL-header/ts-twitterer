@@ -74,7 +74,7 @@ interface Configs {
   listIds: string[];
   currentList: string;
   limitData: LimitData;
-  themename: import("./frontend/theme").themenames;
+  themename: import("./frontend/theme").Themenames;
 }
 
 interface ConfigColumns {

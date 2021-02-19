@@ -10,8 +10,11 @@ export const deleteCacheTweets = async (getState: () => State) => {
     tweetGroup,
   } = listIds.reduce(
     (a, e) => {
+      // eslint-disable-next-line no-param-reassign
       a.tweetGroup[e] = [];
+      // eslint-disable-next-line no-param-reassign
       a.lastTweetIdGroup[e] = 0;
+      // eslint-disable-next-line no-param-reassign
       a.newestTweetDataIdGroup[e] = "0";
       return a;
     },
@@ -22,7 +25,7 @@ export const deleteCacheTweets = async (getState: () => State) => {
     } as Pick<
       State,
       "tweetGroup" | "lastTweetIdGroup" | "newestTweetDataIdGroup"
-    >
+    >,
   );
   await promise;
   return { tweetGroup, lastTweetIdGroup, newestTweetDataIdGroup };

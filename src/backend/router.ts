@@ -1,4 +1,5 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import express from "express";
 import { getNewTweetLows, getRateLimit } from "./util";
 
@@ -24,7 +25,7 @@ export const router = express
     }
     const tweetLows = await getNewTweetLows(
       last_newest_tweet_data_id,
-      list_id
+      list_id,
     ).catch((err) => console.log(err));
     res.send(tweetLows);
   })

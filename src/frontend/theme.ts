@@ -24,6 +24,6 @@ const dark: Theme = {
 
 export const themes = { light, dark };
 
-export type themenames = keyof typeof themes;
+export type Themenames = keyof typeof themes;
 
 export const { ThemeProvider, makeStyles } = createTheme(themes);

@@ -4,7 +4,7 @@ import { createTheming } from "react-jss";
 import { createMakeStyles } from "./createMakeStyles";
 
 export const createTheme = <Theme, ThemeNames extends string>(
-  themes: Record<ThemeNames, Theme>
+  themes: Record<ThemeNames, Theme>,
 ) => {
   const ThemeContext = createContext({} as Theme);
   const Theming = createTheming(ThemeContext);

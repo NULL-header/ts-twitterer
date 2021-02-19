@@ -1,20 +1,7 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { extractDataFromMedia } from "./makeMedia";
 import { removeUrl } from "./removeUrl";
-
-export const makeTweetLow = (tweetData: any, listId: string): TweetColumns => {
-  let tweetLow: any;
-  if (tweetData.retweeted_status) {
-    tweetLow = extractData(tweetData.retweeted_status);
-    tweetLow.is_retweeted = true;
-    tweetLow.retweeter_name = tweetData.user.name;
-  } else {
-    tweetLow = extractData(tweetData);
-    tweetLow.is_retweeted = false;
-  }
-  tweetLow.list_id = listId;
-  return tweetLow;
-};
 
 const extractData = (tweetData: any) => {
   const {
@@ -28,8 +15,8 @@ const extractData = (tweetData: any) => {
   let media;
   if (extended_entities != null) {
     const { indicesArray, media: mediaNonNullable } = extractDataFromMedia(
-      extended_entities.media
-    );
+      extended_entities.media,
+    ) as NonNullable<ReturnType<typeof extractDataFromMedia>>;
     media = mediaNonNullable;
     content = removeUrl(indicesArray, contentData);
   }
@@ -42,4 +29,18 @@ const extractData = (tweetData: any) => {
     icon_url,
     media,
   };
+};
+
+export const makeTweetLow = (tweetData: any, listId: string): TweetColumns => {
+  let tweetLow: any;
+  if (tweetData.retweeted_status) {
+    tweetLow = extractData(tweetData.retweeted_status);
+    tweetLow.is_retweeted = true;
+    tweetLow.retweeter_name = tweetData.user.name;
+  } else {
+    tweetLow = extractData(tweetData);
+    tweetLow.is_retweeted = false;
+  }
+  tweetLow.list_id = listId;
+  return tweetLow;
 };

@@ -1,5 +1,10 @@
 import React, { useReducer, Reducer, Dispatch } from "react";
-import { TimeLine, Config, ListSelector, Data } from "..";
+import { Data } from "../Data";
+import { TimeLine } from "../TimeLine";
+import { Config } from "../Config";
+import { ListSelector } from "../ListSelector";
+// exported things are type only
+// eslint-disable-next-line import/no-cycle
 import { SideBar } from "./SideBar";
 import { useStyles } from "./style";
 
@@ -30,6 +35,9 @@ const reducer: Reducer<State, Action> = (_state, action) => {
     case "CHANGE_TAB": {
       const CurrentScreen = screens[action.tab];
       return { CurrentScreen };
+    }
+    default: {
+      throw new Error("An error occurred in the changing tabs");
     }
   }
 };

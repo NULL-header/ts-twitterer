@@ -1,22 +1,20 @@
 import React from "react";
-import { useSelector } from "frontend/globalState";
+import { useTracked } from "frontend/globalState";
 import { ThemeProvider } from "frontend/theme";
-import { ScreenContainer } from "..";
-
-export const LoadContainer: React.FC = React.memo(() => {
-  const state = useSelector(state => state);
-  console.log({ state });
-  const isInit = useSelector(state => state.isInitializing);
-  if (isInit == null) return <div>Starting</div>;
-  else if (isInit) return <div>Loading</div>;
-  else return <ThemeLoader />;
-});
+import { ScreenContainer } from "../ScreenContainer";
 
 const ThemeLoader: React.FC = React.memo(() => {
-  const themename = useSelector(state => state.themename);
+  const [state] = useTracked();
   return (
-    <ThemeProvider themeName={themename}>
+    <ThemeProvider themeName={state.themename}>
       <ScreenContainer />
     </ThemeProvider>
   );
+});
+export const LoadContainer: React.FC = React.memo(() => {
+  const [state] = useTracked();
+  console.log({ state });
+  if (state.isInitializing == null) return <div>Starting</div>;
+  if (state.isInitializing) return <div>Loading</div>;
+  return <ThemeLoader />;
 });

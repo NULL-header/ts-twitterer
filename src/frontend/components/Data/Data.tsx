@@ -1,6 +1,8 @@
 import React from "react";
-import { useSelector } from "frontend/globalState";
+import { useTracked } from "frontend/globalState";
+
 export const Data: React.FC = React.memo(() => {
-  const limitData = useSelector(state => state.limitData);
+  const [state] = useTracked();
+  const { limitData } = state;
   return <div>{JSON.stringify(limitData)}</div>;
 });

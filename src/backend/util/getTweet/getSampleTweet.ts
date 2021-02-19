@@ -1,5 +1,6 @@
 import fsOrigin from "fs";
 import { getNewTweetLows } from ".";
+
 const fs = fsOrigin.promises;
 
 export const getSample = async (listId: string, fileBasePath: string) => {
@@ -11,11 +12,11 @@ export const getSample = async (listId: string, fileBasePath: string) => {
   ];
   // fix up for any samples
   fs.writeFile(
-    fileBasePath + `${listId}.json`,
+    `${fileBasePath}${listId}.json`,
     JSON.stringify(tweetsSplitted),
     {
       encoding: "utf-8",
-    }
+    },
   ).then(() => console.log("sample updated"));
   return tweetsSplitted;
 };

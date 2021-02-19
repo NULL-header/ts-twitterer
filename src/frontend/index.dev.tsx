@@ -10,5 +10,5 @@ ReactDOM.render(
     <LoadContainer />
     <UpdateButton />
   </Provider>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );

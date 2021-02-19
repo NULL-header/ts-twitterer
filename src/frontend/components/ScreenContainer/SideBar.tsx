@@ -1,4 +1,6 @@
 import React from "react";
+// imported things are types only
+// eslint-disable-next-line import/no-cycle
 import { ScreenDispatch, TabNames } from "./ScreenContainer";
 
 interface Props {
@@ -25,17 +27,16 @@ const tabButtons: TabButton[] = [
   },
 ];
 
-export const SideBar: React.FC<Props> = React.memo((props) => {
-  return (
-    <div>
-      {tabButtons.map((btn) => (
-        <div
-          key={btn.name}
-          onClick={() => props.dispatch({ type: "CHANGE_TAB", tab: btn.name })}
-        >
-          <btn.Component />
-        </div>
-      ))}
-    </div>
-  );
-});
+export const SideBar: React.FC<Props> = React.memo((props) => (
+  <div>
+    {tabButtons.map((btn) => (
+      <button
+        key={btn.name}
+        onClick={() => props.dispatch({ type: "CHANGE_TAB", tab: btn.name })}
+        type="button"
+      >
+        <btn.Component />
+      </button>
+    ))}
+  </div>
+));
