@@ -1,7 +1,7 @@
 import { twitterApi } from "backend/twitterApi";
 
-export const getRateLimitData = async () =>
-  await twitterApi.get("application/rate_limit_status", {
+export const getRateLimitData = () =>
+  twitterApi.get("application/rate_limit_status", {
     resources: "lists",
   });
 
