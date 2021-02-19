@@ -4,7 +4,6 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import packageJSON from "./package.json";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-import "webpack-dev-server";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
 
@@ -14,18 +13,18 @@ const webpackConfig = (env: {
 }): webpack.Configuration => ({
   entry: [
     "webpack-hot-middleware/client?reload=true&timeout=1000",
-    "./src/frontend/index.dev.tsx",
+    "./src/frontend/index.dev.tsx"
   ],
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
-    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.build.json" })],
+    plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any]
   },
   output: {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
-    publicPath: "/",
+    publicPath: "/"
   },
-  devtool: "#inline-source-map",
+  devtool: "inline-source-map",
   module: {
     rules: [
       {
@@ -33,49 +32,35 @@ const webpackConfig = (env: {
         loader: "ts-loader",
         options: {
           // transpileOnly: true,
-          configFile: path.resolve(__dirname, "./tsconfig.build.json"),
+          configFile: path.resolve(__dirname, "./tsconfig.json")
         },
-        exclude: /public/,
-      },
-      {
-        test: /\.html$/,
-        loader: "html-loader",
-      },
-      {
-        test: /\.css$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: { url: false },
-          },
-        ],
+        exclude: /public/
       },
       {
         test: /\.js/,
         enforce: "pre",
-        loader: "source-map-loader",
-      },
-    ],
+        loader: "source-map-loader"
+      }
+    ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./src/frontend/index.dev.html" }),
+    new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
     new webpack.DefinePlugin({
       "process.env.PRODUCTION": env.production || !env.development,
       "process.env.NAME": JSON.stringify(packageJSON.name),
       "process.env.VERSION": JSON.stringify(packageJSON.version),
       "process.env.getTweetsUrl": JSON.stringify("/sample/tweet"),
-      "process.env.getRateUrl": JSON.stringify("/sample/rate"),
+      "process.env.getRateUrl": JSON.stringify("/sample/rate")
     }),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
-    new DotEnvPlugin(),
+    new DotEnvPlugin()
   ],
   externals: {
     react: "React",
-    "react-dom": "ReactDOM",
-  },
+    "react-dom": "ReactDOM"
+  }
 });
 
 export default webpackConfig;
