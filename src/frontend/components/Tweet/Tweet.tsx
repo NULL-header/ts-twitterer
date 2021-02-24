@@ -29,6 +29,7 @@ const makeMediaElement = (tweet: Tweet, className: string) => {
 
 const makeUsername = (username: string) =>
   username.length > 20 ? `${username.slice(0, 21)}…` : username;
+
 export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
   console.log(props.tweet);
   const username = makeUsername(props.tweet.username);

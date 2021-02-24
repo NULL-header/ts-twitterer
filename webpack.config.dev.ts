@@ -1,16 +1,16 @@
 import path from "path";
-import webpack from "webpack";
+import {
+  Configuration,
+  DefinePlugin,
+  HotModuleReplacementPlugin,
+} from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
-import packageJSON from "./package.json";
 
-const webpackConfig = (env: {
-  production: any;
-  development: any;
-}): webpack.Configuration => ({
+const webpackConfig: Configuration = {
   entry: [
     "webpack-hot-middleware/client?reload=true&timeout=1000",
     "./src/frontend/index.dev.tsx",
@@ -47,15 +47,12 @@ const webpackConfig = (env: {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
-    new webpack.DefinePlugin({
-      "process.env.PRODUCTION": env.production || !env.development,
-      "process.env.NAME": JSON.stringify(packageJSON.name),
-      "process.env.VERSION": JSON.stringify(packageJSON.version),
+    new DefinePlugin({
       "process.env.getTweetsUrl": JSON.stringify("/sample/tweet"),
       "process.env.getRateUrl": JSON.stringify("/sample/rate"),
     }),
     new ForkTsCheckerWebpackPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
+    new HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
     new DotEnvPlugin(),
   ],
@@ -63,6 +60,6 @@ const webpackConfig = (env: {
     react: "React",
     "react-dom": "ReactDOM",
   },
-});
+};
 
 export default webpackConfig;

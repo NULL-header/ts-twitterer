@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { twitterApi } from "backend/twitterApi";
 import { makeTweetLow } from "./makeTweetLow";
 
@@ -29,7 +30,7 @@ export const getNewTweetLows = async (
 ) => {
   console.log("getNew");
   const response = await getNewTweetData(listId);
-  const lastIndexOldTweetData = (response as any[]).findIndex(
+  const lastIndexOldTweetData = response.findIndex(
     (e) => e.id === lastNewestTweetDataId,
   );
   const newTweetData: any[] =

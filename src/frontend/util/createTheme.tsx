@@ -15,6 +15,7 @@ export const createTheme = <Theme, ThemeNames extends string>(
   }> = React.memo((props) => {
     const theme = themes[props.themeName];
     return (
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       <Theming.ThemeProvider theme={theme as any}>
         {props.children}
       </Theming.ThemeProvider>

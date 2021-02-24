@@ -189,6 +189,7 @@ const asyncReducer: GlobalAsyncReducer = {
   TOGGLE_THEME_BASE: (args) => async (action) => {
     await manageDispatch(
       args,
+      // eslint-disable-next-line @typescript-eslint/require-await
       async () => {
         const { themename } = args.getState();
         return { themename: toggleThemename(themename) };

@@ -1,12 +1,11 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import webpack from "webpack";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
-import getConfigDev from "webpack.config.dev";
+import config from "webpack.config.dev";
 import { getSampleTweet, getSampleRate } from "backend/util";
 import { app } from "./app";
 
-const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
 
 const getLoopThree = (() => {

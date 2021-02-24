@@ -4,14 +4,16 @@ import { getNewTweetData, makeTweetLows } from "./getTweet";
 import { CONSTVALUE } from "../CONSTVALUE";
 
 const makeFs = (basePath: string) => ({
-  read: async (additionalPath: string) =>
-    await fsOrigin
+  read: async <Data>(additionalPath: string) => {
+    const result = (await fsOrigin
       .readFile(basePath + additionalPath, { encoding: "utf-8" })
       .then(JSON.parse)
-      .catch(() => undefined),
-  write: async (additionalPath: string, target: string) =>
+      .catch(() => undefined)) as Data | undefined;
+    return result;
+  },
+  write: async (additionalPath: string, target: any) =>
     await fsOrigin
-      .writeFile(basePath + additionalPath, target, {
+      .writeFile(basePath + additionalPath, JSON.stringify(target), {
         encoding: "utf-8",
       })
       .catch(() => undefined),
@@ -58,8 +60,10 @@ const makeSampleGetter = <
       return localAdjustedSample;
     }
 
+    // this args are changed by using api
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const remoteRawSample = await getter(...args.getter);
-    const promiseRaw = rawUtil.write(path, JSON.stringify(remoteRawSample));
+    const promiseRaw = rawUtil.write(path, remoteRawSample);
     const remoteAdjustedSample = maker(remoteRawSample, ...args.maker);
     const promiseAdjusted = adjustedUtil.write(
       path,

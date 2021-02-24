@@ -32,6 +32,7 @@ type Tweet = {
 } & (
   | {
       isRetweeted: false;
+      retweeterName: undefined;
     }
   | {
       isRetweeted: true;
@@ -52,6 +53,7 @@ type TweetColumns = {
 } & (
   | {
       is_retweeted: false;
+      retweeter_name: undefined;
     }
   | {
       is_retweeted: true;

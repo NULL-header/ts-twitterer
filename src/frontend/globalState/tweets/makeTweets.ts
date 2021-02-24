@@ -1,17 +1,3 @@
-export const makeTweets = (tweetLows: TweetColumns[]): Tweet[] => {
-  return tweetLows.map((e) => {
-    const tweet = extractData(e);
-    tweet.media = makeMedia(e.media);
-    return tweet;
-  });
-};
-
-const makeMedia = (mediaColumns?: MediaColumns) => {
-  if (mediaColumns == null) return undefined;
-  const { type: mediaType, media_url: mediaUrl } = mediaColumns;
-  return { type: mediaType, mediaUrl } as Media;
-};
-
 const extractData = (tweetColumns: TweetColumns): Tweet => {
   const {
     content,
@@ -23,12 +9,9 @@ const extractData = (tweetColumns: TweetColumns): Tweet => {
     username,
     list_id: listId,
     is_retweeted: isRetweeted,
+    retweeter_name: retweeterName,
   } = tweetColumns;
-  const retweeterName = (tweetColumns as any).retweeter_name as
-    | string
-    | undefined;
-  const retweetData = makeRetweetData(isRetweeted, retweeterName);
-  const tweet: Tweet = {
+  const tweet = {
     content,
     id,
     createdAt,
@@ -37,16 +20,21 @@ const extractData = (tweetColumns: TweetColumns): Tweet => {
     username,
     dataid,
     listId,
-    ...retweetData,
-  };
+    isRetweeted,
+    retweeterName,
+  } as Tweet;
   return tweet;
 };
 
-const makeRetweetData = (isRetweeted: boolean, retweeterName?: string) => {
-  if (isRetweeted) {
-    if (retweeterName == null) throw new Error("retweeterName is undefined");
-    return { isRetweeted, retweeterName };
-  } else {
-    return { isRetweeted };
-  }
+const makeMedia = (mediaColumns?: MediaColumns) => {
+  if (mediaColumns == null) return undefined;
+  const { type: mediaType, media_url: mediaUrl } = mediaColumns;
+  return { type: mediaType, mediaUrl } as Media;
 };
+
+export const makeTweets = (tweetLows: TweetColumns[]): Tweet[] =>
+  tweetLows.map((e) => {
+    const tweet = extractData(e);
+    tweet.media = makeMedia(e.media);
+    return tweet;
+  });

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { extractDataFromMedia } from "./makeMedia";
@@ -42,5 +44,5 @@ export const makeTweetLow = (tweetData: any, listId: string): TweetColumns => {
     tweetLow.is_retweeted = false;
   }
   tweetLow.list_id = listId;
-  return tweetLow;
+  return tweetLow as TweetColumns;
 };
