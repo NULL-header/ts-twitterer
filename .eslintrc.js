@@ -42,5 +42,6 @@ module.exports = {
     ],
     "@typescript-eslint/comma-dangle": "off",
     "@typescript-eslint/indent": "off",
+    "react/jsx-indent": "off",
   },
 };
