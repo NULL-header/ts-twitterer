@@ -74,9 +74,9 @@ interface Configs {
   lastTweetIdGroup: Record<string, number>;
   newestTweetDataIdGroup: Record<string, string>;
   listIds: string[];
-  currentList: string;
+  currentList: string | undefined;
   limitData: LimitData;
-  themename: import("./frontend/theme").Themenames;
+  themename: import("frontend/theme").Themenames;
 }
 
 interface ConfigColumns {
