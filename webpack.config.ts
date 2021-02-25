@@ -1,7 +1,6 @@
 import path from "path";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
 
@@ -10,7 +9,7 @@ const webpackConfig: Configuration = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     plugins: [
-      new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any,
+      new TsconfigPathsPlugin({ configFile: "tsconfig.build.json" }) as any,
     ],
   },
   output: {
@@ -31,9 +30,8 @@ const webpackConfig: Configuration = {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: {
-          configFile: path.resolve(__dirname, "./tsconfig.json"),
+          configFile: "tsconfig.build.json",
         },
-        exclude: /public/,
       },
     ],
   },
@@ -43,7 +41,6 @@ const webpackConfig: Configuration = {
       "process.env.getTweetsUrl": JSON.stringify("/api/tweet"),
       "process.env.getRateUrl": JSON.stringify("/api/rate"),
     }),
-    new ForkTsCheckerWebpackPlugin(),
     new DotEnvPlugin(),
   ],
   externals: {

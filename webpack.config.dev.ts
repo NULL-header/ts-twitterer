@@ -5,7 +5,6 @@ import {
   HotModuleReplacementPlugin,
 } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
@@ -18,7 +17,7 @@ const webpackConfig: Configuration = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     plugins: [
-      new TsconfigPathsPlugin({ configFile: "./tsconfig.json" }) as any,
+      new TsconfigPathsPlugin({ configFile: "tsconfig.build.json" }) as any,
     ],
   },
   output: {
@@ -34,9 +33,9 @@ const webpackConfig: Configuration = {
         loader: "ts-loader",
         options: {
           // transpileOnly: true,
-          configFile: path.resolve(__dirname, "./tsconfig.json"),
+          configFile: "tsconfig.build.json",
+          // onlyCompileBundledFiles: true,
         },
-        exclude: /public/,
       },
       {
         test: /\.js/,
@@ -51,7 +50,6 @@ const webpackConfig: Configuration = {
       "process.env.getTweetsUrl": JSON.stringify("/sample/tweet"),
       "process.env.getRateUrl": JSON.stringify("/sample/rate"),
     }),
-    new ForkTsCheckerWebpackPlugin(),
     new HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
     new DotEnvPlugin(),

@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "lib": ["ES6", "DOM", "ES2019"],
-    "typeRoots": ["node_modules/@types"],
+    "typeRoots": ["node_modules/@types", "src/typings"],
     "removeComments": true,
     "resolveJsonModule": true,
     "noImplicitAny": true,
@@ -21,9 +21,5 @@
       "backend/*": ["*", "src/backend/*"]
     }
   },
-  "include": ["./**/*.ts*", "./**/*.js", "./**/.*.ts", "./**/.*.js"],
-  "exclude": ["node_modules", "public"],
-  "ts-node": {
-    "files": true
-  }
+  "include": ["./**/*.ts*", "./**/*.js", "./**/.*.ts", "./**/.*.js"]
 }
