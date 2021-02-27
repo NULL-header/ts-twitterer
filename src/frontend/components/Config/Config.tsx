@@ -57,7 +57,11 @@ export const Config: React.FC = React.memo(() => {
         </ul>
       </form>
       <h3>Toggle Theme</h3>
-      <button onClick={toggleTheme} type="button">
+      <button
+        onClick={toggleTheme}
+        type="button"
+        aria-label="toggleThemeButton"
+      >
         here
       </button>
     </div>

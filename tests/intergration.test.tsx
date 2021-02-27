@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+import "jest-localstorage-mock";
 import React from "react";
 import Twitter from "twitter";
 import { mocked } from "ts-jest/utils";
@@ -14,11 +15,12 @@ const setUpTwitterMock = makeSetUpTwitterMock(TwitterMocked);
 
 describe("intergration", () => {
   const { server } = makeServer({ port: 3000 });
+  let renderResult: ReturnType<typeof render>;
   beforeAll(async () => {
     await server.run();
   });
   beforeEach(async () => {
-    render(<FrontApp />);
+    renderResult = render(<FrontApp />);
     await waitFor(() => {
       screen.getByRole("main");
     });
@@ -49,6 +51,18 @@ describe("intergration", () => {
         await screen.findByRole("article", { name: /timeline/ }),
       ).toBeInTheDocument();
       expect(screen.queryByLabelText("data")).toBe(null);
+    });
+    it("change color mode", async () => {
+      const body = renderResult.container.parentElement as HTMLBodyElement;
+      const beforeStyle = window.getComputedStyle(body);
+      fireEvent.click(screen.getByLabelText("configTab"));
+      fireEvent.click(await screen.findByLabelText("toggleThemeButton"));
+      await waitFor(() => {
+        const afterStyle = window.getComputedStyle(body);
+        expect(beforeStyle.backgroundColor).not.toEqual(
+          afterStyle.backgroundColor,
+        );
+      });
     });
   });
   describe("Exception", () => {});
