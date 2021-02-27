@@ -4,7 +4,7 @@ import { createTheming } from "react-jss";
 import { createMakeStyles } from "./createMakeStyles";
 
 export const createTheme = <Theme, ThemeNames extends string>(
-  themes: Record<ThemeNames, Theme>
+  themes: Record<ThemeNames, Theme>,
 ) => {
   const ThemeContext = createContext({} as Theme);
   const Theming = createTheming(ThemeContext);
@@ -15,6 +15,7 @@ export const createTheme = <Theme, ThemeNames extends string>(
   }> = React.memo((props) => {
     const theme = themes[props.themeName];
     return (
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       <Theming.ThemeProvider theme={theme as any}>
         {props.children}
       </Theming.ThemeProvider>

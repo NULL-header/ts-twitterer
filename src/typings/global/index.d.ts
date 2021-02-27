@@ -32,6 +32,7 @@ type Tweet = {
 } & (
   | {
       isRetweeted: false;
+      retweeterName: undefined;
     }
   | {
       isRetweeted: true;
@@ -52,6 +53,7 @@ type TweetColumns = {
 } & (
   | {
       is_retweeted: false;
+      retweeter_name: undefined;
     }
   | {
       is_retweeted: true;
@@ -72,9 +74,9 @@ interface Configs {
   lastTweetIdGroup: Record<string, number>;
   newestTweetDataIdGroup: Record<string, string>;
   listIds: string[];
-  currentList: string;
+  currentList: string | undefined;
   limitData: LimitData;
-  themename: import("./frontend/theme").themenames;
+  themename: import("frontend/theme").Themenames;
 }
 
 interface ConfigColumns {

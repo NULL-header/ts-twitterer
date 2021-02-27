@@ -20,7 +20,9 @@ const makeSchema = (columns: string[]) => columns.join(", ");
 
 class MyDB extends Dexie {
   tweets!: Dexie.Table<TweetColumns, number>;
+
   configs!: Dexie.Table<ConfigColumns, 0>;
+
   constructor() {
     super("ts-twitterer");
 

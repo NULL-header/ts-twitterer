@@ -1,26 +1,21 @@
 import React from "react";
-import { useSelector, useUpdate } from "frontend/globalState";
+import { useTracked } from "frontend/globalState";
 
 export const ListSelector: React.FC = React.memo(() => {
-  const listIds = useSelector(state => state.listIds);
-  const dispatch = useUpdate();
+  const [state, dispatch] = useTracked();
+  const { listIds } = state;
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
       const listId = event.currentTarget.value;
       dispatch({ type: "MODIFY", state: { currentList: listId } });
     },
-    [dispatch]
+    [dispatch],
   );
   return (
     <div>
-      {listIds.map((e, i) => (
-        <div key={i}>
-          <input
-            name="list"
-            type="radio"
-            value={e}
-            onClick={handleClick}
-          ></input>
+      {listIds.map((e) => (
+        <div key={e}>
+          <input name="list" type="radio" value={e} onClick={handleClick} />
           {e}
         </div>
       ))}

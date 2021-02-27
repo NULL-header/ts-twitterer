@@ -4,7 +4,7 @@ import { AsyncActionHandlers } from "use-reducer-async";
 export type Flags = {
   isLoadingTweets: boolean;
   isGettingTweets: boolean;
-  isInitializing?: boolean;
+  isInitializing: boolean | undefined;
   isDeletingTweets: boolean;
   isDeletingConfigs: boolean;
   isUpdatingTweets: boolean;

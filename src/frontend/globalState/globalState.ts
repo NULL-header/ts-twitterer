@@ -1,8 +1,8 @@
 /* eslint-disable camelcase */
 import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
-import { db } from "../db";
 import { useReducerAsync } from "use-reducer-async";
+import { db } from "../db";
 import { getTweets, loadNewTweetGroup } from "./tweets";
 import { makeConfigColumns } from "./config";
 import { initialize } from "./initialize";
@@ -23,6 +23,9 @@ const reducer: GlobalReducer = (state, action) => {
     case "MODIFY": {
       return { ...state, ...action.state };
     }
+    default: {
+      throw new Error("An error occurred to modify the global state");
+    }
   }
 };
 
@@ -34,19 +37,20 @@ interface ReducerArgs {
 
 const runWithCallback = async (
   process: () => Promise<Partial<State> | undefined | void>,
-  callback: (arg: boolean) => void
-) => {
-  return await process().catch((err) => {
-    // eslint-disable-next-line standard/no-callback-literal
+  callback: (arg: boolean) => void,
+) =>
+  await process().catch((err) => {
     callback(false);
     console.log(err);
     return undefined;
   });
-};
+
+const makeSendResult = (callback: (isSucess: boolean) => void = () => {}) =>
+  callback;
 
 const dispatchBlank = async (
   process: () => Promise<void>,
-  callback?: (arg: boolean) => void
+  callback?: (arg: boolean) => void,
 ) => {
   const sendResult = makeSendResult(callback);
   await runWithCallback(process, sendResult);
@@ -56,7 +60,7 @@ const dispatchBlank = async (
 const manageDispatch = async (
   { dispatch, signal }: ReducerArgs,
   process: () => Promise<Partial<State> | undefined>,
-  callback?: (arg: boolean) => void
+  callback?: (arg: boolean) => void,
 ) => {
   const sendResult = makeSendResult(callback);
   const result = await runWithCallback(process, sendResult);
@@ -72,7 +76,7 @@ const adjustFlag = async (
   flagName: keyof Flags,
   { dispatch, signal, getState }: ReducerArgs,
   process: () => Promise<Partial<State> | undefined>,
-  callback?: (arg: boolean) => void
+  callback?: (arg: boolean) => void,
 ) => {
   const sendResult = makeSendResult(callback);
   const currentFlag = getState()[flagName];
@@ -87,29 +91,17 @@ const adjustFlag = async (
   sendResult(true);
 };
 
-const makeSendResult = (
-  callback: (isSucess: boolean) => void = (_arg: boolean) => {
-    return;
-  }
-) => {
-  return callback;
-};
-
 const makeAsyncDispatch = (
-  dispatch: AsyncDispatch
-): ((arg: AsyncAction) => Promise<boolean>) => {
-  return (args: AsyncAction) =>
-    new Promise((resolve) => dispatch({ callback: resolve, ...args }));
-};
+  dispatch: AsyncDispatch,
+): ((arg: AsyncAction) => Promise<boolean>) => (args: AsyncAction) =>
+  new Promise((resolve) => dispatch({ callback: resolve, ...args }));
 
 const reverseThemename: Record<Themenames, Themenames> = {
   dark: "light",
   light: "dark",
 };
 
-const toggleThemename = (themename: Themenames) => {
-  return reverseThemename[themename];
-};
+const toggleThemename = (themename: Themenames) => reverseThemename[themename];
 
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS_BASE: (args) => async (action) => {
@@ -117,7 +109,7 @@ const asyncReducer: GlobalAsyncReducer = {
       "isLoadingTweets",
       args,
       async () => await loadNewTweetGroup(args.getState),
-      action.callback
+      action.callback,
     );
   },
   LOAD_NEW_TWEETS: () => async (action) => {
@@ -137,7 +129,7 @@ const asyncReducer: GlobalAsyncReducer = {
       "isGettingTweets",
       args,
       async () => await getTweets(args.getState),
-      action.callback
+      action.callback,
     );
   },
   GET_TWEETS: () => async (action) => {
@@ -155,7 +147,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isDeletingTweets",
       args,
-      async () => await deleteCacheTweets(args.getState)
+      async () => await deleteCacheTweets(args.getState),
     );
   },
   DELETE_CACHE_CONFIG: (args) => async (action) => {
@@ -163,7 +155,7 @@ const asyncReducer: GlobalAsyncReducer = {
       "isDeletingConfigs",
       args,
       async () => await deleteCacheConfig(),
-      action.callback
+      action.callback,
     );
   },
   UPDATE_TWEETS: (args) => async (action) => {
@@ -191,17 +183,18 @@ const asyncReducer: GlobalAsyncReducer = {
         console.log("config written");
         return undefined;
       },
-      action.callback
+      action.callback,
     );
   },
   TOGGLE_THEME_BASE: (args) => async (action) => {
     await manageDispatch(
       args,
+      // eslint-disable-next-line @typescript-eslint/require-await
       async () => {
         const { themename } = args.getState();
         return { themename: toggleThemename(themename) };
       },
-      action.callback
+      action.callback,
     );
   },
   TOGGLE_THEME: () => async (action) => {
@@ -219,7 +212,7 @@ const asyncReducer: GlobalAsyncReducer = {
         const limitData = (await response.json()) as LimitData;
         return { limitData };
       },
-      action.callback
+      action.callback,
     );
   },
 };
@@ -235,15 +228,16 @@ const useValue = () => {
       isDeletingConfigs: false,
       isUpdatingTweets: false,
       isWritingConfig: false,
+      isInitializing: undefined,
       lastTweetIdGroup: {},
       tweetGroup: {},
       newestTweetDataIdGroup: {},
       listIds: [],
-      currentList: "",
+      currentList: undefined,
       limitData: { lists: { limitRate: 0, remaining: 0 } },
       themename: "dark",
     } as State,
-    asyncReducer
+    asyncReducer,
   );
   useEffect(() => {
     dispatch({ type: "INITIALIZE" });
@@ -251,4 +245,4 @@ const useValue = () => {
   return [state, dispatch] as const;
 };
 
-export const { Provider, useSelector, useUpdate } = createContainer(useValue);
+export const { Provider, useTracked, useUpdate } = createContainer(useValue);

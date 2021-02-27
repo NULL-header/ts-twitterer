@@ -1,9 +1,29 @@
-import { db } from "../../db";
 import Dexie from "dexie";
+import update from "immutability-helper";
+import { db } from "../../db";
 import { makeTweets } from "./makeTweets";
 import { State } from "../types";
-import update from "immutability-helper";
 
+const loadNewTweets = async (
+  lastTweetId: number,
+  listId: string,
+): Promise<Tweet[]> => {
+  const newTweets = await db.tweets
+    .where("[id+list_id]")
+    .between([lastTweetId + 1, listId], [Dexie.maxKey, listId])
+    .toArray(makeTweets);
+  console.log("load new tweets");
+  console.log({ newTweets });
+  return newTweets;
+};
+
+const loadNewTweetArray = async (
+  listIds: string[],
+  oldLastTweetIdGroup: Record<string, number>,
+) =>
+  await Promise.all(
+    listIds.map((listId) => loadNewTweets(oldLastTweetIdGroup[listId], listId)),
+  );
 export const loadNewTweetGroup = async (getState: () => State) => {
   const {
     listIds,
@@ -20,7 +40,9 @@ export const loadNewTweetGroup = async (getState: () => State) => {
     (a, index) => {
       const currentListId = listIds[index];
       const currentTweets = tweetsArray[index];
+      // eslint-disable-next-line no-param-reassign
       a.tweetGroup[currentListId] = { $push: currentTweets };
+      // eslint-disable-next-line no-param-reassign
       a.lastTweetIdGroup[currentListId] = {
         $set: currentTweets[currentTweets.length - 1].id,
       };
@@ -29,41 +51,19 @@ export const loadNewTweetGroup = async (getState: () => State) => {
     { tweetGroup: {}, lastTweetIdGroup: {} } as {
       tweetGroup: Record<string, { $push: Tweet[] }>;
       lastTweetIdGroup: Record<string, { $set: number }>;
-    }
+    },
   );
   const tweetGroup = update(oldTweetGroup, newSpecs.tweetGroup);
   const lastTweetIdGroup = update(
     oldLastTweetIdGroup,
-    newSpecs.lastTweetIdGroup
+    newSpecs.lastTweetIdGroup,
   );
   return { tweetGroup, lastTweetIdGroup };
 };
 
-const loadNewTweetArray = async (
-  listIds: string[],
-  oldLastTweetIdGroup: Record<string, number>
-) => {
-  return await Promise.all(
-    listIds.map((listId) => loadNewTweets(oldLastTweetIdGroup[listId], listId))
-  );
-};
-
-const loadNewTweets = async (
-  lastTweetId: number,
-  listId: string
-): Promise<Tweet[]> => {
-  const newTweets = await db.tweets
-    .where("[id+list_id]")
-    .between([lastTweetId + 1, listId], [Dexie.maxKey, listId])
-    .toArray(makeTweets);
-  console.log("load new tweets");
-  console.log({ newTweets });
-  return newTweets;
-};
-
 export const loadOldTweets = async (
   lastTweetId: number,
-  listId: string
+  listId: string,
 ): Promise<Tweet[]> => {
   const newTweets = await db.tweets
     .where("[id+list_id]")

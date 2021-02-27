@@ -1,7 +1,7 @@
 import React from "react";
 import { useUpdate } from "frontend/globalState";
 
-export const UpdateButton: React.FC = React.memo(_props => {
+export const UpdateButton: React.FC = React.memo(() => {
   const dispatch = useUpdate();
   const getTweets = React.useCallback(() => {
     dispatch({ type: "GET_TWEETS", dispatch });
@@ -24,14 +24,26 @@ export const UpdateButton: React.FC = React.memo(_props => {
   return (
     <div>
       <div>
-        <button onClick={getTweets}>get tweets</button>
-        <button onClick={showTweets}>show tweets</button>
-        <button onClick={updateTweet}>update tweets</button>
-        <button onClick={deleteTweet}>delete tweets</button>
+        <button onClick={getTweets} type="button">
+          get tweets
+        </button>
+        <button onClick={showTweets} type="button">
+          show tweets
+        </button>
+        <button onClick={updateTweet} type="button">
+          update tweets
+        </button>
+        <button onClick={deleteTweet} type="button">
+          delete tweets
+        </button>
       </div>
       <div>
-        <button onClick={writeConfig}>write config</button>
-        <button onClick={deleteConfig}>delete config</button>
+        <button onClick={writeConfig} type="button">
+          write config
+        </button>
+        <button onClick={deleteConfig} type="button">
+          delete config
+        </button>
       </div>
     </div>
   );

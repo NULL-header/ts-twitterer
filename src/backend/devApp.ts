@@ -1,19 +1,19 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import webpack from "webpack";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
-import getConfigDev from "webpack.config.dev";
-import { app } from "./app";
+import config from "webpack.config.dev";
 import { getSampleTweet, getSampleRate } from "backend/util";
+import { app } from "./app";
 
-const config = getConfigDev({ production: false, development: true });
 const compiler = webpack(config);
 
 const getLoopThree = (() => {
   let i = 0;
   return () => {
-    if (i === 3) i = 0;
-    return i++;
+    if (i === 2) i = -1;
+    i += 1;
+    return i;
   };
 })();
 
@@ -24,15 +24,15 @@ export const devApp = app
   .use(
     webpackDevMiddleware(compiler, {
       publicPath: config.output?.publicPath as string,
-      stats: "errors-only"
-    })
+      stats: "errors-only",
+    }),
   )
   .use(webpackHotMiddleware(compiler))
   .get("/sample/tweet", async (req, res) => {
     const {
       list_id_str: listId,
       forced_update: forcedUpdate,
-      last_newest_tweet_data_id: lastNewestTweetDataId
+      last_newest_tweet_data_id: lastNewestTweetDataId,
     } = req.query as Record<string, string>;
     const doesUpdate = getBoolean(forcedUpdate);
     console.log(req.query);
@@ -49,15 +49,15 @@ export const devApp = app
     const result = await getSampleTweet(
       {
         getter: [listId],
-        maker: [listId, lastNewestTweetDataId]
+        maker: [listId, lastNewestTweetDataId],
       },
       doesUpdate,
-      listId.toString()
+      listId.toString(),
     );
     const resultSplitted = [
       result.slice(0, 7),
       result.slice(7, 14),
-      result.slice(14)
+      result.slice(14),
     ];
     res.send(resultSplitted[getLoopThree()]);
   })

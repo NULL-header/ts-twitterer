@@ -1,16 +1,10 @@
-/* eslint-disable camelcase */
-export const extractDataFromMedia = (mediaData: any[]) => {
-  const makers = [makeFromVideo, makeFromPhoto, makeFromGif];
-  let data: any;
-  for (const maker of makers) {
-    data = maker(mediaData);
-    if (data) break;
-  }
-  return data;
-};
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 type Maker = (
-  mediaData: any[]
+  mediaData: any[],
 ) => { indicesArray: [number, number][]; media: MediaColumns } | undefined;
 
 const makeFromVideo: Maker = (mediaData) => {
@@ -56,3 +50,11 @@ const makeFromGif: Maker = (mediaData) => {
     indicesArray: [indices],
   };
 };
+
+const makers = [makeFromVideo, makeFromPhoto, makeFromGif];
+
+export const extractDataFromMedia = (mediaData: any[]) =>
+  makers.reduce(
+    (a, e) => (a == null ? e(mediaData) : a),
+    undefined as ReturnType<Maker>,
+  );

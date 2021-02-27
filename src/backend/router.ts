@@ -1,4 +1,6 @@
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import express from "express";
 import { getNewTweetLows, getRateLimit } from "./util";
 
@@ -9,22 +11,23 @@ export const router = express
     res.send({ response: "pong!" });
   })
   .get("/api/tweet", async (req, res) => {
-    const { last_newest_tweet_data_id, list_id } = req.query as Record<
-      string,
-      string
-    >;
+    const {
+      last_newest_tweet_data_id,
+      list_id_str: listId,
+    } = req.query as Record<string, string>;
     if (last_newest_tweet_data_id == null) {
       res
         .status(400)
         .send({ message: "pass last_newest_tweet_data_id as number" });
+      return;
     }
-    if (list_id == null) {
+    if (listId == null) {
       res.status(400).send({ message: "pass list_id of number" });
       return;
     }
     const tweetLows = await getNewTweetLows(
       last_newest_tweet_data_id,
-      list_id
+      listId,
     ).catch((err) => console.log(err));
     res.send(tweetLows);
   })

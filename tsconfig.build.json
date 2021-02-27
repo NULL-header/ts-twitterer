@@ -14,12 +14,15 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "rootDir": ".",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "sourceMap": true,
     "paths": {
       "frontend/*": ["*", "src/frontend/*"],
       "backend/*": ["*", "src/backend/*"]
     }
   },
-  "include": ["./**/*.ts*", "./**/*.js", "./**/.*.ts", "./**/.*.js"]
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "exclude": ["public", "tests"],
+  "files": ["src/backend/index.ts"]
 }
