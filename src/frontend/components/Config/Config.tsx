@@ -39,7 +39,7 @@ export const Config: React.FC = React.memo(() => {
 
   console.log({ listIds });
   return (
-    <div className={classes.root}>
+    <div className={classes.root} aria-label="config" role="article">
       <h2>Config</h2>
       <hr className={classes.divider} />
       <form onSubmit={handleSubmit}>

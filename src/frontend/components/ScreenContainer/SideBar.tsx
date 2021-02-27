@@ -15,25 +15,26 @@ interface TabButton {
 const tabButtons: TabButton[] = [
   {
     name: "TIMELINE",
-    Component: () => <div>timeline</div>,
+    Component: () => <div aria-label="timelineTab">timeline</div>,
   },
   {
     name: "CONFIG",
-    Component: () => <div>config</div>,
+    Component: () => <div aria-label="configTab">config</div>,
   },
   {
     name: "DATA",
-    Component: () => <div>data</div>,
+    Component: () => <div aria-label="dataTab">data</div>,
   },
 ];
 
 export const SideBar: React.FC<Props> = React.memo((props) => (
-  <div>
+  <div role="tablist">
     {tabButtons.map((btn) => (
       <button
         key={btn.name}
         onClick={() => props.dispatch({ type: "CHANGE_TAB", tab: btn.name })}
         type="button"
+        role="tab"
       >
         <btn.Component />
       </button>

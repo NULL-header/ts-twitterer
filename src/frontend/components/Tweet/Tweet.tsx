@@ -35,10 +35,10 @@ export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
   const username = makeUsername(props.tweet.username);
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <div className={classes.root} role="group">
       {props.tweet.isRetweeted && (
         <>
-          <div>{`${props.tweet.retweeterName}さんがリツイート`}</div>
+          <div role="note">{`${props.tweet.retweeterName}さんがリツイート`}</div>
           <hr />
         </>
       )}
