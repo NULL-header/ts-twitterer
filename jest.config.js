@@ -6,14 +6,14 @@ module.exports = {
   roots: ["./tests"],
   testMatch: ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest"
+    "^.+\\.(ts|tsx)$": "ts-jest",
   },
   moduleFileExtensions: ["ts", "tsx", "js"],
   moduleDirectories: ["node_modules", __dirname],
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.json"
-    }
+      tsconfig: "tsconfig.json",
+    },
   },
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths)
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
 };
