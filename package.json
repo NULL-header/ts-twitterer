@@ -76,6 +76,7 @@
     "sort-package-json": "^1.49.0",
     "source-map-loader": "^2.0.1",
     "style-loader": "^2.0.0",
+    "timm": "^1.7.1",
     "ts-jest": "^26.5.1",
     "ts-loader": "^8.0.17",
     "ts-node": "^9.1.1",
