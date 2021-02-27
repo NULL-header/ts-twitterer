@@ -46,7 +46,7 @@ export const ScreenContainer: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initValue);
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <div className={classes.root} role="main">
       <SideBar dispatch={dispatch} />
       <div>
         <state.CurrentScreen />
