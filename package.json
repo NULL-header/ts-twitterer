@@ -8,8 +8,8 @@
     "start:backend": "yarn tsnode src/backend/index.ts",
     "tsnode": "ts-node -P tsconfig.build.json -r tsconfig-paths/register",
     "build": "yarn clean && webpack --mode production --progress",
-    "lint": "eslint src/*.ts*",
-    "lint:fix": "eslint src/*.ts* --fix",
+    "lint": "eslint src/**/*.ts*",
+    "lint:fix": "eslint src/**/*.ts* --fix",
     "dev": "yarn clean && ts-node-dev --respawn -P tsconfig.build.json -r tsconfig-paths/register src/backend/index.ts",
     "clean": "rm -r public/* 2>/dev/null || true",
     "test": "jest"
