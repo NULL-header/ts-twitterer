@@ -6,14 +6,17 @@ import {
 } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
 
 const webpackConfig: Configuration = {
+  mode: "development",
   entry: [
     "webpack-hot-middleware/client?reload=true&timeout=1000",
     "./src/frontend/index.dev.tsx",
   ],
+  target: "web",
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     plugins: [
@@ -24,17 +27,17 @@ const webpackConfig: Configuration = {
     path: path.join(__dirname, "/public"),
     filename: "bundle.js",
     publicPath: "/",
+    pathinfo: false,
   },
-  devtool: "inline-source-map",
+  devtool: "eval-cheap-module-source-map",
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: {
-          // transpileOnly: true,
+          transpileOnly: true,
           configFile: "tsconfig.build.json",
-          // onlyCompileBundledFiles: true,
         },
       },
       {
@@ -53,6 +56,7 @@ const webpackConfig: Configuration = {
     new HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
     new DotEnvPlugin(),
+    new ForkTsCheckerWebpackPlugin(),
   ],
   externals: {
     react: "React",

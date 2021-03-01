@@ -1,18 +1,26 @@
 import React from "react";
-import { useStyles } from "./style";
+import {
+  Box,
+  Divider,
+  Grid,
+  GridItem,
+  Text,
+  Image,
+  VStack,
+} from "@chakra-ui/react";
 
-const makeMediaElement = (tweet: Tweet, className: string) => {
+const makeMediaElement = (tweet: Tweet) => {
   if (tweet.media == null) return;
   switch (tweet.media.type) {
     case "photo": {
       return (
-        <div>
+        <VStack spacing="5vw">
           {tweet.media.mediaUrl.map((e, i) => (
             // no it changes
             // eslint-disable-next-line react/no-array-index-key
-            <img src={e} key={i} className={className} alt="media" />
+            <Image src={e} key={i} />
           ))}
-        </div>
+        </VStack>
       );
     }
     case "animated_gif": {
@@ -30,27 +38,35 @@ const makeMediaElement = (tweet: Tweet, className: string) => {
 const makeUsername = (username: string) =>
   username.length > 20 ? `${username.slice(0, 21)}…` : username;
 
-export const Tweet: React.FC<{ tweet: Tweet }> = React.memo((props) => {
-  console.log(props.tweet);
-  const username = makeUsername(props.tweet.username);
-  const classes = useStyles();
+const Tweet = React.memo(({ tweet }: { tweet: Tweet }) => {
+  console.log(tweet);
+  const username = makeUsername(tweet.username);
   return (
-    <div className={classes.root} role="group">
-      {props.tweet.isRetweeted && (
+    <Box role="group" width="100%">
+      {tweet.isRetweeted && (
         <>
-          <div role="note">{`${props.tweet.retweeterName}さんがリツイート`}</div>
-          <hr />
+          <Text role="note">{`${tweet.retweeterName}さんがリツイート`}</Text>
+          <Divider />
         </>
       )}
-      <div className={classes.tweetContainer}>
-        <img src={props.tweet.iconUrl} className={classes.icon} alt="icon" />
-        <div className={classes.user}>
-          <div>{username}</div>
-          <div>{`@${props.tweet.userid}`}</div>
-        </div>
-        <div className={classes.tweetContent}>{props.tweet.content}</div>
-      </div>
-      {makeMediaElement(props.tweet, classes.media)}
-    </div>
+      <Grid templateColumns="auto 1fr" templateRows="auto auto 1fr">
+        <GridItem rowSpan={2} colSpan={1}>
+          <Image src={tweet.iconUrl} alt="icon" />
+        </GridItem>
+        <GridItem paddingLeft="2vw">
+          <Text>{username}</Text>
+        </GridItem>
+        <GridItem paddingLeft="2vw">
+          <Text>{`@${tweet.userid}`}</Text>
+        </GridItem>
+        <GridItem colSpan={2}>
+          <Text whiteSpace="pre-line">{tweet.content}</Text>
+        </GridItem>
+      </Grid>
+      {makeMediaElement(tweet)}
+    </Box>
   );
 });
+
+Tweet.displayName = "Tweet";
+export { Tweet };

@@ -1,12 +1,17 @@
 import React from "react";
 import { useTracked } from "frontend/globalState";
+import { ContentContainer } from "../ContentContainer";
 
-export const Data: React.FC = React.memo(() => {
+const Data = React.memo(() => {
   const [state] = useTracked();
   const { limitData } = state;
   return (
-    <div aria-label="data" role="article">
+    <ContentContainer header="Data">
       {JSON.stringify(limitData)}
-    </div>
+    </ContentContainer>
   );
 });
+
+Data.displayName = "Data";
+
+export { Data };

@@ -1,29 +1,20 @@
-import { CSSProperties } from "react";
-import { createTheme } from "./util";
+import { extendTheme } from "@chakra-ui/react";
 
-interface Theme {
-  color: {
-    primary: CSSProperties["color"];
-    secondary: CSSProperties["color"];
-  };
-}
-
-const light: Theme = {
-  color: {
-    primary: "black",
-    secondary: "white",
+const globalPseudo = {
+  "&": {
+    "::-webkit-scrollbar": {
+      display: "none",
+    },
   },
 };
 
-const dark: Theme = {
-  color: {
-    primary: "lightgrey",
-    secondary: "grey",
+export const theme = extendTheme({
+  config: { initialColorMode: "dark", useSystemColorMode: true },
+  styles: {
+    global: {
+      "*": {
+        ...globalPseudo,
+      },
+    },
   },
-};
-
-export const themes = { light, dark };
-
-export type Themenames = keyof typeof themes;
-
-export const { ThemeProvider, makeStyles } = createTheme(themes);
+});
