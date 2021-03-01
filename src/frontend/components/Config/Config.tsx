@@ -1,9 +1,9 @@
 import React from "react";
 import { useTracked } from "frontend/globalState";
-import { useStyles } from "./style";
+import { ContentContainer } from "../ContentContainer";
 import { CONSTVALUE } from "../../CONSTVALUE";
 
-export const Config: React.FC = React.memo(() => {
+const Config = React.memo(() => {
   const [state, dispatch] = useTracked();
   const {
     listIds,
@@ -12,7 +12,6 @@ export const Config: React.FC = React.memo(() => {
     tweetGroup,
   } = state;
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const classes = useStyles();
   const handleSubmit = React.useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -39,9 +38,7 @@ export const Config: React.FC = React.memo(() => {
 
   console.log({ listIds });
   return (
-    <div className={classes.root} aria-label="config" role="article">
-      <h2>Config</h2>
-      <hr className={classes.divider} />
+    <ContentContainer header="Config">
       <form onSubmit={handleSubmit}>
         <h3>Ids of a list</h3>
         <ul>
@@ -64,6 +61,10 @@ export const Config: React.FC = React.memo(() => {
       >
         here
       </button>
-    </div>
+    </ContentContainer>
   );
 });
+
+Config.displayName = "Config";
+
+export { Config };

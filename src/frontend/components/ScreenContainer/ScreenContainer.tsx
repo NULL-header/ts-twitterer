@@ -1,57 +1,61 @@
-import React, { useReducer, Reducer, Dispatch } from "react";
+import React from "react";
+import { Tabs, Tab, TabList, TabPanels, TabPanel, Box } from "@chakra-ui/react";
 import { Data } from "../Data";
-import { TimeLine } from "../TimeLine";
+import { Timeline } from "../TimeLine";
 import { Config } from "../Config";
 import { ListSelector } from "../ListSelector";
-// exported things are type only
-// eslint-disable-next-line import/no-cycle
-import { SideBar } from "./SideBar";
-import { useStyles } from "./style";
 
-export type TabNames = "TIMELINE" | "CONFIG" | "DATA";
+const tabs = ["Timeline", "Config", "Data"];
+const tabPanels = [Timeline, Config, Data];
 
-type Action = { type: "CHANGE_TAB"; tab: TabNames };
+const ScreenContainer = React.memo(() => (
+  <>
+    <Box
+      role="main"
+      height="100vh"
+      width="100vw"
+      display="flex"
+      flexDirection="column"
+      padding="2vw"
+    >
+      <Tabs
+        orientation="vertical"
+        flexGrow={1}
+        display="flex"
+        // this line is needed because the scroll system is broken if
+        // it is removed.
+        overflow="hidden"
+      >
+        <TabList
+          marginBottom="auto"
+          borderRightWidth="2px"
+          borderLeftWidth="0px"
+        >
+          {tabs.map((e) => (
+            <Tab
+              borderRightWidth="2px"
+              borderLeftWidth="0px"
+              marginRight="-2px"
+              marginLeft="0px"
+              padding="1.5vw 3vw"
+              key={e}
+            >
+              {e}
+            </Tab>
+          ))}
+        </TabList>
+        <TabPanels height="100%">
+          {tabPanels.map((E) => (
+            <TabPanel height="100%" key={E.displayName}>
+              <E />
+            </TabPanel>
+          ))}
+        </TabPanels>
+      </Tabs>
+      <ListSelector />
+    </Box>
+  </>
+));
 
-type Screens = Record<TabNames, React.FC>;
-
-export type ScreenDispatch = Dispatch<Action>;
-
-interface State {
-  CurrentScreen: Screens[keyof Screens];
-}
-
-const screens: Screens = {
-  TIMELINE: TimeLine,
-  CONFIG: Config,
-  DATA: Data,
-} as const;
-
-const initValue: State = {
-  CurrentScreen: screens.TIMELINE,
-};
-
-const reducer: Reducer<State, Action> = (_state, action) => {
-  switch (action.type) {
-    case "CHANGE_TAB": {
-      const CurrentScreen = screens[action.tab];
-      return { CurrentScreen };
-    }
-    default: {
-      throw new Error("An error occurred in the changing tabs");
-    }
-  }
-};
-
-export const ScreenContainer: React.FC = () => {
-  const [state, dispatch] = useReducer(reducer, initValue);
-  const classes = useStyles();
-  return (
-    <main className={classes.root}>
-      <SideBar dispatch={dispatch} />
-      <div>
-        <state.CurrentScreen />
-        <ListSelector />
-      </div>
-    </main>
-  );
-};
+ScreenContainer.displayName = "ScreenContainer";
+export { ScreenContainer };
