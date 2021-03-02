@@ -96,13 +96,6 @@ const makeAsyncDispatch = (
 ): ((arg: AsyncAction) => Promise<boolean>) => (args: AsyncAction) =>
   new Promise((resolve) => dispatch({ callback: resolve, ...args }));
 
-const reverseThemename: Record<Themenames, Themenames> = {
-  dark: "light",
-  light: "dark",
-};
-
-const toggleThemename = (themename: Themenames) => reverseThemename[themename];
-
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS_BASE: (args) => async (action) => {
     await adjustFlag(
@@ -186,24 +179,6 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  TOGGLE_THEME_BASE: (args) => async (action) => {
-    await manageDispatch(
-      args,
-      // eslint-disable-next-line @typescript-eslint/require-await
-      async () => {
-        const { themename } = args.getState();
-        return { themename: toggleThemename(themename) };
-      },
-      action.callback,
-    );
-  },
-  TOGGLE_THEME: () => async (action) => {
-    await dispatchBlank(async () => {
-      const dispatch = makeAsyncDispatch(action.dispatch);
-      const isSucessToggling = await dispatch({ type: "TOGGLE_THEME_BASE" });
-      if (isSucessToggling) await dispatch({ type: "WRITE_CONFIG" });
-    }, action.callback);
-  },
   GET_RATE: (args) => async (action) => {
     await manageDispatch(
       args,
@@ -218,7 +193,11 @@ const asyncReducer: GlobalAsyncReducer = {
 };
 
 const useValue = () => {
-  const [state, dispatch] = useReducerAsync(
+  const [state, dispatch] = useReducerAsync<
+    GlobalReducer,
+    AsyncAction,
+    AsyncAction | Action
+  >(
     reducer,
     {
       isLoadingTweets: false,
@@ -235,7 +214,6 @@ const useValue = () => {
       listIds: [],
       currentList: undefined,
       limitData: { lists: { limitRate: 0, remaining: 0 } },
-      themename: "dark",
     } as State,
     asyncReducer,
   );

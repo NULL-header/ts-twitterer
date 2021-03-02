@@ -32,9 +32,7 @@ const Config = React.memo(() => {
     },
     [dispatch, lastTweetIdGroup, listIds, newestTweetDataIdGroup, tweetGroup],
   );
-  const toggleTheme = React.useCallback(() => {
-    dispatch({ type: "TOGGLE_THEME", dispatch });
-  }, [dispatch]);
+  const toggleTheme = React.useCallback(() => {}, [dispatch]);
 
   console.log({ listIds });
   return (
