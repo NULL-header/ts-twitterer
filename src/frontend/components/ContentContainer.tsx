@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Box, Grid, GridItem, Heading, Divider } from "@chakra-ui/react";
 
 interface Props {
@@ -6,9 +6,8 @@ interface Props {
   children: React.ReactNode;
 }
 
-const ContentContainer = (props: Props) => {
-  const { header, children } = props;
-  return (
+const ContentContainer = React.memo(
+  forwardRef<HTMLDivElement | null, Props>(({ header, children }, ref) => (
     <Grid
       aria-label={header}
       role="article"
@@ -20,13 +19,12 @@ const ContentContainer = (props: Props) => {
         <Heading size="xl">{header}</Heading>
       </GridItem>
       <Divider />
-      <Box padding="3vw" overflowY="scroll" height="100%">
+      <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
         {children}
       </Box>
     </Grid>
-  );
-};
-
+  )),
+);
 const memorized = React.memo(ContentContainer);
 memorized.displayName = ContentContainer.name;
 export { memorized as ContentContainer };
