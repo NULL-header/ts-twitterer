@@ -76,7 +76,6 @@ interface Configs {
   listIds: string[];
   currentList: string | undefined;
   limitData: LimitData;
-  themename: import("frontend/theme").Themenames;
 }
 
 interface ConfigColumns {
