@@ -1,13 +1,67 @@
 import React from "react";
-import { Tabs, Tab, TabList, TabPanels, TabPanel, Box } from "@chakra-ui/react";
+import {
+  Tabs,
+  Tab,
+  TabList,
+  TabPanels,
+  TabPanel,
+  Box,
+  Text,
+  Collapse,
+} from "@chakra-ui/react";
+import { Icon } from "@chakra-ui/icons";
+import { HiOutlineHome, HiOutlineCog, HiOutlineCube } from "react-icons/hi";
+import { delayCall, useBool } from "frontend/util";
 import { Data } from "./Data";
 import { Timeline } from "./TimeLine";
 import { Config } from "./Config";
 import { ListSelector } from "./ListSelector";
 import { UpdateButton } from "./ForDev";
 
-const tabs = ["Timeline", "Config", "Data"];
-const tabPanels = [Timeline, Config, Data];
+const tabs = {
+  Timeline: { Component: Timeline, Icon: HiOutlineHome },
+  Config: { Component: Config, Icon: HiOutlineCog },
+  Data: { Component: Data, Icon: HiOutlineCube },
+} as Record<string, { Component: React.FC; Icon: React.FC }>;
+
+const useWindowWidthEffect = (effect: () => void) => {
+  const handler = delayCall(() => {
+    effect();
+  });
+  window.addEventListener("resize", handler);
+  return () => window.removeEventListener("resize", handler);
+};
+
+const AllTab = () => {
+  const [isShow, show, hide] = useBool(true);
+  useWindowWidthEffect(() => {
+    if (window.innerWidth > 500) {
+      show();
+    } else {
+      hide();
+    }
+  });
+  return (
+    <>
+      {Object.keys(tabs).map((e) => (
+        <Tab
+          borderRightWidth="2px"
+          borderLeftWidth="0px"
+          marginRight="-2px"
+          marginLeft="0px"
+          padding="1vw 1.5vw"
+          justifyContent="right"
+          key={e}
+        >
+          <Icon as={tabs[e].Icon} boxSize="8" />
+          <Collapse in={isShow} animateOpacity>
+            <Text>{e}</Text>
+          </Collapse>
+        </Tab>
+      ))}
+    </>
+  );
+};
 
 const ScreenContainer = () => (
   <>
@@ -32,25 +86,17 @@ const ScreenContainer = () => (
           borderRightWidth="2px"
           borderLeftWidth="0px"
         >
-          {tabs.map((e) => (
-            <Tab
-              borderRightWidth="2px"
-              borderLeftWidth="0px"
-              marginRight="-2px"
-              marginLeft="0px"
-              padding="1vw 1.5vw"
-              key={e}
-            >
-              {e}
-            </Tab>
-          ))}
+          <AllTab />
         </TabList>
         <TabPanels height="100%">
-          {tabPanels.map((E) => (
-            <TabPanel height="100%" key={E.name || (E as any).displayName}>
-              <E />
-            </TabPanel>
-          ))}
+          {Object.keys(tabs).map((e) => {
+            const { Component } = tabs[e];
+            return (
+              <TabPanel height="100%" key={e}>
+                <Component />
+              </TabPanel>
+            );
+          })}
         </TabPanels>
       </Tabs>
       <ListSelector />
