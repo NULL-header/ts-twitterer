@@ -1,4 +1,9 @@
-import React, { useRef, useLayoutEffect, MutableRefObject } from "react";
+import React, {
+  useRef,
+  useLayoutEffect,
+  MutableRefObject,
+  useEffect,
+} from "react";
 import { useTracked } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { Tweet } from "./Tweet";
@@ -52,7 +57,8 @@ const useScrollEndEffect = (effect: () => void, delayMs = 500) => {
   return targetRef;
 };
 
-const Timeline = React.memo(() => {
+const Timeline = () => {
+  console.log("hey");
   const [state, dispatch] = useTracked();
   const { currentList, tweetGroup } = state;
   const tweetDetails =
@@ -61,14 +67,17 @@ const Timeline = React.memo(() => {
       : // tweetDetails is nullable when currentList just exists and
         // no tweetGroup has it as key of property.
         (tweetGroup[currentList] as Tweet[] | undefined);
-  console.log({ tweetGroup, currentList });
   const divRef = useScrollEndEffect(() =>
     dispatch({ type: "UPDATE_TWEETS", dispatch }),
   );
+  useEffect(() => {
+    if (tweetDetails == null || tweetDetails.length !== 0) return;
+    dispatch({ type: "UPDATE_TWEETS", dispatch });
+  }, [tweetDetails]);
   return (
     <ContentContainer header="Timeline" ref={divRef}>
       <Box marginTop="10vw" />
-      {tweetDetails == null ? undefined : (
+      {tweetDetails == null || tweetDetails.length === 0 ? undefined : (
         <VStack spacing="5vw">
           <Tweet key={tweetDetails[0].dataid} tweet={tweetDetails[0]} />
           {tweetDetails.slice(1).map((e) => (
@@ -79,7 +88,6 @@ const Timeline = React.memo(() => {
       <Box marginTop="50vh" />
     </ContentContainer>
   );
-});
-Timeline.displayName = "Timeline";
+};
 
 export { Timeline };

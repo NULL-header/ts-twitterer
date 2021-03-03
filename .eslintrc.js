@@ -42,5 +42,7 @@ module.exports = {
     "@typescript-eslint/indent": "off",
     "react/jsx-indent": "off",
     "react/require-default-props": "off",
+    "func-names": "off",
+    "react/jsx-props-no-spreading": "off",
   },
 };
