@@ -1,6 +1,6 @@
 import React from "react";
 import { useTracked } from "frontend/globalState";
-import { ScreenContainer } from "../ScreenContainer";
+import { ScreenContainer } from "./ScreenContainer";
 
 export const LoadContainer: React.FC = React.memo(() => {
   const [state] = useTracked();

@@ -13,8 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useTracked } from "frontend/globalState";
 import { useForm } from "react-hook-form";
-import { ContentContainer } from "../ContentContainer";
-import { CONSTVALUE } from "../../CONSTVALUE";
+import { ContentContainer } from "./ContentContainer";
+import { CONSTVALUE } from "../CONSTVALUE";
 
 const HeaddingCommon = React.memo(({ header }: { header: string }) => (
   <Box display="table">

@@ -1,8 +1,8 @@
 import React, { useRef, useLayoutEffect, MutableRefObject } from "react";
 import { useTracked } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
-import { Tweet } from "../Tweet";
-import { ContentContainer } from "../ContentContainer";
+import { Tweet } from "./Tweet";
+import { ContentContainer } from "./ContentContainer";
 
 // extract to pass key only
 const TweetBox = React.memo(({ tweet }: { tweet: Tweet }) => (
