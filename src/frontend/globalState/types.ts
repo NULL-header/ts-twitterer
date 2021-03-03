@@ -31,9 +31,12 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "UPDATE_TWEETS"; dispatch: AsyncDispatch }
   | { type: "WRITE_CONFIG" }
   | { type: "GET_RATE" }
-  | { type: "UPDATE_LISTIDS_BASE"; listId: string }
-  | { type: "UPDATE_LISTIDS"; listId: string; dispatch: AsyncDispatch }
+  | { type: "ADD_LISTIDS_BASE"; listId: string }
+  | { type: "ADD_LISTIDS"; listId: string; dispatch: AsyncDispatch }
+  | { type: "DELETE_LISTIDS_BASE"; listId: string }
+  | { type: "DELETE_LISTIDS"; listId: string; dispatch: AsyncDispatch }
 );
+
 export type GlobalReducer = Reducer<State, Action>;
 export type GlobalAsyncReducer = AsyncActionHandlers<
   GlobalReducer,

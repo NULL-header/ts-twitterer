@@ -2,6 +2,7 @@
 import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
+import { omit } from "timm";
 import { db } from "../db";
 import { getTweets, loadNewTweetGroup } from "./tweets";
 import { makeConfigColumns } from "./config";
@@ -129,7 +130,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await dispatchBlank(async () => {
       const dispatch = makeAsyncDispatch(action.dispatch);
       const isSuccessGetting = await dispatch({ type: "GET_TWEETS_BASE" });
-      console.log("get tweet");
+      console.log("gettweet");
       console.log({ isSuccessGetting });
       const isSuccessRate = await dispatch({ type: "GET_RATE" });
       if (isSuccessGetting || isSuccessRate)
@@ -190,7 +191,7 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  UPDATE_LISTIDS_BASE: (args) => async ({ callback, listId }) => {
+  ADD_LISTIDS_BASE: (args) => async ({ callback, listId }) => {
     await manageDispatch(
       args,
       async () => {
@@ -210,11 +211,45 @@ const asyncReducer: GlobalAsyncReducer = {
       callback,
     );
   },
-  UPDATE_LISTIDS: () => async ({ callback, listId, dispatch }) => {
+  ADD_LISTIDS: () => async ({ callback, listId, dispatch }) => {
     await dispatchBlank(async () => {
       const asyncDispatch = makeAsyncDispatch(dispatch);
       const isSucess = await asyncDispatch({
-        type: "UPDATE_LISTIDS_BASE",
+        type: "ADD_LISTIDS_BASE",
+        listId,
+      });
+      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
+    }, callback);
+  },
+  DELETE_LISTIDS_BASE: (args) => async ({ listId, callback }) => {
+    await manageDispatch(
+      args,
+      async () => {
+        const {
+          listIds,
+          newestTweetDataIdGroup,
+          tweetGroup,
+          lastTweetIdGroup,
+        } = args.getState();
+        const newListIds = listIds.filter((e) => e !== listId);
+        const newNewestTweetDataIdGroup = omit(newestTweetDataIdGroup, listId);
+        const newTweetGroup = omit(tweetGroup, listId);
+        const newLastTweetIdGroup = omit(lastTweetIdGroup, listId);
+        return {
+          listIds: newListIds,
+          newestTweetDataIdGroup: newNewestTweetDataIdGroup,
+          tweetGroup: newTweetGroup,
+          lastTweetIdGroup: newLastTweetIdGroup,
+        };
+      },
+      callback,
+    );
+  },
+  DELETE_LISTIDS: () => async ({ dispatch, listId, callback }) => {
+    await dispatchBlank(async () => {
+      const asyncDispatch = makeAsyncDispatch(dispatch);
+      const isSucess = await asyncDispatch({
+        type: "DELETE_LISTIDS_BASE",
         listId,
       });
       if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
