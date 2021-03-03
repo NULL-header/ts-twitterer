@@ -1,5 +1,5 @@
 import update from "immutability-helper";
-import { CONSTVALUE } from "../../CONSTVALUE";
+import { CONSTVALUE } from "frontend/CONSTVALUE";
 import { State } from "../types";
 import { db } from "../../db";
 
@@ -28,9 +28,15 @@ export const getTweets = async (getState: () => State) => {
     newestTweetDataIdGroup: lastNewestTweetDataIdGroup,
     isGettingTweets,
     listIds,
+    limitData: {
+      lists: { remaining },
+    },
   } = getState();
   console.log({ lastNewestTweetDataIdGroup, isGettingTweets, listIds });
-  if (listIds.length === 0) throw new Error("there are nothing ids of lists");
+  if (remaining < CONSTVALUE.LATE_LIMIT)
+    throw new Error("the remaining is too few");
+  else if (listIds.length === 0)
+    throw new Error("there are nothing ids of lists");
   const tweetLowsArray = await Promise.all(
     listIds.map((listId) =>
       getTweetLows(lastNewestTweetDataIdGroup[listId], listId),
