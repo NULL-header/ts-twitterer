@@ -2,7 +2,7 @@ import React from "react";
 import { useTracked } from "frontend/globalState";
 import { ContentContainer } from "./ContentContainer";
 
-const Data = React.memo(() => {
+const Data = () => {
   const [state] = useTracked();
   const { limitData } = state;
   return (
@@ -10,8 +10,6 @@ const Data = React.memo(() => {
       {JSON.stringify(limitData)}
     </ContentContainer>
   );
-});
-
-Data.displayName = "Data";
+};
 
 export { Data };

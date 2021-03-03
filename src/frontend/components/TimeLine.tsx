@@ -52,7 +52,8 @@ const useScrollEndEffect = (effect: () => void, delayMs = 500) => {
   return targetRef;
 };
 
-const Timeline = React.memo(() => {
+const Timeline = () => {
+  console.log("hey");
   const [state, dispatch] = useTracked();
   const { currentList, tweetGroup } = state;
   const tweetDetails =
@@ -79,7 +80,6 @@ const Timeline = React.memo(() => {
       <Box marginTop="50vh" />
     </ContentContainer>
   );
-});
-Timeline.displayName = "Timeline";
+};
 
 export { Timeline };

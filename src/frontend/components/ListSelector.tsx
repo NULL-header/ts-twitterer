@@ -1,7 +1,7 @@
 import React from "react";
 import { useTracked } from "frontend/globalState";
 
-export const ListSelector: React.FC = React.memo(() => {
+export const ListSelector = () => {
   const [state, dispatch] = useTracked();
   const { listIds } = state;
   const handleClick = React.useCallback(
@@ -21,4 +21,4 @@ export const ListSelector: React.FC = React.memo(() => {
       ))}
     </div>
   );
-});
+};
