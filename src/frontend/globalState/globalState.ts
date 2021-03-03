@@ -4,7 +4,7 @@ import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
 import { omit } from "timm";
 import { db } from "../db";
-import { getTweets, loadNewTweetGroup } from "./tweets";
+import { getTweets, loadNewTweetGroup, updateTweets } from "./tweets";
 import { makeConfigColumns } from "./config";
 import { initialize } from "./initialize";
 import { deleteCacheTweets, deleteCacheConfig } from "./delete";
@@ -152,20 +152,44 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  UPDATE_TWEETS: (args) => async (action) => {
-    await adjustFlag("isUpdatingTweets", args, async () => {
-      const dispatch = makeAsyncDispatch(action.dispatch);
-      console.log("start updating");
-      const isSuccessGetting = await dispatch({
-        type: "GET_TWEETS",
-        dispatch: action.dispatch,
+  GET_TWEETS_OF_CURRENT_BASE: (args) => async ({ callback }) => {
+    await manageDispatch(
+      args,
+      async () => await updateTweets(args.getState),
+      callback,
+    );
+  },
+  GET_TWEETS_OF_CURRENT: () => async ({ dispatch, callback }) => {
+    await dispatchBlank(async () => {
+      const asyncDispatch = makeAsyncDispatch(dispatch);
+      await asyncDispatch({
+        type: "GET_TWEETS_OF_CURRENT_BASE",
       });
-      console.log({ isSuccessGetting });
-      if (isSuccessGetting)
-        await dispatch({ type: "LOAD_NEW_TWEETS", dispatch: action.dispatch });
-      console.log("finish updating");
-      return undefined;
-    });
+      await asyncDispatch({ type: "GET_RATE" });
+    }, callback);
+  },
+  UPDATE_TWEETS: (args) => async ({ dispatch, callback }) => {
+    await adjustFlag(
+      "isUpdatingTweets",
+      args,
+      async () => {
+        const asyncDispatch = makeAsyncDispatch(dispatch);
+        console.log("start updating");
+        const isSuccessGetting = await asyncDispatch({
+          type: "GET_TWEETS_OF_CURRENT",
+          dispatch,
+        });
+        console.log({ isSuccessGetting });
+        if (isSuccessGetting)
+          await asyncDispatch({
+            type: "LOAD_NEW_TWEETS",
+            dispatch,
+          });
+        console.log("finish updating");
+        return undefined;
+      },
+      callback,
+    );
   },
   WRITE_CONFIG: (args) => async (action) => {
     const configLow = makeConfigColumns(args.getState());

@@ -28,6 +28,8 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
+  | { type: "GET_TWEETS_OF_CURRENT_BASE" }
+  | { type: "GET_TWEETS_OF_CURRENT"; dispatch: AsyncDispatch }
   | { type: "UPDATE_TWEETS"; dispatch: AsyncDispatch }
   | { type: "WRITE_CONFIG" }
   | { type: "GET_RATE" }
