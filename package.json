@@ -15,6 +15,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@chakra-ui/icons": "^1.0.5",
     "@chakra-ui/react": "^1.3.3",
     "@emotion/react": "11.1.5",
     "@emotion/styled": "11.1.5",
@@ -69,6 +70,7 @@
     "react-dom": "^17.0.1",
     "react-hook-form": "^6.15.4",
     "react-hooks-async": "^3.10.1",
+    "react-icons": "^4.2.0",
     "react-refresh": "^0.9.0",
     "react-tracked": "^1.6.5",
     "react-use": "^17.1.1",
