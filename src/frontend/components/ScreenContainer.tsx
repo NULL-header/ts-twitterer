@@ -4,11 +4,12 @@ import { Data } from "./Data";
 import { Timeline } from "./TimeLine";
 import { Config } from "./Config";
 import { ListSelector } from "./ListSelector";
+import { UpdateButton } from "./ForDev";
 
 const tabs = ["Timeline", "Config", "Data"];
 const tabPanels = [Timeline, Config, Data];
 
-const ScreenContainer = React.memo(() => (
+const ScreenContainer = () => (
   <>
     <Box
       role="main"
@@ -37,7 +38,7 @@ const ScreenContainer = React.memo(() => (
               borderLeftWidth="0px"
               marginRight="-2px"
               marginLeft="0px"
-              padding="1.5vw 3vw"
+              padding="1vw 1.5vw"
               key={e}
             >
               {e}
@@ -46,16 +47,17 @@ const ScreenContainer = React.memo(() => (
         </TabList>
         <TabPanels height="100%">
           {tabPanels.map((E) => (
-            <TabPanel height="100%" key={E.displayName}>
+            <TabPanel height="100%" key={E.name || (E as any).displayName}>
               <E />
             </TabPanel>
           ))}
         </TabPanels>
       </Tabs>
       <ListSelector />
+      <UpdateButton />
     </Box>
   </>
-));
+);
 
 ScreenContainer.displayName = "ScreenContainer";
 export { ScreenContainer };
