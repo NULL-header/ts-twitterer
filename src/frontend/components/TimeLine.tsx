@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { useTracked } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
+import { delayCall } from "frontend/util";
 import { Tweet } from "./Tweet";
 import { ContentContainer } from "./ContentContainer";
 
@@ -31,28 +32,20 @@ const makeGetSholdUpdate = (
   return diff < acceptDif;
 };
 
-const useScrollEndEffect = (effect: () => void, delayMs = 500) => {
+const useScrollEndEffect = (effect: () => void) => {
   const targetRef = useRef<HTMLDivElement | null>(null);
   useLayoutEffect(() => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    const { current: target } = targetRef;
-    if (target == null) return;
     const getShouldUpdate = makeGetSholdUpdate(
       targetRef as MutableRefObject<HTMLDivElement>,
     );
-    const callback = () => {
+    const handler = delayCall(() => {
       const shouldUpdate = getShouldUpdate();
       if (shouldUpdate) effect();
-      timeout = null;
-    };
-    const handleScroll = () => {
-      if (timeout != null) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(callback, delayMs);
-    };
-    target.addEventListener("scroll", handleScroll);
-    return () => target.removeEventListener("scroll", handleScroll);
+    });
+    const { current: target } = targetRef;
+    if (target == null) throw new Error("ref is null");
+    target.addEventListener("scroll", handler);
+    return () => target.removeEventListener("scroll", handler);
   }, []);
   return targetRef;
 };
