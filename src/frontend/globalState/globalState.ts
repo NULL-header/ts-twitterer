@@ -190,6 +190,36 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
+  UPDATE_LISTIDS_BASE: (args) => async ({ callback, listId }) => {
+    await manageDispatch(
+      args,
+      async () => {
+        const {
+          listIds,
+          newestTweetDataIdGroup,
+          lastTweetIdGroup,
+          tweetGroup,
+        } = args.getState();
+        return {
+          listIds: [...listIds, listId],
+          newestTweetDataIdGroup: { ...newestTweetDataIdGroup, [listId]: "0" },
+          lastTweetIdGroup: { ...lastTweetIdGroup, [listId]: 0 },
+          tweetGroup: { ...tweetGroup, [listId]: [] },
+        };
+      },
+      callback,
+    );
+  },
+  UPDATE_LISTIDS: () => async ({ callback, listId, dispatch }) => {
+    await dispatchBlank(async () => {
+      const asyncDispatch = makeAsyncDispatch(dispatch);
+      const isSucess = await asyncDispatch({
+        type: "UPDATE_LISTIDS_BASE",
+        listId,
+      });
+      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
+    }, callback);
+  },
 };
 
 const useValue = () => {
