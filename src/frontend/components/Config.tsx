@@ -11,7 +11,7 @@ import {
   Input,
   useColorMode,
 } from "@chakra-ui/react";
-import { useTracked } from "frontend/globalState";
+import { useTracked, useUpdate } from "frontend/globalState";
 import { useForm } from "react-hook-form";
 import { ContentContainer } from "./ContentContainer";
 import { CONSTVALUE } from "../CONSTVALUE";
@@ -24,9 +24,20 @@ const HeaddingCommon = React.memo(({ header }: { header: string }) => (
 ));
 HeaddingCommon.displayName = "HeaddingCommon";
 
-const ItemBar = React.memo(({ listId }: { listId: string }) => (
-  <Text>{listId}</Text>
-));
+const ItemBar = React.memo(({ listId }: { listId: string }) => {
+  const dispatch = useUpdate();
+  return (
+    <Box display="flex" width="100%">
+      <Text marginRight="auto">{listId}</Text>
+      <Button
+        marginRight="3vw"
+        onClick={() => dispatch({ type: "DELETE_LISTIDS", listId, dispatch })}
+      >
+        delete
+      </Button>
+    </Box>
+  );
+});
 ItemBar.displayName = "ItemBar";
 
 const validateListIdsLength = (length: number) =>
@@ -57,7 +68,7 @@ const IdForm = () => {
   }>();
   const submitData = useCallback(
     handleSubmit((data) => {
-      dispatch({ type: "UPDATE_LISTIDS", dispatch, listId: data.listId });
+      dispatch({ type: "ADD_LISTIDS", dispatch, listId: data.listId });
     }),
     [handleSubmit],
   );
