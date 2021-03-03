@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import {
   Tabs,
   Tab,
@@ -25,22 +25,29 @@ const tabs = {
 } as Record<string, { Component: React.FC; Icon: React.FC }>;
 
 const useWindowWidthEffect = (effect: () => void) => {
-  const handler = delayCall(() => {
-    effect();
+  useLayoutEffect(() => {
+    const handler = delayCall(() => {
+      effect();
+    });
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
   });
-  window.addEventListener("resize", handler);
-  return () => window.removeEventListener("resize", handler);
 };
 
 const AllTab = () => {
   const [isShow, show, hide] = useBool(true);
-  useWindowWidthEffect(() => {
+  const manageResize = () => {
     if (window.innerWidth > 500) {
       show();
     } else {
       hide();
     }
-  });
+  };
+  useWindowWidthEffect(manageResize);
+  useLayoutEffect(() => {
+    manageResize();
+  }, []);
+
   return (
     <>
       {Object.keys(tabs).map((e) => (
