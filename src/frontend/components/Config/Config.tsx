@@ -1,67 +1,113 @@
-import React from "react";
+import React, { useCallback } from "react";
+import {
+  FormControl,
+  FormErrorMessage,
+  Divider,
+  Heading,
+  Text,
+  Button,
+  Box,
+  VStack,
+  Input,
+  useColorMode,
+} from "@chakra-ui/react";
 import { useTracked } from "frontend/globalState";
+import { useForm } from "react-hook-form";
 import { ContentContainer } from "../ContentContainer";
 import { CONSTVALUE } from "../../CONSTVALUE";
 
-const Config = React.memo(() => {
-  const [state, dispatch] = useTracked();
-  const {
-    listIds,
-    newestTweetDataIdGroup,
-    lastTweetIdGroup,
-    tweetGroup,
-  } = state;
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const handleSubmit = React.useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (inputRef.current == null || listIds.length >= CONSTVALUE.LIST_LIMIT)
-        return;
-      const listId = inputRef.current.value;
-      if (listId.length === 0) return;
-      dispatch({
-        type: "MODIFY",
-        state: {
-          listIds: [...listIds, listId],
-          newestTweetDataIdGroup: { ...newestTweetDataIdGroup, [listId]: "0" },
-          lastTweetIdGroup: { ...lastTweetIdGroup, [listId]: 0 },
-          tweetGroup: { ...tweetGroup, [listId]: [] },
-        },
-      });
-      inputRef.current.value = "";
-    },
-    [dispatch, lastTweetIdGroup, listIds, newestTweetDataIdGroup, tweetGroup],
-  );
-  const toggleTheme = React.useCallback(() => {}, [dispatch]);
+const HeaddingCommon = React.memo(({ header }: { header: string }) => (
+  <Box display="table">
+    <Heading size="md">{header}</Heading>
+    <Divider marginBottom="2vw" width="calc(100% + 5vw)" />
+  </Box>
+));
+HeaddingCommon.displayName = "HeaddingCommon";
 
-  console.log({ listIds });
+const ItemBar = React.memo(({ listId }: { listId: string }) => (
+  <Text>{listId}</Text>
+));
+ItemBar.displayName = "ItemBar";
+
+const validateListIdsLength = (length: number) =>
+  length <= CONSTVALUE.LIST_LIMIT ||
+  ((
+    <Text>
+      listIds is too many. delete list id until it is under
+      {` ${CONSTVALUE.LIST_LIMIT}.`}
+    </Text>
+  ) as any);
+
+const makeValidate = (listIds: string[]) => {
+  const { length } = listIds;
+  return {
+    pattern: {
+      value: /^[0-9]+$/,
+      message: (<Text>this is woung pattern. use number only.</Text>) as any,
+    },
+    validate: () => validateListIdsLength(length),
+  };
+};
+
+const IdForm = () => {
+  const [state, dispatch] = useTracked();
+  const { listIds } = state;
+  const { handleSubmit, errors, register } = useForm<{
+    listId: string;
+  }>();
+  const submitData = useCallback(
+    handleSubmit((data) => {
+      dispatch({ type: "UPDATE_LISTIDS", dispatch, listId: data.listId });
+    }),
+    [handleSubmit],
+  );
   return (
-    <ContentContainer header="Config">
-      <form onSubmit={handleSubmit}>
-        <h3>Ids of a list</h3>
-        <ul>
-          {listIds.map((e) => (
-            <li key={e}>{e}</li>
-          ))}
-          <li>
-            <input
-              ref={inputRef}
+    <Box>
+      <HeaddingCommon header="Ids of a list" />
+      <form onSubmit={submitData}>
+        <Box paddingLeft="5vw">
+          <VStack alignItems="start">
+            {listIds.map((e) => (
+              <ItemBar listId={e} key={e} />
+            ))}
+          </VStack>
+          <FormControl isInvalid={errors.listId != null}>
+            <Input
+              name="listId"
+              marginLeft="-1rem"
+              ref={register(makeValidate(listIds))}
               placeholder="write ids you wanna add any lists"
             />
-          </li>
-        </ul>
+            <FormErrorMessage>
+              <Text>{errors.listId?.message}</Text>
+            </FormErrorMessage>
+          </FormControl>
+        </Box>
       </form>
-      <h3>Toggle Theme</h3>
-      <button
-        onClick={toggleTheme}
-        type="button"
-        aria-label="toggleThemeButton"
-      >
-        here
-      </button>
-    </ContentContainer>
+    </Box>
   );
-});
+};
+
+const ToggleForm = () => {
+  const { toggleColorMode } = useColorMode();
+  return (
+    <Box>
+      <HeaddingCommon header="toggle Theme" />
+      <Button marginLeft="5vw" onClick={toggleColorMode}>
+        HERE
+      </Button>
+    </Box>
+  );
+};
+
+const Config = React.memo(() => (
+  <ContentContainer header="Config">
+    <VStack alignItems="right" spacing="10vw">
+      <IdForm />
+      <ToggleForm />
+    </VStack>
+  </ContentContainer>
+));
 
 Config.displayName = "Config";
 
