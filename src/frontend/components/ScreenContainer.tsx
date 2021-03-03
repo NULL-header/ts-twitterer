@@ -1,9 +1,9 @@
 import React from "react";
 import { Tabs, Tab, TabList, TabPanels, TabPanel, Box } from "@chakra-ui/react";
-import { Data } from "../Data";
-import { Timeline } from "../TimeLine";
-import { Config } from "../Config";
-import { ListSelector } from "../ListSelector";
+import { Data } from "./Data";
+import { Timeline } from "./TimeLine";
+import { Config } from "./Config";
+import { ListSelector } from "./ListSelector";
 
 const tabs = ["Timeline", "Config", "Data"];
 const tabPanels = [Timeline, Config, Data];
