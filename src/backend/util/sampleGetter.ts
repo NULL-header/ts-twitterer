@@ -8,8 +8,8 @@ const makeFs = (basePath: string) => ({
     const result = (await fsOrigin
       .readFile(basePath + additionalPath, { encoding: "utf-8" })
       .then(JSON.parse)
-      .catch(() => undefined)) as Data | undefined;
-    return result;
+      .catch(() => undefined)) as Data | string | undefined;
+    return typeof result === "string" ? JSON.parse(result) : result;
   },
   write: async (additionalPath: string, target: any) =>
     await fsOrigin
