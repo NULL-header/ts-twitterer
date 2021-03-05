@@ -1,18 +1,13 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { CONSTVALUE } from "frontend/CONSTVALUE";
 import { db } from "frontend/db";
-import { mergeDeep } from "timm";
+import update from "immutability-helper";
 import { State } from "../types";
-
-const findNewDifferences = async (tweetLowsArray: TweetColumns[][]) => {
-  const indicesNewTweet = tweetLowsArray.reduce((a, e, i) => {
-    // eslint-disable-next-line no-param-reassign
-    if (e.length !== 0) a[a.length] = i;
-    return a;
-  }, [] as number[]);
-  if (indicesNewTweet.length === 0) throw new Error("new tweet is nothing");
-  const tweetLows = tweetLowsArray.flat();
-  return { indicesNewTweet, tweetLows };
-};
+import {
+  CurrentListInitError,
+  DataIdMapInitError,
+  ShouldUnupdateError,
+} from "../errors";
 
 const getTweetLows = async (lastNewestTweetDataId: string, listId: string) => {
   const tweetResponse = await fetch(
@@ -32,47 +27,76 @@ const throwErrorToWrongValue = (
     throw new Error("it is not needed because it will do by old task");
 };
 
-export const getTweets = async (getState: () => State) => {
-  const {
-    newestTweetDataIdGroup: lastNewestTweetDataIdGroup,
-    isGettingTweets,
-    listIds,
-    limitData: {
-      lists: { remaining },
-    },
-  } = getState();
-  console.log({ lastNewestTweetDataIdGroup, isGettingTweets, listIds });
-  throwErrorToWrongValue(isGettingTweets, remaining);
-  if (listIds.length === 0) throw new Error("there are nothing ids of lists");
-  const tweetLowsArray = await Promise.all(
-    listIds.map((listId) =>
-      getTweetLows(lastNewestTweetDataIdGroup[listId], listId),
-    ),
-  );
-  const { indicesNewTweet, tweetLows } = await findNewDifferences(
-    tweetLowsArray,
-  );
-  const writingPromise = db.tweets.bulkAdd(tweetLows as any);
-  const newDataGroup = indicesNewTweet.reduce((a, index) => {
-    const listId = listIds[index];
-    const tweets = tweetLowsArray[index];
-    // it is reduce
-    // eslint-disable-next-line no-param-reassign
-    a[listId] = tweets[tweets.length - 1].dataid;
-    return a;
-  }, {} as Record<string, string>);
-  await writingPromise;
-  return {
-    newestTweetDataIdGroup: mergeDeep(
-      lastNewestTweetDataIdGroup,
-      newDataGroup,
-    ) as Record<string, string>,
+const manageDataId = (dataMap: Configs["newestTweetDataIdMap"]) => {
+  const spec = [] as [string, string][];
+  const get = (listId: string) => {
+    const dataid = dataMap.get(listId);
+    if (dataid == null) throw new DataIdMapInitError({ key: { listId } });
+    return dataid;
   };
+  const addDataId = ({
+    listId,
+    dataid,
+  }: {
+    listId: string;
+    dataid: string;
+  }) => {
+    spec.push([listId, dataid]);
+  };
+  const makeNewMap = () => update(dataMap, { $add: spec });
+  return { get, addDataId, makeNewMap };
 };
 
-export const updateTweets = async (getState: () => State) => {
+type DataIdManager = ReturnType<typeof manageDataId>;
+
+const getTweetLowsArray = (listIds: string[], manager: DataIdManager) =>
+  Promise.all(
+    listIds.map((listId) => {
+      const dataid = manager.get(listId);
+      return getTweetLows(dataid, listId);
+    }),
+  );
+
+const writeTweetLows = (tweetLowsArray: any[][]) => {
+  const tweetLows = tweetLowsArray.flat();
+  return db.tweets.bulkAdd(tweetLows as any);
+};
+
+const makeNewTweetLows = (tweetLowsArray: any[][], manager: DataIdManager) =>
+  tweetLowsArray.filter((e) => {
+    const isNew = e.length !== 0;
+    if (isNew) {
+      const { dataid, list_id } = e[0];
+      manager.addDataId({ dataid, listId: list_id });
+    }
+    return isNew;
+  });
+
+export const getTweets = async (getState: () => State) => {
   const {
-    newestTweetDataIdGroup: lastNewestTweetDataIdGroup,
+    isGettingTweets,
+    listIds,
+    newestTweetDataIdMap,
+    limitData: {
+      lists: { remaining },
+    },
+  } = getState();
+  throwErrorToWrongValue(isGettingTweets, remaining);
+  const manager = manageDataId(newestTweetDataIdMap);
+  const tweetLowsArray = await getTweetLowsArray(listIds, manager);
+  const newTweetLowsArray = makeNewTweetLows(tweetLowsArray, manager);
+  if (newTweetLowsArray.length === 0) throw new ShouldUnupdateError();
+  const writingPromise = writeTweetLows(tweetLowsArray);
+  const newMap = manager.makeNewMap();
+  await writingPromise;
+  return {
+    newestTweetDataIdMap: newMap,
+  } as State;
+};
+
+export const getTweetFromSingleList = async (getState: () => State) => {
+  const {
+    newestTweetDataIdMap,
     isGettingTweets,
     currentList,
     limitData: {
@@ -80,17 +104,16 @@ export const updateTweets = async (getState: () => State) => {
     },
   } = getState();
   throwErrorToWrongValue(isGettingTweets, remaining);
-  if (currentList == null) throw new Error("current list is undefined");
-  const tweetLow = await getTweetLows(
-    lastNewestTweetDataIdGroup[currentList],
-    currentList,
-  );
-  if (tweetLow.length === 0) throw new Error("new tweet is nothing");
-  const writingPromise = db.tweets.bulkAdd(tweetLow as any);
-  const newestTweetDataIdGroup = mergeDeep(lastNewestTweetDataIdGroup, {
-    [currentList]: tweetLow[tweetLow.length - 1].dataid,
-  }) as Record<string, string>;
-  console.log("newData", { newestTweetDataIdGroup });
+  if (currentList == null) throw new CurrentListInitError();
+  const manager = manageDataId(newestTweetDataIdMap);
+  const tweetLows = await getTweetLows(manager.get(currentList), currentList);
+  if (tweetLows.length === 0) throw new ShouldUnupdateError();
+  const writingPromise = db.tweets.bulkAdd(tweetLows as any);
+  manager.addDataId({
+    listId: currentList,
+    dataid: tweetLows[tweetLows.length - 1].dataid,
+  });
+  const newMap = manager.makeNewMap();
   await writingPromise;
-  return { newestTweetDataIdGroup };
+  return { newestTweetDataIdMap: newMap } as State;
 };

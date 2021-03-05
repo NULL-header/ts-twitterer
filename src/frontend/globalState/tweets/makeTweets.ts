@@ -32,9 +32,11 @@ const makeMedia = (mediaColumns?: MediaColumns) => {
   return { type: mediaType, mediaUrl } as Media;
 };
 
+export const makeTweet = (tweetLow: any): Tweet => {
+  const tweet = extractData(tweetLow);
+  tweet.media = makeMedia(tweetLow.media);
+  return tweet;
+};
+
 export const makeTweets = (tweetLows: TweetColumns[]): Tweet[] =>
-  tweetLows.map((e) => {
-    const tweet = extractData(e);
-    tweet.media = makeMedia(e.media);
-    return tweet;
-  });
+  tweetLows.map(makeTweet);

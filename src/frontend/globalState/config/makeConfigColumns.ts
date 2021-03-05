@@ -3,19 +3,19 @@ import { State } from "../types";
 export const makeConfigColumns = (state: State): ConfigColumns => {
   const {
     currentList,
-    lastTweetIdGroup,
+    lastTweetId,
     limitData,
     listIds,
-    newestTweetDataIdGroup,
+    newestTweetDataIdMap,
   } = state as Configs;
   return {
     id: 0,
     last_data: {
       currentList,
-      lastTweetIdGroup,
+      lastTweetId,
       limitData,
       listIds,
-      newestTweetDataIdGroup,
+      newestTweetDataIdMap,
     },
   };
 };

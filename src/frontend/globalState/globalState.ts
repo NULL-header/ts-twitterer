@@ -2,9 +2,9 @@
 import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
-import { omit } from "timm";
+import update from "immutability-helper";
 import { db } from "../db";
-import { getTweets, loadNewTweetGroup, updateTweets } from "./tweets";
+import { getTweets, loadNewTweets, getTweetFromSingleList } from "./tweets";
 import { makeConfigColumns } from "./config";
 import { initialize } from "./initialize";
 import { deleteCacheTweets, deleteCacheConfig } from "./delete";
@@ -102,7 +102,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isLoadingTweets",
       args,
-      async () => await loadNewTweetGroup(args.getState),
+      async () => await loadNewTweets(args.getState),
       action.callback,
     );
   },
@@ -155,7 +155,7 @@ const asyncReducer: GlobalAsyncReducer = {
   GET_TWEETS_OF_CURRENT_BASE: (args) => async ({ callback }) => {
     await manageDispatch(
       args,
-      async () => await updateTweets(args.getState),
+      async () => await getTweetFromSingleList(args.getState),
       callback,
     );
   },
@@ -219,18 +219,12 @@ const asyncReducer: GlobalAsyncReducer = {
     await manageDispatch(
       args,
       async () => {
-        const {
-          listIds,
-          newestTweetDataIdGroup,
-          lastTweetIdGroup,
-          tweetGroup,
-        } = args.getState();
+        const { listIds, newestTweetDataIdMap } = args.getState();
+        const newMap = update(newestTweetDataIdMap, { $add: [[listId, "0"]] });
         return {
           listIds: [...listIds, listId],
-          newestTweetDataIdGroup: { ...newestTweetDataIdGroup, [listId]: "0" },
-          lastTweetIdGroup: { ...lastTweetIdGroup, [listId]: 0 },
-          tweetGroup: { ...tweetGroup, [listId]: [] },
-        };
+          newestTweetDataIdMap: newMap,
+        } as State;
       },
       callback,
     );
@@ -249,21 +243,14 @@ const asyncReducer: GlobalAsyncReducer = {
     await manageDispatch(
       args,
       async () => {
-        const {
-          listIds,
-          newestTweetDataIdGroup,
-          tweetGroup,
-          lastTweetIdGroup,
-        } = args.getState();
+        const { listIds, newestTweetDataIdMap } = args.getState();
         const newListIds = listIds.filter((e) => e !== listId);
-        const newNewestTweetDataIdGroup = omit(newestTweetDataIdGroup, listId);
-        const newTweetGroup = omit(tweetGroup, listId);
-        const newLastTweetIdGroup = omit(lastTweetIdGroup, listId);
+        const newDataMap = update(newestTweetDataIdMap, {
+          $add: [[listId, undefined as any]],
+        });
         return {
           listIds: newListIds,
-          newestTweetDataIdGroup: newNewestTweetDataIdGroup,
-          tweetGroup: newTweetGroup,
-          lastTweetIdGroup: newLastTweetIdGroup,
+          newestTweetDataIdMap: newDataMap,
         };
       },
       callback,
@@ -297,9 +284,9 @@ const useValue = () => {
       isUpdatingTweets: false,
       isWritingConfig: false,
       isInitializing: undefined,
-      lastTweetIdGroup: {},
-      tweetGroup: {},
-      newestTweetDataIdGroup: {},
+      lastTweetId: 0,
+      tweets: [],
+      newestTweetDataIdMap: new Map(),
       listIds: [],
       currentList: undefined,
       limitData: { lists: { limitRate: 0, remaining: 0 } },
