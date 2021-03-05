@@ -15,12 +15,12 @@ const loadNewTweetsFromDB = async (
 };
 
 export const loadNewTweets = async (getState: () => State) => {
-  const { lastTweetId: oldLastTweetId, currentList } = getState();
+  const { lastTweetId: oldLastTweetId, currentList, tweets } = getState();
   if (currentList == null) throw new Error("current list is undefined");
-  const tweets = await loadNewTweetsFromDB(oldLastTweetId, currentList);
-  if (tweets.length === 0) throw new Error("new tweets do not exist");
-  const lastTweetId = tweets[tweets.length - 1].id;
-  return { tweets, lastTweetId };
+  const newTweets = await loadNewTweetsFromDB(oldLastTweetId, currentList);
+  if (newTweets.length === 0) throw new Error("new tweets do not exist");
+  const lastTweetId = newTweets[newTweets.length - 1].id;
+  return { tweets: [...tweets, ...newTweets], lastTweetId };
 };
 
 export const loadOldTweets = async (
