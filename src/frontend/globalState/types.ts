@@ -12,7 +12,7 @@ export type Flags = {
 };
 
 type AppData = {
-  tweetGroup: Record<string, Tweet[]>;
+  tweets: Tweet[];
 };
 
 export type State = Flags & Configs & AppData;
