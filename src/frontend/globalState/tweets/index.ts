@@ -1,2 +1,2 @@
-export * from "./loadNewTweets";
+export * from "./load";
 export * from "./getTweets";

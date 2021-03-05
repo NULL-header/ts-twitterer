@@ -53,27 +53,21 @@ const useScrollEndEffect = (effect: () => void) => {
 const Timeline = () => {
   console.log("hey");
   const [state, dispatch] = useTracked();
-  const { currentList, tweetGroup } = state;
-  const tweetDetails =
-    currentList == null
-      ? undefined
-      : // tweetDetails is nullable when currentList just exists and
-        // no tweetGroup has it as key of property.
-        (tweetGroup[currentList] as Tweet[] | undefined);
+  const { tweets } = state;
   const divRef = useScrollEndEffect(() =>
     dispatch({ type: "UPDATE_TWEETS", dispatch }),
   );
   useEffect(() => {
-    if (tweetDetails == null || tweetDetails.length !== 0) return;
+    if (tweets.length !== 0) return;
     dispatch({ type: "UPDATE_TWEETS", dispatch });
-  }, [tweetDetails]);
+  }, [tweets]);
   return (
     <ContentContainer header="Timeline" ref={divRef}>
       <Box marginTop="10vw" />
-      {tweetDetails == null || tweetDetails.length === 0 ? undefined : (
+      {tweets.length === 0 ? undefined : (
         <VStack spacing="5vw">
-          <Tweet key={tweetDetails[0].dataid} tweet={tweetDetails[0]} />
-          {tweetDetails.slice(1).map((e) => (
+          <Tweet key={tweets[0].dataid} tweet={tweets[0]} />
+          {tweets.slice(1).map((e) => (
             <TweetBox key={e.dataid} tweet={e} />
           ))}
         </VStack>

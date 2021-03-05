@@ -1,34 +1,24 @@
 import { State } from "./types";
 import { db } from "../db";
 
+const makeEmptyData = (dataIdGroup: Configs["newestTweetDataIdMap"]) => {
+  const lastTweetId = 0;
+  const tweets = [] as Tweet[];
+  const newestTweetDataIdMap = new Map() as Configs["newestTweetDataIdMap"];
+  dataIdGroup.forEach((_, key) => {
+    newestTweetDataIdMap.set(key, "0");
+  });
+  return { lastTweetId, tweets, newestTweetDataIdMap };
+};
+
 export const deleteCacheTweets = async (getState: () => State) => {
-  const { listIds } = getState();
   const promise = db.tweets.clear();
-  const {
-    lastTweetIdGroup,
-    newestTweetDataIdGroup,
-    tweetGroup,
-  } = listIds.reduce(
-    (a, e) => {
-      // eslint-disable-next-line no-param-reassign
-      a.tweetGroup[e] = [];
-      // eslint-disable-next-line no-param-reassign
-      a.lastTweetIdGroup[e] = 0;
-      // eslint-disable-next-line no-param-reassign
-      a.newestTweetDataIdGroup[e] = "0";
-      return a;
-    },
-    {
-      tweetGroup: {},
-      lastTweetIdGroup: {},
-      newestTweetDataIdGroup: {},
-    } as Pick<
-      State,
-      "tweetGroup" | "lastTweetIdGroup" | "newestTweetDataIdGroup"
-    >,
+  const { newestTweetDataIdMap: dataidMap } = getState();
+  const { lastTweetId, tweets, newestTweetDataIdMap } = makeEmptyData(
+    dataidMap,
   );
   await promise;
-  return { tweetGroup, lastTweetIdGroup, newestTweetDataIdGroup };
+  return { tweets, lastTweetId, newestTweetDataIdMap };
 };
 
 export const deleteCacheConfig = async () => {
@@ -37,9 +27,8 @@ export const deleteCacheConfig = async () => {
     currentList: "",
     limitData: { lists: { limitRate: 0, remaining: 0 } },
     listIds: [] as string[],
-    themename: "dark",
-    lastTweetIdGroup: {},
-    newestTweetDataIdGroup: {},
+    lastTweetId: 0,
+    newestTweetDataIdMap: new Map(),
   } as Configs;
   await promise;
   return initValue;
