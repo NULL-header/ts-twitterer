@@ -3,11 +3,16 @@ import { useEffect, Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
 import update from "immutability-helper";
-import { db } from "../db";
-import { getTweets, loadNewTweets, getTweetFromSingleList } from "./tweets";
-import { makeConfigColumns } from "./config";
-import { initialize } from "./initialize";
-import { deleteCacheTweets, deleteCacheConfig } from "./delete";
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import {
+  saveTweetFromSingleList,
+  saveTweets,
+  deleteCacheConfig,
+  deleteCacheTweets,
+  initialize,
+  loadNewTweets,
+  saveConfigs,
+} from "comlink-loader?singleton=true!../worker/connect";
 import {
   State,
   Flags,
@@ -102,7 +107,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isLoadingTweets",
       args,
-      async () => await loadNewTweets(args.getState),
+      async () => await loadNewTweets(args.getState()),
       action.callback,
     );
   },
@@ -122,7 +127,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isGettingTweets",
       args,
-      async () => await getTweets(args.getState),
+      async () => await saveTweets(args.getState()),
       action.callback,
     );
   },
@@ -141,7 +146,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isDeletingTweets",
       args,
-      async () => await deleteCacheTweets(args.getState),
+      async () => await deleteCacheTweets(args.getState()),
     );
   },
   DELETE_CACHE_CONFIG: (args) => async (action) => {
@@ -155,7 +160,7 @@ const asyncReducer: GlobalAsyncReducer = {
   GET_TWEETS_OF_CURRENT_BASE: (args) => async ({ callback }) => {
     await manageDispatch(
       args,
-      async () => await getTweetFromSingleList(args.getState),
+      async () => await saveTweetFromSingleList(args.getState()),
       callback,
     );
   },
@@ -192,15 +197,10 @@ const asyncReducer: GlobalAsyncReducer = {
     );
   },
   WRITE_CONFIG: (args) => async (action) => {
-    const configLow = makeConfigColumns(args.getState());
     await adjustFlag(
       "isWritingConfig",
       args,
-      async () => {
-        await db.configs.put(configLow);
-        console.log("config written");
-        return undefined;
-      },
+      async () => saveConfigs(args.getState()),
       action.callback,
     );
   },
