@@ -3,9 +3,9 @@ import { State } from "frontend/globalState/types";
 import {
   DuplicateError,
   RateError,
-  DataIdMapInitError,
   ShouldUnupdateError,
   CurrentListInitError,
+  NewestDataIdMapError,
 } from "frontend/globalState/errors";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
 import { Work } from "./types";
@@ -13,11 +13,15 @@ import { db } from "./db";
 
 const throwErrorToWrongValue = (
   isGettingTweets: boolean,
-  remaining: number,
+  limitData: LimitData | undefined,
 ) => {
-  if (remaining < CONSTVALUE.LATE_LIMIT)
-    throw new RateError({ limit: { remaining } });
-  else if (isGettingTweets)
+  if (limitData != null) {
+    const {
+      lists: { remaining },
+    } = limitData;
+    if (remaining < CONSTVALUE.LATE_LIMIT)
+      throw new RateError({ limit: { remaining } });
+  } else if (isGettingTweets)
     throw new DuplicateError({ flag: { isGettingTweets } });
 };
 
@@ -35,7 +39,7 @@ const getTweetLowsArray = (
   Promise.all(
     listIds.map((listId) => {
       const dataid = dataIdMap.get(listId);
-      if (dataid == null) throw new DataIdMapInitError({ key: { listId } });
+      if (dataid == null) throw new NewestDataIdMapError({ key: { listId } });
       return getTweetLows(dataid, listId);
     }),
   );
@@ -62,11 +66,9 @@ export const saveTweets = async ({
   isGettingTweets,
   listIds,
   newestTweetDataIdMap,
-  limitData: {
-    lists: { remaining },
-  },
+  limitData,
 }: State) => {
-  throwErrorToWrongValue(isGettingTweets, remaining);
+  throwErrorToWrongValue(isGettingTweets, limitData);
   const tweetLowsArray = await getTweetLowsArray(listIds, newestTweetDataIdMap);
   const newTweetLowsArray = makeNewTweetLows(
     tweetLowsArray,
@@ -81,18 +83,18 @@ export const saveTweetFromSingleList: Work = async ({
   newestTweetDataIdMap,
   isGettingTweets,
   currentList,
-  limitData: {
-    lists: { remaining },
-  },
+  limitData,
 }) => {
-  throwErrorToWrongValue(isGettingTweets, remaining);
+  throwErrorToWrongValue(isGettingTweets, limitData);
   if (currentList == null) throw new CurrentListInitError();
-  const dataid = newestTweetDataIdMap.get(currentList);
-  if (dataid == null) throw new DataIdMapInitError({ key: { dataid } });
+  const dataid = newestTweetDataIdMap.get(currentList) || "0";
   const tweetLows = await getTweetLows(dataid, currentList);
   if (tweetLows.length === 0) throw new ShouldUnupdateError();
   const writingPromise = db.tweets.bulkAdd(tweetLows as any);
-  newestTweetDataIdMap.set(currentList, tweetLows[tweetLows.length - 1].dataid);
+  newestTweetDataIdMap.set(
+    currentList,
+    tweetLows[tweetLows.length - 1].tweet.dataid,
+  );
   await writingPromise;
   return { newestTweetDataIdMap } as State;
 };

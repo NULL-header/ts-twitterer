@@ -8,7 +8,7 @@ import {
   saveTweetFromSingleList,
   saveTweets,
   deleteCacheConfig,
-  deleteCacheTweets,
+  deleteCacheTweetsAll,
   initialize,
   loadNewTweets,
   saveConfigs,
@@ -146,7 +146,7 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isDeletingTweets",
       args,
-      async () => await deleteCacheTweets(args.getState()),
+      async () => await deleteCacheTweetsAll(),
     );
   },
   DELETE_CACHE_CONFIG: (args) => async (action) => {
@@ -287,9 +287,11 @@ const useValue = () => {
       lastTweetId: 0,
       tweets: [],
       newestTweetDataIdMap: new Map(),
+      newestUniqIdMap: new Map(),
+      oldestUniqIdMap: new Map(),
       listIds: [],
       currentList: undefined,
-      limitData: { lists: { limitRate: 0, remaining: 0 } },
+      limitData: undefined,
     } as State,
     asyncReducer,
   );

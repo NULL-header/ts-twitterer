@@ -11,11 +11,33 @@ export class CurrentListInitError extends InitializeError {
   }
 }
 
-export class DataIdMapInitError extends InitializeError {
-  constructor({ key }: { key: { [keyName: string]: any } }) {
+type IdMapErrorArgs = { key: { [keyname: string]: string } };
+
+class IdMapError extends Error {
+  constructor({ key }: IdMapErrorArgs, mapName: string) {
     super(
-      `The value of the key of newestTweetDataIdMap is not initialized. key is this: ${key}`,
+      `The value of the key of ${mapName} is undefined. The key is here: ${JSON.stringify(
+        key,
+      )}`,
     );
+  }
+}
+
+export class OldestUniqIdMapError extends IdMapError {
+  constructor(value: IdMapErrorArgs) {
+    super(value, "oldestIdMap");
+  }
+}
+
+export class NewestUniqIdMapError extends IdMapError {
+  constructor(value: IdMapErrorArgs) {
+    super(value, "newesIdMap");
+  }
+}
+
+export class NewestDataIdMapError extends IdMapError {
+  constructor(value: IdMapErrorArgs) {
+    super(value, "newestDataIdMap");
   }
 }
 

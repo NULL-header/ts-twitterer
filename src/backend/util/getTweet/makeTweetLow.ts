@@ -1,48 +1,59 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { extractDataFromMedia } from "./makeMedia";
 import { removeUrl } from "./removeUrl";
 
 const extractData = (tweetData: any) => {
   const {
     full_text: contentData,
-    id_str: dataid,
-    created_at,
-    user: { screen_name: userid, name: username, profile_image_url: icon_url },
-    extended_entities,
+    created_at: createdAt,
+    user: {
+      screen_name: twitterId,
+      name,
+      profile_image_url_https: iconUrl,
+      description,
+      profile_banner_url: bannerUrl,
+    },
+    extended_entities: extendedEntities,
   } = tweetData;
-  let content: string = contentData;
-  let media;
-  if (extended_entities != null) {
+  const mutable = {
+    content: contentData,
+    media: undefined as Media | undefined,
+    hasMedia: false,
+  };
+  if (extendedEntities != null) {
     const { indicesArray, media: mediaNonNullable } = extractDataFromMedia(
-      extended_entities.media,
+      extendedEntities.media,
     ) as NonNullable<ReturnType<typeof extractDataFromMedia>>;
-    media = mediaNonNullable;
-    content = removeUrl(indicesArray, contentData);
+    mutable.media = mediaNonNullable;
+    mutable.hasMedia = true;
+    mutable.content = removeUrl(indicesArray, contentData);
   }
   return {
-    content,
-    dataid,
-    created_at,
-    userid,
-    username,
-    icon_url,
-    media,
+    tweet: {
+      createdAt,
+      user: {
+        name,
+        twitterId,
+        iconUrl,
+        description,
+        bannerUrl,
+      },
+      ...mutable,
+    },
   };
 };
 
 export const makeTweetLow = (tweetData: any, listId: string): TweetColumns => {
   let tweetLow: any;
+  const { id_str: dataid } = tweetData;
   if (tweetData.retweeted_status) {
     tweetLow = extractData(tweetData.retweeted_status);
-    tweetLow.is_retweeted = true;
-    tweetLow.retweeter_name = tweetData.user.name;
+    tweetLow.tweet.isRetweeted = true;
+    tweetLow.tweet.retweeterName = tweetData.user.name;
   } else {
     tweetLow = extractData(tweetData);
-    tweetLow.is_retweeted = false;
+    tweetLow.tweet.isRetweeted = false;
   }
-  tweetLow.list_id = listId;
+  tweetLow.tweet.listId = listId;
+  tweetLow.tweet.dataid = dataid;
   return tweetLow as TweetColumns;
 };
