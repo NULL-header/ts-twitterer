@@ -292,6 +292,7 @@ const useValue = () => {
       listIds: [],
       currentList: undefined,
       limitData: undefined,
+      isAuthorized: false,
     } as State,
     asyncReducer,
   );

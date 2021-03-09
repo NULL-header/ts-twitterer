@@ -53,6 +53,7 @@ type Configs = {
   currentList: string | undefined;
   limitData: LimitData | undefined;
   listIds: string[];
+  isAuthorized: boolean;
 };
 
 interface ConfigColumns {
