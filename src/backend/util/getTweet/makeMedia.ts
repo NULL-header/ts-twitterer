@@ -1,11 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/naming-convention */
-
 type Maker = (
   mediaData: any[],
-) => { indicesArray: [number, number][]; media: MediaColumns } | undefined;
+) => { indicesArray: [number, number][]; media: Media } | undefined;
 
 const makeFromVideo: Maker = (mediaData) => {
   const videoData = mediaData[0];
@@ -20,20 +15,20 @@ const makeFromVideo: Maker = (mediaData) => {
   }, variants[0]);
   return {
     indicesArray: [indices as [number, number]],
-    media: { type: "video", media_url: largestVideo.url as string },
+    media: { type: "video", mediaUrl: largestVideo.url as string },
   };
 };
 
 const makeFromPhoto: Maker = (mediaData) => {
   if (mediaData[0].type !== "photo") return;
   const indicesArray: [number, number][] = [];
-  const media_url = [] as string[];
+  const mediaUrl = [] as string[];
   mediaData.forEach((e, i) => {
     const { indices, media_url: url } = e;
     indicesArray[i] = indices;
-    media_url[i] = url;
+    mediaUrl[i] = url;
   });
-  return { indicesArray, media: { type: "photo", media_url } };
+  return { indicesArray, media: { type: "photo", mediaUrl } };
 };
 
 const makeFromGif: Maker = (mediaData) => {
@@ -42,11 +37,11 @@ const makeFromGif: Maker = (mediaData) => {
   const {
     indices,
     video_info: {
-      variants: [{ url: media_url }],
+      variants: [{ url: mediaUrl }],
     },
   } = gifData;
   return {
-    media: { type: "animated_gif", media_url },
+    media: { type: "animated_gif", mediaUrl },
     indicesArray: [indices],
   };
 };
