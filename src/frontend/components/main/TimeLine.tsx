@@ -3,12 +3,12 @@ import React, {
   useLayoutEffect,
   MutableRefObject,
   useEffect,
+  memo,
 } from "react";
 import { useTracked } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { delayCall } from "frontend/util";
 import { Tweet } from "./Tweet";
-import { ContentContainer } from "./ContentContainer";
 
 // extract to pass key only
 const TweetBox = React.memo(({ tweet }: { tweet: Tweet }) => (
@@ -32,29 +32,31 @@ const makeGetSholdUpdate = (
   return diff < acceptDif;
 };
 
-const useScrollEndEffect = (effect: () => void) => {
-  const targetRef = useRef<HTMLDivElement | null>(null);
+const useScrollEndEffect = (
+  ref: MutableRefObject<HTMLDivElement | null>,
+  effect: () => void,
+) => {
   useLayoutEffect(() => {
     const getShouldUpdate = makeGetSholdUpdate(
-      targetRef as MutableRefObject<HTMLDivElement>,
+      ref as MutableRefObject<HTMLDivElement>,
     );
     const handler = delayCall(() => {
       const shouldUpdate = getShouldUpdate();
       if (shouldUpdate) effect();
     });
-    const { current: target } = targetRef;
+    const { current: target } = ref;
     if (target == null) throw new Error("ref is null");
     target.addEventListener("scroll", handler);
     return () => target.removeEventListener("scroll", handler);
   }, []);
-  return targetRef;
 };
 
-const Timeline = () => {
+const Timeline = memo(() => {
   console.log("hey");
   const [state, dispatch] = useTracked();
   const { tweets } = state;
-  const divRef = useScrollEndEffect(() =>
+  const ref = useRef<HTMLDivElement | null>(null);
+  useScrollEndEffect(ref as any, () =>
     dispatch({ type: "UPDATE_TWEETS", dispatch }),
   );
   useEffect(() => {
@@ -62,19 +64,21 @@ const Timeline = () => {
     dispatch({ type: "UPDATE_TWEETS", dispatch });
   }, [tweets]);
   return (
-    <ContentContainer header="Timeline" ref={divRef}>
-      <Box marginTop="10vw" />
-      {tweets.length === 0 ? undefined : (
-        <VStack spacing="5vw">
-          <Tweet key={tweets[0].dataid} tweet={tweets[0]} />
-          {tweets.slice(1).map((e) => (
-            <TweetBox key={e.dataid} tweet={e} />
-          ))}
-        </VStack>
-      )}
-      <Box marginTop="50vh" />
-    </ContentContainer>
+    <>
+      <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
+        <Box marginTop="10vw" />
+        {tweets.length === 0 ? undefined : (
+          <VStack spacing="5vw">
+            <Tweet key={tweets[0].dataid} tweet={tweets[0]} />
+            {tweets.slice(1).map((e) => (
+              <TweetBox key={e.dataid} tweet={e} />
+            ))}
+          </VStack>
+        )}
+        <Box marginTop="50vh" />
+      </Box>
+    </>
   );
-};
+});
 
 export { Timeline };

@@ -2,27 +2,16 @@ import React, { useCallback } from "react";
 import {
   FormControl,
   FormErrorMessage,
-  Divider,
-  Heading,
   Text,
   Button,
   Box,
   VStack,
   Input,
-  useColorMode,
 } from "@chakra-ui/react";
 import { useTracked, useUpdate } from "frontend/globalState";
 import { useForm } from "react-hook-form";
-import { ContentContainer } from "./ContentContainer";
-import { CONSTVALUE } from "../CONSTVALUE";
-
-const HeaddingCommon = React.memo(({ header }: { header: string }) => (
-  <Box display="table">
-    <Heading size="md">{header}</Heading>
-    <Divider marginBottom="2vw" width="calc(100% + 5vw)" />
-  </Box>
-));
-HeaddingCommon.displayName = "HeaddingCommon";
+import { CONSTVALUE } from "frontend/CONSTVALUE";
+import { ToggleForm, HeaddingCommon } from "../ConfigBase";
 
 const ItemBar = React.memo(({ listId }: { listId: string }) => {
   const dispatch = useUpdate();
@@ -99,25 +88,11 @@ const IdForm = () => {
   );
 };
 
-const ToggleForm = () => {
-  const { toggleColorMode } = useColorMode();
-  return (
-    <Box>
-      <HeaddingCommon header="toggle Theme" />
-      <Button marginLeft="5vw" onClick={toggleColorMode}>
-        HERE
-      </Button>
-    </Box>
-  );
-};
-
 const Config = React.memo(() => (
-  <ContentContainer header="Config">
-    <VStack alignItems="right" spacing="10vw">
-      <IdForm />
-      <ToggleForm />
-    </VStack>
-  </ContentContainer>
+  <VStack alignItems="right" spacing="10vw">
+    <IdForm />
+    <ToggleForm />
+  </VStack>
 ));
 
 Config.displayName = "Config";
