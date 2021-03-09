@@ -1,4 +1,3 @@
-import Dexie from "dexie";
 import { State } from "frontend/globalState/types";
 import {
   CurrentListInitError,
@@ -7,63 +6,31 @@ import {
 import { Work } from "./types";
 import { db } from "./db";
 
-const extractData = (tweetColumns: TweetColumns): Tweet => {
-  const {
-    content,
-    id,
-    created_at: createdAt,
-    icon_url: iconUrl,
-    userid,
-    dataid,
-    username,
-    list_id: listId,
-    is_retweeted: isRetweeted,
-    retweeter_name: retweeterName,
-  } = tweetColumns;
-  const tweet = {
-    content,
-    id,
-    createdAt,
-    iconUrl,
-    userid,
-    username,
-    dataid,
-    listId,
-    isRetweeted,
-    retweeterName,
-  } as Tweet;
-  return tweet;
-};
-
-const makeMedia = (mediaColumns?: MediaColumns) => {
-  if (mediaColumns == null) return undefined;
-  const { type: mediaType, media_url: mediaUrl } = mediaColumns;
-  return { type: mediaType, mediaUrl } as Media;
-};
-
-const makeTweet = (tweetLow: any): Tweet => {
-  const tweet = extractData(tweetLow);
-  tweet.media = makeMedia(tweetLow.media);
-  return tweet;
-};
-
-const makeTweets = (tweetLows: TweetColumns[]): Tweet[] =>
-  tweetLows.map(makeTweet);
-
-const loadTweetsFromDB = (lastTweetId: number, listId: string) =>
+const loadTweetsFromDB = (oldestUniqId: number, listId: string) =>
   db.tweets
-    .where("[id+list_id]")
-    .between([lastTweetId + 1, listId], [Dexie.maxKey, listId])
-    .toArray(makeTweets);
+    .where("tweet.listId")
+    .equals(listId)
+    .filter((e) => e.tweet.uniqid > oldestUniqId)
+    .toArray((e) => e.map((tweetData) => tweetData.tweet));
+
+const loadTweetsAllFromDB = (listId: string) =>
+  db.tweets
+    .where("tweet.listId")
+    .equals(listId)
+    .toArray((e) => e.map((tweetData) => tweetData.tweet));
 
 export const loadNewTweets: Work = async ({
-  lastTweetId: oldLastTweetId,
+  oldestUniqIdMap,
   currentList,
   tweets,
 }) => {
   if (currentList == null) throw new CurrentListInitError();
-  const newTweets = await loadTweetsFromDB(oldLastTweetId, currentList);
+  const uniqid = oldestUniqIdMap.get(currentList);
+  let newTweets: Tweet[];
+  if (uniqid == null) newTweets = await loadTweetsAllFromDB(currentList);
+  else newTweets = await loadTweetsFromDB(uniqid, currentList);
   if (newTweets.length === 0) throw new ShouldUnupdateError();
-  const lastTweetId = newTweets[newTweets.length - 1].id;
-  return { tweets: tweets.concat(newTweets), lastTweetId } as State;
+  const newUniqid = newTweets[newTweets.length - 1].uniqid;
+  oldestUniqIdMap.set(currentList, newUniqid);
+  return { tweets: tweets.concat(newTweets), oldestUniqIdMap } as State;
 };
