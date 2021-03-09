@@ -1,17 +1,14 @@
 import Dexie from "dexie";
 
 const tweetColumnsFirst = [
-  "++id",
-  "username",
-  "userid",
-  "icon_url",
-  "content",
-  "created_at",
-  "media",
-  "list_id",
-  "[id+list_id]",
-  "is_retweeted",
-  "retweeter_name",
+  "++tweet.uniqid",
+  "tweet",
+  "tweet.user.name",
+  "tweet.user.twitterId",
+  "tweet.createdAt",
+  "tweet.listId",
+  "tweet.hasMedia",
+  "tweet.isRetweeted",
 ];
 
 const configColumnsFirst = ["id", "last_data"];

@@ -9,25 +9,19 @@ type Media =
       type: "animated_gif" | "video";
     };
 
-type MediaColumns =
-  | {
-      media_url: string[];
-      type: "photo";
-    }
-  | {
-      media_url: string;
-      type: "animated_gif" | "video";
-    };
-
 type Tweet = {
-  id: number;
-  dataid: string;
-  username: string;
-  userid: string;
-  iconUrl: string;
-  content: string;
+  uniqid: number;
+  user: {
+    name: string;
+    twitterId: string;
+    iconUrl: string;
+    bannerUrl: string;
+    profile: string;
+    description: string;
+  };
   createdAt: string;
-  media?: Media;
+  dataid: string;
+  content: string;
   listId: string;
 } & (
   | {
@@ -38,28 +32,12 @@ type Tweet = {
       isRetweeted: true;
       retweeterName: string;
     }
-);
+) &
+  ({ hasMedia: true; media: Media } | { hasMedia: false; media: undefined });
 
 type TweetColumns = {
-  id: number;
-  dataid: string;
-  username: string;
-  userid: string;
-  icon_url: string;
-  content: string;
-  created_at: string;
-  media?: MediaColumns;
-  list_id: string;
-} & (
-  | {
-      is_retweeted: false;
-      retweeter_name: undefined;
-    }
-  | {
-      is_retweeted: true;
-      retweeter_name: string;
-    }
-);
+  tweet: Tweet;
+};
 
 interface Limit {
   limitRate: number;
@@ -68,19 +46,18 @@ interface Limit {
 
 type LimitData = Record<"lists", Limit>;
 
-type Themenames = "light" | "dark";
-
-interface Configs {
-  lastTweetId: number;
+type Configs = {
+  oldestUniqIdMap: Map<string, number>;
+  newestUniqIdMap: Map<string, number>;
   newestTweetDataIdMap: Map<string, string>;
-  listIds: string[];
   currentList: string | undefined;
-  limitData: LimitData;
-}
+  limitData: LimitData | undefined;
+  listIds: string[];
+};
 
 interface ConfigColumns {
   id: 0;
-  last_data: Configs;
+  last_data: Configs & { tweets: Tweet[] };
 }
 
 declare module "comlink-loader?singleton=true!../worker/connect" {
