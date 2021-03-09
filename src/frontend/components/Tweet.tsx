@@ -40,7 +40,7 @@ const makeUsername = (username: string) =>
 
 const Tweet = React.memo(({ tweet }: { tweet: Tweet }) => {
   console.log(tweet);
-  const username = makeUsername(tweet.username);
+  const username = makeUsername(tweet.user.name);
   return (
     <Box role="group" width="100%">
       {tweet.isRetweeted && (
@@ -51,13 +51,13 @@ const Tweet = React.memo(({ tweet }: { tweet: Tweet }) => {
       )}
       <Grid templateColumns="auto 1fr" templateRows="auto auto 1fr">
         <GridItem rowSpan={2} colSpan={1}>
-          <Image src={tweet.iconUrl} alt="icon" />
+          <Image src={tweet.user.iconUrl} alt="icon" />
         </GridItem>
         <GridItem paddingLeft="2vw">
           <Text>{username}</Text>
         </GridItem>
         <GridItem paddingLeft="2vw">
-          <Text>{`@${tweet.userid}`}</Text>
+          <Text>{`@${tweet.user.twitterId}`}</Text>
         </GridItem>
         <GridItem colSpan={2}>
           <Text whiteSpace="pre-line">{tweet.content}</Text>
