@@ -1,5 +1,6 @@
 import express from "express";
 import session from "express-session";
+import bodyParser from "body-parser";
 import redis from "redis";
 import makeRedisStore from "connect-redis";
 import { router } from "./router";
@@ -24,4 +25,6 @@ export const app = express()
       },
     }),
   )
+  .use(bodyParser.urlencoded({ extended: false }))
+  .use(bodyParser.json())
   .use(router);

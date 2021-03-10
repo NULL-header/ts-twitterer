@@ -15,7 +15,7 @@ const throwErrorToWrongValue = (
   isGettingTweets: boolean,
   limitData: LimitData | undefined,
 ) => {
-  if (limitData != null) {
+  if (limitData != null && limitData.lists != null) {
     const {
       lists: { remaining },
     } = limitData;

@@ -80,7 +80,7 @@ export const router = express
     ).catch((err) => console.log(err));
     res.send(response);
   })
-  .post("/api/token", (req, res) => {
+  .post("/api/token/set", (req, res) => {
     const {
       consumer_token: consumerToken,
       consumer_token_secret: consumerTokenSecret,
@@ -92,6 +92,15 @@ export const router = express
       consumerTokenSecret,
       accessToken,
       accessTokenSecret,
+    });
+    res.end();
+  })
+  .post("/api/token/delete", (req, res) => {
+    Object.assign(req.session, {
+      consumerToken: undefined,
+      consumerTokenSecret: undefined,
+      accessToken: undefined,
+      accessTokenSecret: undefined,
     });
     res.end();
   });
