@@ -22,14 +22,11 @@ export type AsyncDispatch = Dispatch<Action | AsyncAction>;
 
 export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "LOAD_NEW_TWEETS" }
-  | { type: "GET_TWEETS_BASE" }
-  | { type: "GET_TWEETS"; dispatch: AsyncDispatch }
+  | { type: "GET_TWEETS" }
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
-  | { type: "GET_TWEETS_OF_CURRENT_BASE" }
-  | { type: "GET_TWEETS_OF_CURRENT"; dispatch: AsyncDispatch }
-  | { type: "UPDATE_TWEETS"; dispatch: AsyncDispatch }
+  | { type: "GET_TWEETS_OF_CURRENT" }
   | { type: "WRITE_CONFIG" }
   | { type: "GET_RATE" }
   | { type: "ADD_LISTIDS"; listId: string }
