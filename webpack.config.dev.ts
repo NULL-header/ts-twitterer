@@ -33,6 +33,13 @@ const webpackConfig: Configuration = {
   module: {
     rules: [
       {
+        test: /.*src\/frontend\/worker\/connect\/index.ts/,
+        loader: "comlink-loader",
+        options: {
+          singleton: true,
+        },
+      },
+      {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: {

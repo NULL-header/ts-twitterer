@@ -60,9 +60,3 @@ interface ConfigColumns {
   id: 0;
   last_data: Configs & { tweets: Tweet[] };
 }
-
-declare module "comlink-loader?singleton=true!../worker/connect" {
-  type Origin = typeof import("frontend/worker/connect");
-  const origin: Origin;
-  export = origin;
-}
