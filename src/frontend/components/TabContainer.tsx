@@ -54,7 +54,7 @@ const AllTab = memo<Props>(({ tabs }) => {
           justifyContent="right"
           key={e}
         >
-          <Icon as={tabs[e].Icon} boxSize="8" />
+          <Icon as={tabs[e].Icon} boxSize="32" />
           <Collapse in={isShow} animateOpacity>
             <Text>{e}</Text>
           </Collapse>
