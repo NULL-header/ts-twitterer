@@ -103,22 +103,13 @@ const makeAsyncDispatch = (
   new Promise((resolve) => dispatch({ callback: resolve, ...args }));
 
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS_BASE: (args) => async (action) => {
+  LOAD_NEW_TWEETS: (args) => async (action) => {
     await adjustFlag(
       "isLoadingTweets",
       args,
       async () => await loadNewTweets(args.getState()),
       action.callback,
     );
-  },
-  LOAD_NEW_TWEETS: () => async (action) => {
-    await dispatchBlank(async () => {
-      const dispatch = makeAsyncDispatch(action.dispatch);
-      const isSuccessLoading = await dispatch({
-        type: "LOAD_NEW_TWEETS_BASE",
-      });
-      if (isSuccessLoading) await dispatch({ type: "WRITE_CONFIG" });
-    }, action.callback);
   },
   INITIALIZE: (args) => async () => {
     await adjustFlag("isInitializing", args, async () => await initialize());
@@ -188,7 +179,6 @@ const asyncReducer: GlobalAsyncReducer = {
         if (isSuccessGetting)
           await asyncDispatch({
             type: "LOAD_NEW_TWEETS",
-            dispatch,
           });
         console.log("finish updating");
         return undefined;
@@ -220,7 +210,7 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  ADD_LISTIDS_BASE: (args) => async ({ callback, listId }) => {
+  ADD_LISTIDS: (args) => async ({ callback, listId }) => {
     await manageDispatch(
       args,
       async () => {
@@ -234,17 +224,7 @@ const asyncReducer: GlobalAsyncReducer = {
       callback,
     );
   },
-  ADD_LISTIDS: () => async ({ callback, listId, dispatch }) => {
-    await dispatchBlank(async () => {
-      const asyncDispatch = makeAsyncDispatch(dispatch);
-      const isSucess = await asyncDispatch({
-        type: "ADD_LISTIDS_BASE",
-        listId,
-      });
-      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
-    }, callback);
-  },
-  DELETE_LISTIDS_BASE: (args) => async ({ listId, callback }) => {
+  DELETE_LISTIDS: (args) => async ({ listId, callback }) => {
     await manageDispatch(
       args,
       async () => {
@@ -260,16 +240,6 @@ const asyncReducer: GlobalAsyncReducer = {
       },
       callback,
     );
-  },
-  DELETE_LISTIDS: () => async ({ dispatch, listId, callback }) => {
-    await dispatchBlank(async () => {
-      const asyncDispatch = makeAsyncDispatch(dispatch);
-      const isSucess = await asyncDispatch({
-        type: "DELETE_LISTIDS_BASE",
-        listId,
-      });
-      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
-    }, callback);
   },
   AUTHORISE: ({ getState, dispatch }) => async ({ callback }) => {
     await dispatchBlank(async () => {

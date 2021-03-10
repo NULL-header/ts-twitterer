@@ -21,8 +21,7 @@ export type Action = { type: "MODIFY"; state: Partial<State> };
 export type AsyncDispatch = Dispatch<Action | AsyncAction>;
 
 export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
-  | { type: "LOAD_NEW_TWEETS_BASE" }
-  | { type: "LOAD_NEW_TWEETS"; dispatch: AsyncDispatch }
+  | { type: "LOAD_NEW_TWEETS" }
   | { type: "GET_TWEETS_BASE" }
   | { type: "GET_TWEETS"; dispatch: AsyncDispatch }
   | { type: "INITIALIZE" }
@@ -33,10 +32,8 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "UPDATE_TWEETS"; dispatch: AsyncDispatch }
   | { type: "WRITE_CONFIG" }
   | { type: "GET_RATE" }
-  | { type: "ADD_LISTIDS_BASE"; listId: string }
-  | { type: "ADD_LISTIDS"; listId: string; dispatch: AsyncDispatch }
-  | { type: "DELETE_LISTIDS_BASE"; listId: string }
-  | { type: "DELETE_LISTIDS"; listId: string; dispatch: AsyncDispatch }
+  | { type: "ADD_LISTIDS"; listId: string }
+  | { type: "DELETE_LISTIDS"; listId: string }
   | {
       type: "AUTHORISE";
     }
