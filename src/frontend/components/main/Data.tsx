@@ -1,15 +1,10 @@
 import React from "react";
 import { useTracked } from "frontend/globalState";
-import { ContentContainer } from "./ContentContainer";
 
 const Data = () => {
   const [state] = useTracked();
   const { limitData } = state;
-  return (
-    <ContentContainer header="Data">
-      {JSON.stringify(limitData)}
-    </ContentContainer>
-  );
+  return <>{JSON.stringify(limitData)}</>;
 };
 
 export { Data };

@@ -11,6 +11,7 @@ const makeConfigColumns = (state: State): ConfigColumns => {
     listIds,
     newestTweetDataIdMap,
     tweets,
+    isAuthorized,
   } = state as Configs & Pick<State, "tweets">;
   return {
     id: 0,
@@ -22,6 +23,7 @@ const makeConfigColumns = (state: State): ConfigColumns => {
       listIds,
       newestTweetDataIdMap,
       tweets,
+      isAuthorized,
     },
   };
 };

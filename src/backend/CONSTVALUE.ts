@@ -11,4 +11,5 @@ export const CONSTVALUE = {
   PORT: parseInt(process.env.PORT as string, 10) || 3000,
   SAMPLE_DIRECTORY: `${process.cwd()}/samples/`,
   SAMPLE_BASE_NAME: "sample",
+  COOKIE_SECRET: process.env.COOKIE_SECRET as string,
 };

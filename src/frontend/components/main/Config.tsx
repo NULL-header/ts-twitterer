@@ -2,27 +2,19 @@ import React, { useCallback } from "react";
 import {
   FormControl,
   FormErrorMessage,
-  Divider,
-  Heading,
   Text,
   Button,
   Box,
   VStack,
   Input,
-  useColorMode,
 } from "@chakra-ui/react";
 import { useTracked, useUpdate } from "frontend/globalState";
 import { useForm } from "react-hook-form";
-import { ContentContainer } from "./ContentContainer";
-import { CONSTVALUE } from "../CONSTVALUE";
-
-const HeaddingCommon = React.memo(({ header }: { header: string }) => (
-  <Box display="table">
-    <Heading size="md">{header}</Heading>
-    <Divider marginBottom="2vw" width="calc(100% + 5vw)" />
-  </Box>
-));
-HeaddingCommon.displayName = "HeaddingCommon";
+import { CONSTVALUE } from "frontend/CONSTVALUE";
+import { useBool } from "frontend/util";
+import { useUpdateEffect } from "react-use";
+import { useAsyncTask } from "react-hooks-async";
+import { ToggleForm, HeaddingCommon } from "../ConfigBase";
 
 const ItemBar = React.memo(({ listId }: { listId: string }) => {
   const dispatch = useUpdate();
@@ -31,7 +23,7 @@ const ItemBar = React.memo(({ listId }: { listId: string }) => {
       <Text marginRight="auto">{listId}</Text>
       <Button
         marginRight="3vw"
-        onClick={() => dispatch({ type: "DELETE_LISTIDS", listId, dispatch })}
+        onClick={() => dispatch({ type: "DELETE_LISTIDS", listId })}
       >
         delete
       </Button>
@@ -68,7 +60,7 @@ const IdForm = () => {
   }>();
   const submitData = useCallback(
     handleSubmit((data) => {
-      dispatch({ type: "ADD_LISTIDS", dispatch, listId: data.listId });
+      dispatch({ type: "ADD_LISTIDS", listId: data.listId });
     }),
     [handleSubmit],
   );
@@ -99,25 +91,38 @@ const IdForm = () => {
   );
 };
 
-const ToggleForm = () => {
-  const { toggleColorMode } = useColorMode();
+const DeleteKeyForm = React.memo(() => {
+  const [isFired, fire] = useBool(false);
+  const dispatch = useUpdate();
+  const task = useAsyncTask(
+    useCallback(
+      async ({ signal }) => {
+        const result = await fetch("/api/auth/delete", { method: "POST" });
+        console.log(result);
+        if (signal.aborted) return;
+        dispatch({ type: "AUTHORISE" });
+      },
+      [isFired],
+    ),
+  );
+  useUpdateEffect(() => {
+    if (!isFired) return;
+    task.start();
+  }, [isFired]);
   return (
     <Box>
-      <HeaddingCommon header="toggle Theme" />
-      <Button marginLeft="5vw" onClick={toggleColorMode}>
-        HERE
-      </Button>
+      <HeaddingCommon header="Delete Keys" />
+      <Button onClick={fire}>DELETE</Button>
     </Box>
   );
-};
+});
 
 const Config = React.memo(() => (
-  <ContentContainer header="Config">
-    <VStack alignItems="right" spacing="10vw">
-      <IdForm />
-      <ToggleForm />
-    </VStack>
-  </ContentContainer>
+  <VStack alignItems="right" spacing="10vw">
+    <IdForm />
+    <ToggleForm />
+    <DeleteKeyForm />
+  </VStack>
 ));
 
 Config.displayName = "Config";

@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { twitterApi } from "backend/twitterApi";
+import Twitter from "twitter";
 import { makeTweetLow } from "./makeTweetLow";
 
-export const getNewTweetData = (listId: string): Promise<any[]> =>
-  twitterApi.get("lists/statuses", {
+export const getNewTweetData = (
+  listId: string,
+  client: Twitter,
+): Promise<any[]> =>
+  client.get("lists/statuses", {
     list_id: listId,
     include_rts: true,
     tweet_mode: "extended",
@@ -27,9 +30,10 @@ export const makeTweetLows = (
 export const getNewTweetLows = async (
   lastNewestTweetDataId: string,
   listId: string,
+  client: Twitter,
 ) => {
   console.log("getNew");
-  const response = await getNewTweetData(listId);
+  const response = await getNewTweetData(listId, client);
   const lastIndexOldTweetData = response.findIndex(
     (e) => e.id === lastNewestTweetDataId,
   );

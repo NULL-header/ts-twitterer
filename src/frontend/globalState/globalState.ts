@@ -1,9 +1,10 @@
 /* eslint-disable camelcase */
-import { useEffect, Dispatch } from "react";
+import { Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
 import update from "immutability-helper";
 // eslint-disable-next-line import/no-webpack-loader-syntax
+import { useMount } from "react-use";
 import {
   saveTweetFromSingleList,
   saveTweets,
@@ -12,14 +13,13 @@ import {
   initialize,
   loadNewTweets,
   saveConfigs,
-} from "comlink-loader?singleton=true!../worker/connect";
+} from "../worker/connect";
 import {
   State,
   Flags,
   Action,
   GlobalAsyncReducer,
   GlobalReducer,
-  AsyncDispatch,
   AsyncAction,
 } from "./types";
 import { CONSTVALUE } from "../CONSTVALUE";
@@ -97,13 +97,8 @@ const adjustFlag = async (
   sendResult(true);
 };
 
-const makeAsyncDispatch = (
-  dispatch: AsyncDispatch,
-): ((arg: AsyncAction) => Promise<boolean>) => (args: AsyncAction) =>
-  new Promise((resolve) => dispatch({ callback: resolve, ...args }));
-
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS_BASE: (args) => async (action) => {
+  LOAD_NEW_TWEETS: (args) => async (action) => {
     await adjustFlag(
       "isLoadingTweets",
       args,
@@ -111,36 +106,16 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  LOAD_NEW_TWEETS: () => async (action) => {
-    await dispatchBlank(async () => {
-      const dispatch = makeAsyncDispatch(action.dispatch);
-      const isSuccessLoading = await dispatch({
-        type: "LOAD_NEW_TWEETS_BASE",
-      });
-      if (isSuccessLoading) await dispatch({ type: "WRITE_CONFIG" });
-    }, action.callback);
-  },
   INITIALIZE: (args) => async () => {
     await adjustFlag("isInitializing", args, async () => await initialize());
   },
-  GET_TWEETS_BASE: (args) => async (action) => {
+  GET_TWEETS: (args) => async (action) => {
     await adjustFlag(
       "isGettingTweets",
       args,
       async () => await saveTweets(args.getState()),
       action.callback,
     );
-  },
-  GET_TWEETS: () => async (action) => {
-    await dispatchBlank(async () => {
-      const dispatch = makeAsyncDispatch(action.dispatch);
-      const isSuccessGetting = await dispatch({ type: "GET_TWEETS_BASE" });
-      console.log("gettweet");
-      console.log({ isSuccessGetting });
-      const isSuccessRate = await dispatch({ type: "GET_RATE" });
-      if (isSuccessGetting || isSuccessRate)
-        await dispatch({ type: "WRITE_CONFIG" });
-    }, action.callback);
   },
   DELETE_CACHE_TWEETS: (args) => async () => {
     await adjustFlag(
@@ -157,42 +132,10 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  GET_TWEETS_OF_CURRENT_BASE: (args) => async ({ callback }) => {
+  GET_TWEETS_OF_CURRENT: (args) => async ({ callback }) => {
     await manageDispatch(
       args,
       async () => await saveTweetFromSingleList(args.getState()),
-      callback,
-    );
-  },
-  GET_TWEETS_OF_CURRENT: () => async ({ dispatch, callback }) => {
-    await dispatchBlank(async () => {
-      const asyncDispatch = makeAsyncDispatch(dispatch);
-      await asyncDispatch({
-        type: "GET_TWEETS_OF_CURRENT_BASE",
-      });
-      await asyncDispatch({ type: "GET_RATE" });
-    }, callback);
-  },
-  UPDATE_TWEETS: (args) => async ({ dispatch, callback }) => {
-    await adjustFlag(
-      "isUpdatingTweets",
-      args,
-      async () => {
-        const asyncDispatch = makeAsyncDispatch(dispatch);
-        console.log("start updating");
-        const isSuccessGetting = await asyncDispatch({
-          type: "GET_TWEETS_OF_CURRENT",
-          dispatch,
-        });
-        console.log({ isSuccessGetting });
-        if (isSuccessGetting)
-          await asyncDispatch({
-            type: "LOAD_NEW_TWEETS",
-            dispatch,
-          });
-        console.log("finish updating");
-        return undefined;
-      },
       callback,
     );
   },
@@ -200,7 +143,12 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isWritingConfig",
       args,
-      async () => saveConfigs(args.getState()),
+      async () => {
+        const state = args.getState();
+        console.log(state);
+        saveConfigs(state);
+        return undefined;
+      },
       action.callback,
     );
   },
@@ -215,7 +163,7 @@ const asyncReducer: GlobalAsyncReducer = {
       action.callback,
     );
   },
-  ADD_LISTIDS_BASE: (args) => async ({ callback, listId }) => {
+  ADD_LISTIDS: (args) => async ({ callback, listId }) => {
     await manageDispatch(
       args,
       async () => {
@@ -229,17 +177,7 @@ const asyncReducer: GlobalAsyncReducer = {
       callback,
     );
   },
-  ADD_LISTIDS: () => async ({ callback, listId, dispatch }) => {
-    await dispatchBlank(async () => {
-      const asyncDispatch = makeAsyncDispatch(dispatch);
-      const isSucess = await asyncDispatch({
-        type: "ADD_LISTIDS_BASE",
-        listId,
-      });
-      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
-    }, callback);
-  },
-  DELETE_LISTIDS_BASE: (args) => async ({ listId, callback }) => {
+  DELETE_LISTIDS: (args) => async ({ listId, callback }) => {
     await manageDispatch(
       args,
       async () => {
@@ -256,14 +194,10 @@ const asyncReducer: GlobalAsyncReducer = {
       callback,
     );
   },
-  DELETE_LISTIDS: () => async ({ dispatch, listId, callback }) => {
+  AUTHORISE: ({ getState, dispatch }) => async ({ callback }) => {
     await dispatchBlank(async () => {
-      const asyncDispatch = makeAsyncDispatch(dispatch);
-      const isSucess = await asyncDispatch({
-        type: "DELETE_LISTIDS_BASE",
-        listId,
-      });
-      if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
+      const { isAuthorized } = getState();
+      dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
     }, callback);
   },
 };
@@ -292,13 +226,17 @@ const useValue = () => {
       listIds: [],
       currentList: undefined,
       limitData: undefined,
+      isAuthorized: false,
     } as State,
     asyncReducer,
   );
-  useEffect(() => {
+  useMount(() => {
     dispatch({ type: "INITIALIZE" });
-  }, [dispatch]);
+  });
+
   return [state, dispatch] as const;
 };
 
-export const { Provider, useTracked, useUpdate } = createContainer(useValue);
+export const { Provider, useTracked, useUpdate, useSelector } = createContainer(
+  useValue,
+);

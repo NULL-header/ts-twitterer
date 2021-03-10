@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { twitterApi } from "backend/twitterApi";
+import Twitter from "twitter";
 
-export const getRateLimitData = () =>
-  twitterApi.get("application/rate_limit_status", {
+export const getRateLimitData = (client: Twitter) =>
+  client.get("application/rate_limit_status", {
     resources: "lists",
   });
 
@@ -16,7 +16,7 @@ export const makeLimitData = (response: any): LimitData => {
   return { lists: { limitRate: limit, remaining } };
 };
 
-export const getRateLimit = async (): Promise<LimitData> => {
-  const response = await getRateLimitData();
+export const getRateLimit = async (client: Twitter): Promise<LimitData> => {
+  const response = await getRateLimitData(client);
   return makeLimitData(response);
 };
