@@ -37,6 +37,9 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "ADD_LISTIDS"; listId: string; dispatch: AsyncDispatch }
   | { type: "DELETE_LISTIDS_BASE"; listId: string }
   | { type: "DELETE_LISTIDS"; listId: string; dispatch: AsyncDispatch }
+  | {
+      type: "AUTHORISE";
+    }
 );
 
 export type GlobalReducer = Reducer<State, Action>;

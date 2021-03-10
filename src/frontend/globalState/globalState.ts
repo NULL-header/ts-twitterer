@@ -271,7 +271,7 @@ const asyncReducer: GlobalAsyncReducer = {
       if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
     }, callback);
   },
-  AUTHORISE: ({ getState }) => async ({ dispatch, callback }) => {
+  AUTHORISE: ({ getState, dispatch }) => async ({ callback }) => {
     await dispatchBlank(async () => {
       const { isAuthorized } = getState();
       dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
