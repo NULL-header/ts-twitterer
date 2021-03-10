@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { useEffect, Dispatch, useRef } from "react";
+import { Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
 import update from "immutability-helper";
@@ -250,39 +250,6 @@ const asyncReducer: GlobalAsyncReducer = {
   },
 };
 
-const useWriteEffect = () => {
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  const [state, dispatch] = useTracked();
-  const beforeRef = useRef<null | true>(null);
-  const {
-    isAuthorized,
-    currentList,
-    listIds,
-    limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
-    isInitializing,
-  } = state;
-  useEffect(() => {
-    if (isInitializing == null || isInitializing) return;
-    if (beforeRef.current == null) {
-      beforeRef.current = true;
-      return;
-    }
-    dispatch({ type: "WRITE_CONFIG" });
-  }, [
-    isAuthorized,
-    isInitializing,
-    currentList,
-    listIds,
-    limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
-  ]);
-};
-
 const useValue = () => {
   const [state, dispatch] = useReducerAsync<
     GlobalReducer,
@@ -314,7 +281,6 @@ const useValue = () => {
   useMount(() => {
     dispatch({ type: "INITIALIZE" });
   });
-  useWriteEffect();
 
   return [state, dispatch] as const;
 };

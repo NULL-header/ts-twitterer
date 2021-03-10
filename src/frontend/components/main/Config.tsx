@@ -11,6 +11,9 @@ import {
 import { useTracked, useUpdate } from "frontend/globalState";
 import { useForm } from "react-hook-form";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
+import { useBool } from "frontend/util";
+import { useUpdateEffect } from "react-use";
+import { useAsyncTask } from "react-hooks-async";
 import { ToggleForm, HeaddingCommon } from "../ConfigBase";
 
 const ItemBar = React.memo(({ listId }: { listId: string }) => {
@@ -20,7 +23,7 @@ const ItemBar = React.memo(({ listId }: { listId: string }) => {
       <Text marginRight="auto">{listId}</Text>
       <Button
         marginRight="3vw"
-        onClick={() => dispatch({ type: "DELETE_LISTIDS", listId, dispatch })}
+        onClick={() => dispatch({ type: "DELETE_LISTIDS", listId })}
       >
         delete
       </Button>
@@ -57,7 +60,7 @@ const IdForm = () => {
   }>();
   const submitData = useCallback(
     handleSubmit((data) => {
-      dispatch({ type: "ADD_LISTIDS", dispatch, listId: data.listId });
+      dispatch({ type: "ADD_LISTIDS", listId: data.listId });
     }),
     [handleSubmit],
   );
@@ -88,10 +91,37 @@ const IdForm = () => {
   );
 };
 
+const DeleteKeyForm = React.memo(() => {
+  const [isFired, fire] = useBool(false);
+  const dispatch = useUpdate();
+  const task = useAsyncTask(
+    useCallback(
+      async ({ signal }) => {
+        const result = await fetch("/api/auth/delete", { method: "POST" });
+        console.log(result);
+        if (signal.aborted) return;
+        dispatch({ type: "AUTHORISE" });
+      },
+      [isFired],
+    ),
+  );
+  useUpdateEffect(() => {
+    if (!isFired) return;
+    task.start();
+  }, [isFired]);
+  return (
+    <Box>
+      <HeaddingCommon header="Delete Keys" />
+      <Button onClick={fire}>DELETE</Button>
+    </Box>
+  );
+});
+
 const Config = React.memo(() => (
   <VStack alignItems="right" spacing="10vw">
     <IdForm />
     <ToggleForm />
+    <DeleteKeyForm />
   </VStack>
 ));
 

@@ -7,7 +7,7 @@ export const UpdateButton: React.FC = React.memo(() => {
     dispatch({ type: "GET_TWEETS", dispatch });
   }, [dispatch]);
   const showTweets = React.useCallback(() => {
-    dispatch({ type: "LOAD_NEW_TWEETS", dispatch });
+    dispatch({ type: "LOAD_NEW_TWEETS" });
   }, [dispatch]);
   const deleteTweet = React.useCallback(() => {
     dispatch({ type: "DELETE_CACHE_TWEETS" });

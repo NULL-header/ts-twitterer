@@ -1,4 +1,4 @@
-import React, { useEffect, FC } from "react";
+import React, { useEffect, FC, useRef } from "react";
 import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";
 import { useTracked } from "frontend/globalState";
 
@@ -31,6 +31,39 @@ const asyncReducer: AsyncActionHandlers<typeof reducer, AsyncAction> = {
   },
 };
 
+const useWriteEffect = () => {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const [state, dispatch] = useTracked();
+  const beforeRef = useRef<null | true>(null);
+  const {
+    isAuthorized,
+    currentList,
+    listIds,
+    limitData,
+    newestTweetDataIdMap,
+    newestUniqIdMap,
+    oldestUniqIdMap,
+    isInitializing,
+  } = state;
+  useEffect(() => {
+    if (isInitializing == null || isInitializing) return;
+    if (beforeRef.current == null) {
+      beforeRef.current = true;
+      return;
+    }
+    dispatch({ type: "WRITE_CONFIG" });
+  }, [
+    isAuthorized,
+    isInitializing,
+    currentList,
+    listIds,
+    limitData,
+    newestTweetDataIdMap,
+    newestUniqIdMap,
+    oldestUniqIdMap,
+  ]);
+};
+
 export const LoadContainer = () => {
   const [{ isInitializing, isAuthorized }] = useTracked();
   const [Component, dispatch] = useReducerAsync(
@@ -39,8 +72,10 @@ export const LoadContainer = () => {
     asyncReducer,
   );
 
+  useWriteEffect();
+
   useEffect(() => {
-    if (isInitializing == null || !isInitializing) return;
+    if (isInitializing == null || isInitializing) return;
     if (isAuthorized) dispatch({ type: "LOAD_MAIN" });
     else dispatch({ type: "LOAD_AUTH" });
   }, [isAuthorized, isInitializing]);
