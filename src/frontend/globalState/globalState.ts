@@ -12,7 +12,7 @@ import {
   initialize,
   loadNewTweets,
   saveConfigs,
-} from "comlink-loader?singleton=true!../worker/connect";
+} from "../worker/connect";
 import {
   State,
   Flags,
@@ -200,7 +200,12 @@ const asyncReducer: GlobalAsyncReducer = {
     await adjustFlag(
       "isWritingConfig",
       args,
-      async () => saveConfigs(args.getState()),
+      async () => {
+        const state = args.getState();
+        console.log(state);
+        saveConfigs(state);
+        return undefined;
+      },
       action.callback,
     );
   },
@@ -266,6 +271,12 @@ const asyncReducer: GlobalAsyncReducer = {
       if (isSucess) await asyncDispatch({ type: "WRITE_CONFIG" });
     }, callback);
   },
+  AUTHORISE: ({ getState }) => async ({ dispatch, callback }) => {
+    await dispatchBlank(async () => {
+      const { isAuthorized } = getState();
+      dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
+    }, callback);
+  },
 };
 
 const useValue = () => {
@@ -298,8 +309,10 @@ const useValue = () => {
   );
   useEffect(() => {
     dispatch({ type: "INITIALIZE" });
-  }, [dispatch]);
+  }, []);
   return [state, dispatch] as const;
 };
 
-export const { Provider, useTracked, useUpdate } = createContainer(useValue);
+export const { Provider, useTracked, useUpdate, useSelector } = createContainer(
+  useValue,
+);
