@@ -1,10 +1,10 @@
 import React from "react";
+import { HiOutlineCog, HiOutlineCube, HiOutlineHome } from "react-icons/hi";
 import { TabGroup } from "../TabContainer";
 import { ScreenContainer } from "../ScreenContainer";
 import { Timeline } from "./TimeLine";
 import { Config } from "./Config";
 import { Data } from "./Data";
-import { HiOutlineCog, HiOutlineCube, HiOutlineHome } from "./icons";
 
 const tabs = {
   Timeline: { Component: Timeline, Icon: HiOutlineHome },

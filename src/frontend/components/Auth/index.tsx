@@ -1,12 +1,12 @@
 import React from "react";
+import { HiOutlineCog, HiOutlineKey } from "react-icons/hi";
 import { TabGroup } from "../TabContainer";
 import { ScreenContainer } from "../ScreenContainer";
-import { AuthForm } from "./Auth";
-import { HiOutlineCog, HiOutlineHome } from "./icon";
+import { Auth } from "./Auth";
 import { Config } from "./Config";
 
 const tabs = {
-  Auth: { Component: AuthForm, Icon: HiOutlineHome },
+  Auth: { Component: Auth, Icon: HiOutlineKey },
   Config: { Component: Config, Icon: HiOutlineCog },
 } as TabGroup;
 
