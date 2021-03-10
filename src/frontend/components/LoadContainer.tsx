@@ -1,6 +1,7 @@
 import React, { useEffect, FC, useRef } from "react";
 import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";
 import { useTracked } from "frontend/globalState";
+import { useUpdateEffect } from "react-use";
 
 type Action = { type: "MODIFY"; Component: FC };
 type AsyncAction = { type: "LOAD_AUTH" } | { type: "LOAD_MAIN" };
@@ -31,10 +32,29 @@ const asyncReducer: AsyncActionHandlers<typeof reducer, AsyncAction> = {
   },
 };
 
+const useMoratorium = (deps: any[]) => {
+  const beforeRef = useRef<null | boolean>(null);
+  useUpdateEffect(() => {
+    if (beforeRef.current == null) beforeRef.current = false;
+    if (!beforeRef.current) beforeRef.current = true;
+  }, deps);
+  return { isFired: () => beforeRef.current };
+};
+
+const useLimitGetEffect = () => {
+  const [{ isGettingTweets }, dispatch] = useTracked();
+  const { isFired } = useMoratorium([isGettingTweets]);
+
+  useUpdateEffect(() => {
+    console.log("usemlimit", { isFired: isFired() });
+    if (!isFired()) return;
+    console.log("get_late");
+    dispatch({ type: "GET_RATE" });
+  }, [isGettingTweets]);
+};
+
 const useWriteEffect = () => {
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const [state, dispatch] = useTracked();
-  const beforeRef = useRef<null | true>(null);
   const {
     isAuthorized,
     currentList,
@@ -45,16 +65,13 @@ const useWriteEffect = () => {
     oldestUniqIdMap,
     isInitializing,
   } = state;
+  const { isFired } = useMoratorium([isInitializing]);
   useEffect(() => {
-    if (isInitializing == null || isInitializing) return;
-    if (beforeRef.current == null) {
-      beforeRef.current = true;
-      return;
-    }
+    if (!isFired()) return;
+    console.log("effect");
     dispatch({ type: "WRITE_CONFIG" });
   }, [
     isAuthorized,
-    isInitializing,
     currentList,
     listIds,
     limitData,
@@ -73,6 +90,7 @@ export const LoadContainer = () => {
   );
 
   useWriteEffect();
+  useLimitGetEffect();
 
   useEffect(() => {
     if (isInitializing == null || isInitializing) return;

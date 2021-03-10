@@ -4,7 +4,7 @@ import { useUpdate } from "frontend/globalState";
 export const UpdateButton: React.FC = React.memo(() => {
   const dispatch = useUpdate();
   const getTweets = React.useCallback(() => {
-    dispatch({ type: "GET_TWEETS", dispatch });
+    dispatch({ type: "GET_TWEETS" });
   }, [dispatch]);
   const showTweets = React.useCallback(() => {
     dispatch({ type: "LOAD_NEW_TWEETS" });
@@ -13,7 +13,7 @@ export const UpdateButton: React.FC = React.memo(() => {
     dispatch({ type: "DELETE_CACHE_TWEETS" });
   }, [dispatch]);
   const updateTweet = React.useCallback(() => {
-    dispatch({ type: "UPDATE_TWEETS", dispatch });
+    dispatch({ type: "GET_TWEETS_OF_CURRENT" });
   }, [dispatch]);
   const writeConfig = React.useCallback(() => {
     dispatch({ type: "WRITE_CONFIG" });

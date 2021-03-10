@@ -56,12 +56,10 @@ const Timeline = memo(() => {
   const [state, dispatch] = useTracked();
   const { tweets } = state;
   const ref = useRef<HTMLDivElement | null>(null);
-  useScrollEndEffect(ref as any, () =>
-    dispatch({ type: "UPDATE_TWEETS", dispatch }),
-  );
+  useScrollEndEffect(ref as any, () => dispatch({ type: "LOAD_NEW_TWEETS" }));
   useEffect(() => {
     if (tweets.length !== 0) return;
-    dispatch({ type: "UPDATE_TWEETS", dispatch });
+    dispatch({ type: "LOAD_NEW_TWEETS" });
   }, [tweets]);
   return (
     <>
