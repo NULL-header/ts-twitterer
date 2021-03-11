@@ -1,20 +1,17 @@
 import React, { useCallback } from "react";
 import {
-  FormControl,
-  FormErrorMessage,
+  Box,
   Text,
   Button,
-  Box,
   VStack,
+  FormControl,
+  FormErrorMessage,
   Input,
 } from "@chakra-ui/react";
-import { useTracked, useUpdate } from "frontend/globalState";
-import { useForm } from "react-hook-form";
+import { useUpdate, useTracked } from "frontend/globalState";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
-import { useBool } from "frontend/util";
-import { useUpdateEffect } from "react-use";
-import { useAsyncTask } from "react-hooks-async";
-import { ToggleForm, HeaddingCommon } from "../ConfigBase";
+import { useForm } from "react-hook-form";
+import { HeaddingCommon } from "frontend/components/ConfigBase";
 
 const ItemBar = React.memo(({ listId }: { listId: string }) => {
   const dispatch = useUpdate();
@@ -52,7 +49,7 @@ const makeValidate = (listIds: string[]) => {
   };
 };
 
-const IdForm = () => {
+export const IdForm = () => {
   const [state, dispatch] = useTracked();
   const { listIds } = state;
   const { handleSubmit, errors, register } = useForm<{
@@ -90,41 +87,3 @@ const IdForm = () => {
     </Box>
   );
 };
-
-const DeleteKeyForm = React.memo(() => {
-  const [isFired, fire] = useBool(false);
-  const dispatch = useUpdate();
-  const task = useAsyncTask(
-    useCallback(
-      async ({ signal }) => {
-        const result = await fetch("/api/auth/delete", { method: "POST" });
-        console.log(result);
-        if (signal.aborted) return;
-        dispatch({ type: "AUTHORISE" });
-      },
-      [isFired],
-    ),
-  );
-  useUpdateEffect(() => {
-    if (!isFired) return;
-    task.start();
-  }, [isFired]);
-  return (
-    <Box>
-      <HeaddingCommon header="Delete Keys" />
-      <Button onClick={fire}>DELETE</Button>
-    </Box>
-  );
-});
-
-const Config = React.memo(() => (
-  <VStack alignItems="right" spacing="10vw">
-    <IdForm />
-    <ToggleForm />
-    <DeleteKeyForm />
-  </VStack>
-));
-
-Config.displayName = "Config";
-
-export { Config };
