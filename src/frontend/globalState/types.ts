@@ -20,7 +20,7 @@ export type State = Flags & Configs & AppData;
 export type Action = { type: "MODIFY"; state: Partial<State> };
 export type AsyncDispatch = Dispatch<Action | AsyncAction>;
 
-export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
+export type AsyncAction =
   | { type: "LOAD_NEW_TWEETS" }
   | { type: "GET_TWEETS" }
   | { type: "INITIALIZE" }
@@ -33,8 +33,7 @@ export type AsyncAction = { callback?: (isSuccess: boolean) => void } & (
   | { type: "DELETE_LISTIDS"; listId: string }
   | {
       type: "AUTHORISE";
-    }
-);
+    };
 
 export type GlobalReducer = Reducer<State, Action>;
 export type GlobalAsyncReducer = AsyncActionHandlers<

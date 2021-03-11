@@ -39,159 +39,111 @@ interface ReducerArgs {
   getState: () => State;
 }
 
-const runWithCallback = async (
-  process: () => Promise<Partial<State> | undefined | void>,
-  callback: (arg: boolean) => void,
-) =>
-  await process().catch((err) => {
-    callback(false);
-    console.log(err);
-    return undefined;
-  });
-
-const makeSendResult = (callback: (isSucess: boolean) => void = () => {}) =>
-  callback;
-
-const dispatchBlank = async (
-  process: () => Promise<void>,
-  callback?: (arg: boolean) => void,
-) => {
-  const sendResult = makeSendResult(callback);
-  await runWithCallback(process, sendResult);
-  sendResult(true);
-};
-
 const manageDispatch = async (
   { dispatch, signal }: ReducerArgs,
-  process: () => Promise<Partial<State> | undefined>,
-  callback?: (arg: boolean) => void,
+  effect: () => Promise<Partial<State>>,
 ) => {
-  const sendResult = makeSendResult(callback);
-  const result = await runWithCallback(process, sendResult);
-  if (signal.aborted || result == null) {
-    sendResult(false);
-    return;
-  }
+  const result = await effect();
+  if (signal.aborted) return;
   dispatch({ type: "MODIFY", state: result });
-  sendResult(true);
 };
 
 const adjustFlag = async (
   flagName: keyof Flags,
   { dispatch, signal, getState }: ReducerArgs,
-  process: () => Promise<Partial<State> | undefined>,
-  callback?: (arg: boolean) => void,
+  effect: () => Promise<Partial<State> | undefined>,
 ) => {
-  const sendResult = makeSendResult(callback);
   const currentFlag = getState()[flagName];
   if (currentFlag) {
-    sendResult(false);
     return;
   }
   dispatch({ type: "MODIFY", state: { [flagName]: true } });
-  const result = (await runWithCallback(process, sendResult)) || {};
+  const result = (await effect()) || {};
   if (signal.aborted) return;
   dispatch({ type: "MODIFY", state: { ...result, [flagName]: false } });
-  sendResult(true);
 };
 
 const asyncReducer: GlobalAsyncReducer = {
-  LOAD_NEW_TWEETS: (args) => async (action) => {
+  LOAD_NEW_TWEETS: (args) => async () =>
     await adjustFlag(
       "isLoadingTweets",
       args,
       async () => await loadNewTweets(args.getState()),
-      action.callback,
-    );
-  },
-  INITIALIZE: (args) => async () => {
-    await adjustFlag("isInitializing", args, async () => await initialize());
-  },
-  GET_TWEETS: (args) => async (action) => {
+    ),
+  INITIALIZE: (args) => async () =>
+    await adjustFlag("isInitializing", args, async () => await initialize()),
+  GET_TWEETS: (args) => async () =>
     await adjustFlag(
       "isGettingTweets",
       args,
       async () => await saveTweets(args.getState()),
-      action.callback,
-    );
-  },
-  DELETE_CACHE_TWEETS: (args) => async () => {
+    ),
+  DELETE_CACHE_TWEETS: (args) => async () =>
     await adjustFlag(
       "isDeletingTweets",
       args,
       async () => await deleteCacheTweetsAll(),
-    );
-  },
-  DELETE_CACHE_CONFIG: (args) => async (action) => {
+    ),
+  DELETE_CACHE_CONFIG: (args) => async () =>
     await adjustFlag(
       "isDeletingConfigs",
       args,
       async () => await deleteCacheConfig(),
-      action.callback,
-    );
+    ),
+  GET_TWEETS_OF_CURRENT: (args) => async () =>
+    (await saveTweetFromSingleList(args.getState())) as void,
+  WRITE_CONFIG: (args) => async () =>
+    await adjustFlag("isWritingConfig", args, async () => {
+      const state = args.getState();
+      console.log(state);
+      saveConfigs(state);
+      return undefined;
+    }),
+  GET_RATE: (args) => async () =>
+    await manageDispatch(args, async () => {
+      const response = await fetch(CONSTVALUE.GET_RATE_URL);
+      const limitData = (await response.json()) as LimitData;
+      return { limitData };
+    }),
+  ADD_LISTIDS: (args) => async ({ listId }) =>
+    await manageDispatch(args, async () => {
+      const { listIds } = args.getState();
+      return {
+        listIds: [...listIds, listId],
+      } as State;
+    }),
+  DELETE_LISTIDS: (args) => async ({ listId }) => {
+    await manageDispatch(args, async () => {
+      const { listIds } = args.getState();
+      const newListIds = listIds.filter((e) => e !== listId);
+      return {
+        listIds: newListIds,
+      };
+    });
   },
-  GET_TWEETS_OF_CURRENT: (args) => async ({ callback }) => {
-    await manageDispatch(
-      args,
-      async () => await saveTweetFromSingleList(args.getState()),
-      callback,
-    );
+  AUTHORISE: ({ getState, dispatch }) => async () => {
+    const { isAuthorized } = getState();
+    dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
   },
-  WRITE_CONFIG: (args) => async (action) => {
-    await adjustFlag(
-      "isWritingConfig",
-      args,
-      async () => {
-        const state = args.getState();
-        console.log(state);
-        saveConfigs(state);
-        return undefined;
-      },
-      action.callback,
-    );
-  },
-  GET_RATE: (args) => async (action) => {
-    await manageDispatch(
-      args,
-      async () => {
-        const response = await fetch(CONSTVALUE.GET_RATE_URL);
-        const limitData = (await response.json()) as LimitData;
-        return { limitData };
-      },
-      action.callback,
-    );
-  },
-  ADD_LISTIDS: (args) => async ({ callback, listId }) => {
-    await manageDispatch(
-      args,
-      async () => {
-        const { listIds } = args.getState();
-        return {
-          listIds: [...listIds, listId],
-        } as State;
-      },
-      callback,
-    );
-  },
-  DELETE_LISTIDS: (args) => async ({ listId, callback }) => {
-    await manageDispatch(
-      args,
-      async () => {
-        const { listIds } = args.getState();
-        const newListIds = listIds.filter((e) => e !== listId);
-        return {
-          listIds: newListIds,
-        };
-      },
-      callback,
-    );
-  },
-  AUTHORISE: ({ getState, dispatch }) => async ({ callback }) => {
-    await dispatchBlank(async () => {
-      const { isAuthorized } = getState();
-      dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
-    }, callback);
-  },
+};
+
+const iniitalValue: State = {
+  isLoadingTweets: false,
+  isGettingTweets: false,
+  isDeletingTweets: false,
+  isDeletingConfigs: false,
+  isUpdatingTweets: false,
+  isWritingConfig: false,
+  isInitializing: undefined,
+  tweets: [],
+  newestTweetDataIdMap: new Map(),
+  newestUniqIdMap: new Map(),
+  oldestUniqIdMap: new Map(),
+  windowLength: 30,
+  listIds: [],
+  currentList: undefined,
+  limitData: undefined,
+  isAuthorized: false,
 };
 
 const useValue = () => {
@@ -199,30 +151,7 @@ const useValue = () => {
     GlobalReducer,
     AsyncAction,
     AsyncAction | Action
-  >(
-    reducer,
-    {
-      isLoadingTweets: false,
-      isSettingTweets: false,
-      isGettingTweets: false,
-      isDeletingTweets: false,
-      isDeletingConfigs: false,
-      isUpdatingTweets: false,
-      isWritingConfig: false,
-      isInitializing: undefined,
-      lastTweetId: 0,
-      tweets: [],
-      newestTweetDataIdMap: new Map(),
-      newestUniqIdMap: new Map(),
-      oldestUniqIdMap: new Map(),
-      windowLength: 30,
-      listIds: [],
-      currentList: undefined,
-      limitData: undefined,
-      isAuthorized: false,
-    } as State,
-    asyncReducer,
-  );
+  >(reducer, iniitalValue, asyncReducer);
   useMount(() => {
     dispatch({ type: "INITIALIZE" });
   });
