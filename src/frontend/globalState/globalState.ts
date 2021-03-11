@@ -215,6 +215,7 @@ const useValue = () => {
       newestTweetDataIdMap: new Map(),
       newestUniqIdMap: new Map(),
       oldestUniqIdMap: new Map(),
+      windowLength: 30,
       listIds: [],
       currentList: undefined,
       limitData: undefined,

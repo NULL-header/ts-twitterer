@@ -64,6 +64,7 @@ const useWriteEffect = () => {
     newestUniqIdMap,
     oldestUniqIdMap,
     isInitializing,
+    windowLength,
   } = state;
   const { isFired } = useMoratorium([isInitializing]);
   useEffect(() => {
@@ -78,6 +79,7 @@ const useWriteEffect = () => {
     newestTweetDataIdMap,
     newestUniqIdMap,
     oldestUniqIdMap,
+    windowLength,
   ]);
 };
 
