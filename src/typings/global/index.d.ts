@@ -54,6 +54,7 @@ type Configs = {
   limitData: LimitData | undefined;
   listIds: string[];
   isAuthorized: boolean;
+  windowLength: number;
 };
 
 interface ConfigColumns {

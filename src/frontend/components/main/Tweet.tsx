@@ -39,7 +39,6 @@ const makeUsername = (username: string) =>
   username.length > 20 ? `${username.slice(0, 21)}…` : username;
 
 const Tweet = React.memo(({ tweet }: { tweet: Tweet }) => {
-  console.log(tweet);
   const username = makeUsername(tweet.user.name);
   return (
     <Box role="group" width="100%">

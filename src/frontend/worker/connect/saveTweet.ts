@@ -5,7 +5,6 @@ import {
   RateError,
   ShouldUnupdateError,
   CurrentListInitError,
-  NewestDataIdMapError,
 } from "frontend/globalState/errors";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
 import { Work } from "./types";
@@ -39,8 +38,7 @@ const getTweetLowsArray = (
   Promise.all(
     listIds.map((listId) => {
       const dataid = dataIdMap.get(listId);
-      if (dataid == null) throw new NewestDataIdMapError({ key: { listId } });
-      return getTweetLows(dataid, listId);
+      return getTweetLows(dataid || "0", listId);
     }),
   );
 

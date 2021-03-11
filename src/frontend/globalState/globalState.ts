@@ -2,8 +2,6 @@
 import { Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
-import update from "immutability-helper";
-// eslint-disable-next-line import/no-webpack-loader-syntax
 import { useMount } from "react-use";
 import {
   saveTweetFromSingleList,
@@ -167,11 +165,9 @@ const asyncReducer: GlobalAsyncReducer = {
     await manageDispatch(
       args,
       async () => {
-        const { listIds, newestTweetDataIdMap } = args.getState();
-        const newMap = update(newestTweetDataIdMap, { $add: [[listId, "0"]] });
+        const { listIds } = args.getState();
         return {
           listIds: [...listIds, listId],
-          newestTweetDataIdMap: newMap,
         } as State;
       },
       callback,
@@ -181,14 +177,10 @@ const asyncReducer: GlobalAsyncReducer = {
     await manageDispatch(
       args,
       async () => {
-        const { listIds, newestTweetDataIdMap } = args.getState();
+        const { listIds } = args.getState();
         const newListIds = listIds.filter((e) => e !== listId);
-        const newDataMap = update(newestTweetDataIdMap, {
-          $add: [[listId, undefined as any]],
-        });
         return {
           listIds: newListIds,
-          newestTweetDataIdMap: newDataMap,
         };
       },
       callback,
@@ -223,6 +215,7 @@ const useValue = () => {
       newestTweetDataIdMap: new Map(),
       newestUniqIdMap: new Map(),
       oldestUniqIdMap: new Map(),
+      windowLength: 30,
       listIds: [],
       currentList: undefined,
       limitData: undefined,
