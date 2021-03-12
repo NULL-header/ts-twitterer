@@ -1,32 +1,26 @@
-import Immutable, { Map as IMap, List } from "immutable";
+import Immutable from "immutable";
 
-interface TweetsDetailChildren {
-  tweets: List<Tweet>;
-  newestDataidMap: IMap<string, string>;
-  newestUniqidMap: IMap<string, number>;
-  oldestUniqidMap: IMap<string, number>;
-  windowLength: number;
-  currentList: string;
-  listids: List<string>;
-}
+const initValue = {
+  tweets: Immutable.List<Tweet>(),
+  newestDataidMap: Immutable.Map<string, string>(),
+  newestUniqidMap: Immutable.Map<string, number>(),
+  oldestUniqidMap: Immutable.Map<string, number>(),
+  windowLength: 30,
+  currentList: undefined as string | undefined,
+  listids: Immutable.List<string>(),
+};
 
 export interface TweetsDetailObj {
   tweets: Tweet[];
   newestDataidMap: Record<string, string>;
   newestUniqidMap: Record<string, number>;
   oldestUniqidMap: Record<string, number>;
-  windowLength: number;
-  currentList: string;
   listids: string[];
+  windowLength: number;
+  currentList: string | undefined;
 }
 
-const BaseRecord = Immutable.Record({
-  tweets: Immutable.List(),
-  newestDataidMap: Immutable.Map(),
-  newestUniqidMap: Immutable.Map(),
-  oldestUniqidMap: Immutable.Map(),
-  windowLength: 30,
-} as TweetsDetailChildren);
+const BaseRecord = Immutable.Record(initValue);
 
 export class TweetsDetail extends BaseRecord {
   toJS() {
@@ -62,10 +56,6 @@ export class TweetsDetail extends BaseRecord {
   }
 
   load(obj: TweetsDetailObj): TweetsDetail {
-    return this.set("tweets", Immutable.List(obj.tweets))
-      .set("newestDataidMap", Immutable.Map(obj.newestDataidMap))
-      .set("newestUniqidMap", Immutable.Map(obj.newestUniqidMap))
-      .set("oldestUniqidMap", Immutable.Map(obj.oldestUniqidMap))
-      .set("windowLength", obj.windowLength);
+    return this.merge(obj as any);
   }
 }
