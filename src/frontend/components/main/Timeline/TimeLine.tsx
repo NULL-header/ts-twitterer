@@ -1,14 +1,16 @@
 import React, {
+  useState,
   useRef,
+  useMemo,
   useLayoutEffect,
   MutableRefObject,
   useEffect,
   memo,
 } from "react";
-import { useUpdate, useSelector } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
-import { delayCall } from "frontend/util";
-import Immutable from "immutable";
+import { delayCall, useConstAsyncTask } from "frontend/util";
+import { TimelineDetail } from "frontend/models/TimelineDetail";
+import { loadNewTweets } from "frontend/worker/connect";
 import { Tweet } from "./Tweet";
 
 // extract to pass key only
@@ -52,29 +54,57 @@ const useScrollEndEffect = (
   }, []);
 };
 
-const Timeline = memo(() => {
-  console.log("hey");
-  const dispatch = useUpdate();
-  const tweets = useSelector((state) => state.tweetsDetail.tweets);
-  const ref = useRef<HTMLDivElement | null>(null);
-  useScrollEndEffect(ref as any, () => dispatch({ type: "LOAD_NEW_TWEETS" }));
-  useEffect(() => {
-    if (tweets.size !== 0) return;
-    dispatch({ type: "LOAD_NEW_TWEETS" });
-  }, [tweets]);
-  return (
-    <>
-      <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
-        <Box marginTop="10vw" />
+const Empty = memo(() => <Box marginTop="50vh" />);
+
+const Tweets = memo<{ tweets: TimelineDetail["tweetsDetail"]["tweets"] }>(
+  ({ tweets }) => {
+    // firstがundefinedである可能性を潰す
+    if (tweets.size === 0) return <>{undefined}</>;
+    const firstTweet = tweets.first() as Tweet;
+    return (
+      <>
         {tweets.size === 0 ? undefined : (
           <VStack spacing="5vw">
-            <Tweet key={tweets.first().dataid} tweet={tweets.first()} />
+            <Tweet key={firstTweet.dataid} tweet={firstTweet} />
             {tweets.slice(1).map((e: Tweet) => (
               <TweetBox key={e.dataid} tweet={e} />
             ))}
           </VStack>
         )}
-        <Box marginTop="50vh" />
+      </>
+    );
+  },
+);
+
+const Timeline = memo(() => {
+  const [timelineDetail, setTimelineDetail] = useState(new TimelineDetail());
+  const loadTask = useConstAsyncTask(
+    timelineDetail,
+    async ({ signal, getState }) => {
+      const { currentList, tweetsDetail } = getState();
+      const nextTweetsDetail = await loadNewTweets({
+        currentList,
+        tweetsDetailObj: tweetsDetail.toJS(),
+      });
+      if (signal.aborted) return;
+      setTimelineDetail((detail) => detail.merge(nextTweetsDetail as any));
+    },
+  );
+  const tweets = useMemo(() => timelineDetail.tweetsDetail.tweets, [
+    timelineDetail.tweetsDetail.tweets,
+  ]);
+  const ref = useRef<HTMLDivElement | null>(null);
+  useScrollEndEffect(ref as any, () => loadTask.start());
+  useEffect(() => {
+    if (tweets.size !== 0) return;
+    loadTask.start();
+  }, [tweets]);
+  return (
+    <>
+      <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
+        <Empty />
+        <Tweets tweets={tweets} />
+        <Empty />
       </Box>
     </>
   );
