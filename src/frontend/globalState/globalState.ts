@@ -21,7 +21,7 @@ import {
   AsyncAction,
 } from "./types";
 import { CONSTVALUE } from "../CONSTVALUE";
-import { TweetsDetail } from "./models/tweetsDetail";
+import { TweetsDetail } from "./models/TweetsDetail";
 
 const reducer: GlobalReducer = (state, action) => {
   switch (action.type) {

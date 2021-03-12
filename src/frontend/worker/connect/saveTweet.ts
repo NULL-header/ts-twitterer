@@ -4,7 +4,7 @@ import { CONSTVALUE } from "frontend/CONSTVALUE";
 import {
   TweetsDetail,
   TweetsDetailObj,
-} from "frontend/globalState/models/tweetsDetail";
+} from "frontend/globalState/models/TweetsDetail";
 import Immutable from "immutable";
 import { db } from "./db";
 

@@ -5,7 +5,7 @@ import {
 import {
   TweetsDetailObj,
   TweetsDetail,
-} from "frontend/globalState/models/tweetsDetail";
+} from "frontend/globalState/models/TweetsDetail";
 import { db } from "./db";
 
 const loadTweetsFromDB = (
