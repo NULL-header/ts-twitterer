@@ -2,10 +2,7 @@ import {
   CurrentListInitError,
   ShouldUnupdateError,
 } from "frontend/globalState/errors";
-import {
-  TweetsDetailObj,
-  TweetsDetail,
-} from "frontend/globalState/models/TweetsDetail";
+import { TweetsDetailObj, TweetsDetail } from "frontend/models/TweetsDetail";
 import { db } from "./db";
 
 const loadTweetsFromDB = (
@@ -39,7 +36,6 @@ export const loadNewTweets = async ({
   const { windowLength } = tweetsDetail;
   const uniqid = tweetsDetail.newestUniqidMap.get(currentList);
   let newTweets: Tweet[];
-  console.log(uniqid);
   if (uniqid == null)
     newTweets = await loadTweetsAllFromDB(currentList, windowLength);
   else
