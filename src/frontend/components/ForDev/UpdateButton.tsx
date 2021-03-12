@@ -12,9 +12,6 @@ export const UpdateButton: React.FC = React.memo(() => {
   const deleteTweet = React.useCallback(() => {
     dispatch({ type: "DELETE_CACHE_TWEETS" });
   }, [dispatch]);
-  const updateTweet = React.useCallback(() => {
-    dispatch({ type: "GET_TWEETS_OF_CURRENT" });
-  }, [dispatch]);
   const writeConfig = React.useCallback(() => {
     dispatch({ type: "WRITE_CONFIG" });
   }, [dispatch]);
@@ -29,9 +26,6 @@ export const UpdateButton: React.FC = React.memo(() => {
         </button>
         <button onClick={showTweets} type="button">
           show tweets
-        </button>
-        <button onClick={updateTweet} type="button">
-          update tweets
         </button>
         <button onClick={deleteTweet} type="button">
           delete tweets

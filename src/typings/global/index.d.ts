@@ -47,17 +47,15 @@ interface Limit {
 type LimitData = Record<"lists", Limit>;
 
 type Configs = {
-  oldestUniqIdMap: Map<string, number>;
-  newestUniqIdMap: Map<string, number>;
-  newestTweetDataIdMap: Map<string, string>;
   currentList: string | undefined;
   limitData: LimitData | undefined;
   listIds: string[];
   isAuthorized: boolean;
-  windowLength: number;
 };
 
 interface ConfigColumns {
   id: 0;
-  last_data: Configs & { tweets: Tweet[] };
+  last_data: Configs & {
+    tweetsDetail: import("frontend/globalState/models/tweetsDetail").TweetsDetailObj;
+  };
 }

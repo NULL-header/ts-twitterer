@@ -60,27 +60,15 @@ const useWriteEffect = () => {
     currentList,
     listIds,
     limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
     isInitializing,
-    windowLength,
+    tweetsDetail,
   } = state;
   const { isFired } = useMoratorium([isInitializing]);
   useEffect(() => {
     if (!isFired()) return;
     console.log("effect");
     dispatch({ type: "WRITE_CONFIG" });
-  }, [
-    isAuthorized,
-    currentList,
-    listIds,
-    limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
-    windowLength,
-  ]);
+  }, [isAuthorized, currentList, listIds, limitData, tweetsDetail]);
 };
 
 export const LoadContainer = () => {

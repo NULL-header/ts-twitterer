@@ -1,4 +1,9 @@
 import { State } from "frontend/globalState/types";
+import {
+  TweetsDetailObj,
+  TweetsDetail,
+} from "frontend/globalState/models/tweetsDetail";
+import Immutable from "immutable";
 import { db } from "./db";
 
 export const deleteCacheConfig = async () => {
@@ -7,22 +12,28 @@ export const deleteCacheConfig = async () => {
     currentList: undefined,
     limitData: undefined,
     listIds: [] as string[],
-    tweets: [] as Tweet[],
-    newestTweetDataIdMap: new Map(),
-    newestUniqIdMap: new Map(),
-    oldestUniqIdMap: new Map(),
   } as State;
+  const value = {
+    nextState: initValue,
+    tweetsDetailObj: {} as TweetsDetailObj,
+  };
   await promise;
-  return initValue;
+  return value;
 };
 
-export const deleteCacheTweetsAll = async () => {
+export const deleteCacheTweetsAll = async ({
+  tweetsDetailObj,
+}: {
+  tweetsDetailObj: TweetsDetailObj;
+}) => {
   const promise = db.tweets.clear();
+  const nextDetailObj = new TweetsDetail()
+    .load(tweetsDetailObj)
+    .set("newestDataidMap", Immutable.Map())
+    .set("newestDataidMap", Immutable.Map())
+    .set("oldestUniqidMap", Immutable.Map())
+    .set("tweets", Immutable.List())
+    .toJS();
   await promise;
-  return {
-    newestTweetDataIdMap: new Map(),
-    newestUniqIdMap: new Map(),
-    oldestUniqIdMap: new Map(),
-    tweets: [] as Tweet[],
-  } as State;
+  return nextDetailObj;
 };

@@ -1,5 +1,6 @@
 import { Dispatch, Reducer } from "react";
 import { AsyncActionHandlers } from "use-reducer-async";
+import { TweetsDetail } from "./models/tweetsDetail";
 
 export type Flags = {
   isLoadingTweets: boolean;
@@ -12,7 +13,7 @@ export type Flags = {
 };
 
 type AppData = {
-  tweets: Tweet[];
+  tweetsDetail: TweetsDetail;
 };
 
 export type State = Flags & Configs & AppData;
@@ -26,7 +27,6 @@ export type AsyncAction =
   | { type: "INITIALIZE" }
   | { type: "DELETE_CACHE_TWEETS" }
   | { type: "DELETE_CACHE_CONFIG" }
-  | { type: "GET_TWEETS_OF_CURRENT" }
   | { type: "WRITE_CONFIG" }
   | { type: "GET_RATE" }
   | { type: "ADD_LISTIDS"; listId: string }

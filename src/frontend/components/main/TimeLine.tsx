@@ -5,9 +5,10 @@ import React, {
   useEffect,
   memo,
 } from "react";
-import { useTracked } from "frontend/globalState";
+import { useUpdate, useSelector } from "frontend/globalState";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { delayCall } from "frontend/util";
+import Immutable from "immutable";
 import { Tweet } from "./Tweet";
 
 // extract to pass key only
@@ -53,22 +54,22 @@ const useScrollEndEffect = (
 
 const Timeline = memo(() => {
   console.log("hey");
-  const [state, dispatch] = useTracked();
-  const { tweets } = state;
+  const dispatch = useUpdate();
+  const tweets = useSelector((state) => state.tweetsDetail.tweets);
   const ref = useRef<HTMLDivElement | null>(null);
   useScrollEndEffect(ref as any, () => dispatch({ type: "LOAD_NEW_TWEETS" }));
   useEffect(() => {
-    if (tweets.length !== 0) return;
+    if (tweets.size !== 0) return;
     dispatch({ type: "LOAD_NEW_TWEETS" });
   }, [tweets]);
   return (
     <>
       <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
         <Box marginTop="10vw" />
-        {tweets.length === 0 ? undefined : (
+        {tweets.size === 0 ? undefined : (
           <VStack spacing="5vw">
-            <Tweet key={tweets[0].dataid} tweet={tweets[0]} />
-            {tweets.slice(1).map((e) => (
+            <Tweet key={tweets.first().dataid} tweet={tweets.first()} />
+            {tweets.slice(1).map((e: Tweet) => (
               <TweetBox key={e.dataid} tweet={e} />
             ))}
           </VStack>

@@ -5,27 +5,19 @@ import { db } from "./db";
 const makeConfigColumns = (state: State): ConfigColumns => {
   const {
     currentList,
-    oldestUniqIdMap,
-    newestUniqIdMap,
     limitData,
     listIds,
-    newestTweetDataIdMap,
-    tweets,
+    tweetsDetail,
     isAuthorized,
-    windowLength,
-  } = state as Configs & Pick<State, "tweets">;
+  } = state as Configs & Pick<State, "tweetsDetail">;
   return {
     id: 0,
     last_data: {
       currentList,
-      oldestUniqIdMap,
-      newestUniqIdMap,
       limitData,
       listIds,
-      newestTweetDataIdMap,
-      windowLength,
-      tweets,
       isAuthorized,
+      tweetsDetail,
     },
   };
 };

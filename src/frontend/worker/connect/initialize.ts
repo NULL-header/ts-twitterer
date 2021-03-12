@@ -1,5 +1,4 @@
 import { ConfigInitError } from "frontend/globalState/errors";
-import { State } from "frontend/globalState/types";
 import { db } from "./db";
 
 const loadConfigs = async () => {
@@ -10,5 +9,5 @@ const loadConfigs = async () => {
 
 export const initialize = async () => {
   const lastData = await loadConfigs();
-  return lastData as State;
+  return lastData;
 };

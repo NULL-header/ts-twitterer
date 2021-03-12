@@ -3,8 +3,8 @@ import { Dispatch } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync } from "use-reducer-async";
 import { useMount } from "react-use";
+import Immutable from "immutable";
 import {
-  saveTweetFromSingleList,
   saveTweets,
   deleteCacheConfig,
   deleteCacheTweetsAll,
@@ -21,6 +21,7 @@ import {
   AsyncAction,
 } from "./types";
 import { CONSTVALUE } from "../CONSTVALUE";
+import { TweetsDetail } from "./models/tweetsDetail";
 
 const reducer: GlobalReducer = (state, action) => {
   switch (action.type) {
@@ -65,33 +66,51 @@ const adjustFlag = async (
 
 const asyncReducer: GlobalAsyncReducer = {
   LOAD_NEW_TWEETS: (args) => async () =>
-    await adjustFlag(
-      "isLoadingTweets",
-      args,
-      async () => await loadNewTweets(args.getState()),
-    ),
+    await adjustFlag("isLoadingTweets", args, async () => {
+      const { currentList, tweetsDetail } = args.getState();
+      return await loadNewTweets({
+        currentList,
+        tweetsDetailObj: tweetsDetail.toJS(),
+      });
+    }),
   INITIALIZE: (args) => async () =>
-    await adjustFlag("isInitializing", args, async () => await initialize()),
+    await adjustFlag("isInitializing", args, async () => {
+      try {
+        const lastData = ((await initialize()) as any) as State;
+
+        if (lastData.tweetsDetail != null)
+          lastData.tweetsDetail = args
+            .getState()
+            .tweetsDetail.load(lastData.tweetsDetail);
+        return lastData;
+      } catch (e) {}
+    }),
   GET_TWEETS: (args) => async () =>
-    await adjustFlag(
-      "isGettingTweets",
-      args,
-      async () => await saveTweets(args.getState()),
-    ),
+    await adjustFlag("isGettingTweets", args, async () => {
+      const { listIds, limitData, tweetsDetail } = args.getState();
+      const obj = await saveTweets({
+        listIds,
+        limitData,
+        newestDataidMapObj: tweetsDetail.newestDataidMap.toJS(),
+      });
+      return {
+        tweetsDetail: tweetsDetail.set("newestDataidMap", Immutable.Map(obj)),
+      };
+    }),
   DELETE_CACHE_TWEETS: (args) => async () =>
-    await adjustFlag(
-      "isDeletingTweets",
-      args,
-      async () => await deleteCacheTweetsAll(),
-    ),
+    await adjustFlag("isDeletingTweets", args, async () => {
+      const { tweetsDetail } = args.getState();
+      const result = await deleteCacheTweetsAll({
+        tweetsDetailObj: tweetsDetail.toJS(),
+      });
+      return { tweetsDetail: tweetsDetail.load(result) };
+    }),
   DELETE_CACHE_CONFIG: (args) => async () =>
-    await adjustFlag(
-      "isDeletingConfigs",
-      args,
-      async () => await deleteCacheConfig(),
-    ),
-  GET_TWEETS_OF_CURRENT: (args) => async () =>
-    (await saveTweetFromSingleList(args.getState())) as void,
+    await adjustFlag("isDeletingConfigs", args, async () => {
+      const { tweetsDetail } = args.getState();
+      const { nextState, tweetsDetailObj } = await deleteCacheConfig();
+      return { ...nextState, tweetsDetail: tweetsDetail.load(tweetsDetailObj) };
+    }),
   WRITE_CONFIG: (args) => async () =>
     await adjustFlag("isWritingConfig", args, async () => {
       const state = args.getState();
@@ -135,16 +154,14 @@ const iniitalValue: State = {
   isUpdatingTweets: false,
   isWritingConfig: false,
   isInitializing: undefined,
-  tweets: [],
-  newestTweetDataIdMap: new Map(),
-  newestUniqIdMap: new Map(),
-  oldestUniqIdMap: new Map(),
-  windowLength: 30,
   listIds: [],
   currentList: undefined,
   limitData: undefined,
   isAuthorized: false,
+  tweetsDetail: new TweetsDetail(),
 };
+
+console.log(new TweetsDetail());
 
 const useValue = () => {
   const [state, dispatch] = useReducerAsync<

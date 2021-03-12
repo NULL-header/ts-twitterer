@@ -3,6 +3,7 @@ import { useTracked } from "frontend/globalState";
 
 export const ListSelector = () => {
   const [state, dispatch] = useTracked();
+  console.log(state);
   const { listIds } = state;
   const handleClick = React.useCallback(
     (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
