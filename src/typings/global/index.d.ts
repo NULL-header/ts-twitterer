@@ -56,6 +56,6 @@ type Configs = {
 interface ConfigColumns {
   id: 0;
   last_data: Configs & {
-    tweetsDetail: import("frontend/globalState/models/tweetsDetail").TweetsDetailObj;
+    tweetsDetail: import("frontend/globalState/models/TweetsDetail").TweetsDetailObj;
   };
 }

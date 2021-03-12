@@ -1,5 +1,4 @@
-// eslint-disable-next-line max-classes-per-file
-import Immutable, { Record as IRecord, Map as IMap, List } from "immutable";
+import Immutable, { Map as IMap, List } from "immutable";
 
 interface TweetsDetailChildren {
   tweets: List<Tweet>;
@@ -21,40 +20,33 @@ export interface TweetsDetailObj {
   listids: string[];
 }
 
-const BaseRecord = (Immutable.Record({
+const BaseRecord = Immutable.Record({
   tweets: Immutable.List(),
   newestDataidMap: Immutable.Map(),
   newestUniqidMap: Immutable.Map(),
   oldestUniqidMap: Immutable.Map(),
   windowLength: 30,
-} as TweetsDetailChildren) as any) as new () => ReturnType<
-  IRecord.Factory<TweetsDetailChildren>
-> &
-  TweetsDetailChildren;
+} as TweetsDetailChildren);
 
 export class TweetsDetail extends BaseRecord {
-  set<T extends keyof TweetsDetailChildren>(
-    key: T,
-    value: TweetsDetailChildren[T],
-  ): TweetsDetail {
-    return super.set(key, value) as any;
+  toJS() {
+    return super.toJS() as TweetsDetailObj;
   }
 
-  toJS(): TweetsDetailObj {
-    return super.toJS() as any;
-  }
-
+  // 古い順に渡す
   addTweets(tweets: Tweet[]) {
+    // 配列がゼロである可能性を潰して、nextTweets.firstとnextTweets.lastがundefinedである可能性を潰す
+    if (tweets.length === 0) return this;
     const { tweets: oldTweets } = this;
     const allTweets = oldTweets.push(...tweets);
     const nextTweets =
       allTweets.size > this.windowLength
         ? allTweets.slice(allTweets.size - this.windowLength - 1)
         : allTweets;
-    const newestTweet = nextTweets.last();
-    const oldestTweet = nextTweets.first();
+    const newestTweet = nextTweets.last() as Tweet;
+    const oldestTweet = nextTweets.first() as Tweet;
     const currentList = newestTweet.listId;
-    return this.set("tweets", nextTweets as any)
+    return this.set("tweets", nextTweets)
       .set(
         "newestDataidMap",
         this.newestDataidMap.set(currentList, newestTweet.dataid),
