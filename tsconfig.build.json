@@ -4,6 +4,7 @@
   "exclude": ["public", "tests"],
   "files": ["src/backend/index.ts"],
   "compilerOptions": {
-    "module": "ESNext"
+    "module": "ESNext",
+    "target": "ESNext"
   }
 }
