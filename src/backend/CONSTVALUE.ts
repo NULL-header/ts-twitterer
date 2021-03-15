@@ -12,4 +12,5 @@ export const CONSTVALUE = {
   SAMPLE_DIRECTORY: `${process.cwd()}/samples/`,
   SAMPLE_BASE_NAME: "sample",
   COOKIE_SECRET: process.env.COOKIE_SECRET as string,
+  SAMPLE_LIST_ID: process.env.LIST_ID as string,
 };
