@@ -1,4 +1,5 @@
 import Dexie from "dexie";
+import { GlobalDataObj } from "frontend/globalState/GlobalData";
 
 const tweetColumnsFirst = [
   "++tweet.uniqid",
@@ -11,21 +12,21 @@ const tweetColumnsFirst = [
   "tweet.isRetweeted",
 ];
 
-const configColumnsFirst = ["id", "last_data"];
+const globalDataFirst = ["uniqid", "lastData"];
 
 const makeSchema = (columns: string[]) => columns.join(", ");
 
 class MyDB extends Dexie {
   tweets!: Dexie.Table<TweetColumns, number>;
 
-  configs!: Dexie.Table<ConfigColumns, 0>;
+  globalData!: Dexie.Table<{ uniqid: 0; lastData: GlobalDataObj }, 0>;
 
   constructor() {
     super("ts-twitterer");
 
     this.version(1).stores({
       tweets: makeSchema(tweetColumnsFirst),
-      configs: makeSchema(configColumnsFirst),
+      globalData: makeSchema(globalDataFirst),
     });
   }
 }

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { RateError, ShouldUnupdateError } from "frontend/globalState/errors";
+import { RateError, ShouldUnupdateError } from "frontend/errors";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
 import {
   TweetsDetail,
   TweetsDetailObj,
-} from "frontend/globalState/models/TweetsDetail";
+} from "frontend/components/main/Timeline/TweetsDetail";
 import Immutable from "immutable";
 import { db } from "./db";
 

@@ -1,8 +1,8 @@
+import { CurrentListInitError, ShouldUnupdateError } from "frontend/errors";
 import {
-  CurrentListInitError,
-  ShouldUnupdateError,
-} from "frontend/globalState/errors";
-import { TweetsDetailObj, TweetsDetail } from "frontend/models/TweetsDetail";
+  TweetsDetailObj,
+  TweetsDetail,
+} from "frontend/components/main/Timeline/TweetsDetail";
 import { db } from "./db";
 
 const loadTweetsFromDB = (

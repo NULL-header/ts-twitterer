@@ -59,7 +59,9 @@ const AuthForm = () => {
         },
       });
       if (signal.aborted) return;
-      setGlobalState((state) => state.set("isAuthorized", true));
+      setGlobalState((state) =>
+        state.set("globalData", state.globalData.set("isAuthorized", true)),
+      );
     }, []),
   );
   const { errors, register, handleSubmit } = useForm<Fields>();

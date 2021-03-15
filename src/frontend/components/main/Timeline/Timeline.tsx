@@ -9,8 +9,9 @@ import React, {
 } from "react";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { delayCall, useConstAsyncTask } from "frontend/util";
-import { TimelineDetail } from "frontend/models/TimelineDetail";
 import { loadNewTweets } from "frontend/worker/connect";
+import { CurrentListInitError } from "frontend/errors";
+import { TimelineDetail } from "./TimelineDetail";
 import { Tweet } from "./Tweet";
 
 // extract to pass key only
@@ -76,17 +77,31 @@ const Tweets = memo<{ tweets: TimelineDetail["tweetsDetail"]["tweets"] }>(
   },
 );
 
+type Args<T> = T extends (...args: infer A) => any ? A : never;
+
+const updateTweets = async (...args: Args<typeof loadNewTweets>) => {
+  let result;
+  try {
+    result = await loadNewTweets(...args);
+  } catch (e) {
+    if (e instanceof CurrentListInitError) {
+      result = undefined;
+    }
+  }
+  return result;
+};
+
 const Timeline = memo(() => {
   const [timelineDetail, setTimelineDetail] = useState(new TimelineDetail());
   const loadTask = useConstAsyncTask(
     timelineDetail,
     async ({ signal, getState }) => {
       const { currentList, tweetsDetail } = getState();
-      const nextTweetsDetail = await loadNewTweets({
+      const nextTweetsDetail = await updateTweets({
         currentList,
         tweetsDetailObj: tweetsDetail.toJS(),
       });
-      if (signal.aborted) return;
+      if (signal.aborted || nextTweetsDetail == null) return;
       setTimelineDetail((detail) => detail.merge(nextTweetsDetail as any));
     },
   );
