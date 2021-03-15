@@ -1,107 +1,94 @@
-import React, { useEffect, FC, useRef } from "react";
-import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";
-import { useTracked } from "frontend/globalState";
-import { useUpdateEffect } from "react-use";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useAsyncTask } from "react-hooks-async";
+import { useGlobal } from "frontend/globalState";
 
-type Action = { type: "MODIFY"; Component: FC };
-type AsyncAction = { type: "LOAD_AUTH" } | { type: "LOAD_MAIN" };
+// const useMoratorium = (deps: any[]) => {
+//   const beforeRef = useRef<null | boolean>(null);
+//   useUpdateEffect(() => {
+//     if (beforeRef.current == null) beforeRef.current = false;
+//     if (!beforeRef.current) beforeRef.current = true;
+//   }, deps);
+//   return { isFired: () => beforeRef.current };
+// };
 
-type State = FC | undefined;
+// const useLimitGetEffect = () => {
+//   const [{ isGettingTweets }, dispatch] = useTracked();
+//   const { isFired } = useMoratorium([isGettingTweets]);
 
-const reducer = (state: State, action: Action) => {
-  switch (action.type) {
-    case "MODIFY": {
-      return action.Component as State;
-    }
-    default: {
-      throw new Error("An error occurred to modify the global state");
-    }
-  }
+//   useUpdateEffect(() => {
+//     console.log("usemlimit", { isFired: isFired() });
+//     if (!isFired()) return;
+//     console.log("get_late");
+//     dispatch({ type: "GET_RATE" });
+//   }, [isGettingTweets]);
+// };
+
+// const useWriteEffect = () => {
+//   const [state, dispatch] = useTracked();
+//   const {
+//     isAuthorized,
+//     currentList,
+//     listIds,
+//     limitData,
+//     isInitializing,
+//     tweetsDetail,
+//   } = state;
+//   const { isFired } = useMoratorium([isInitializing]);
+//   useEffect(() => {
+//     if (!isFired()) return;
+//     console.log("effect");
+//     dispatch({ type: "WRITE_CONFIG" });
+//   }, [isAuthorized, currentList, listIds, limitData, tweetsDetail]);
+// };
+
+const useLoadTasks = (setState: (state: any) => void) => {
+  const loadMainTask = useAsyncTask(
+    useCallback(async ({ signal }) => {
+      const { Component } = await import(
+        /* webpackChunkName: "main" */ "./main"
+      );
+      if (signal.aborted) return;
+      setState(Component);
+    }, []),
+  );
+  const loadAuthTask = useAsyncTask(
+    useCallback(async ({ signal }) => {
+      const { Component } = await import(
+        /* webpackChunkName: "auth" */ "./auth"
+      );
+      if (signal.aborted) return;
+      setState(Component);
+    }, []),
+  );
+  return { loadMainTask, loadAuthTask };
 };
 
-const asyncReducer: AsyncActionHandlers<typeof reducer, AsyncAction> = {
-  LOAD_AUTH: ({ dispatch, signal }) => async () => {
-    const { Component } = await import(/* webpackChunkName: "auth" */ "./Auth");
-    if (signal.aborted) return;
-    dispatch({ type: "MODIFY", Component });
-  },
-  LOAD_MAIN: ({ dispatch, signal }) => async () => {
-    const { Component } = await import(/* webpackChunkName: "main" */ "./main");
-    if (signal.aborted) return;
-    dispatch({ type: "MODIFY", Component });
-  },
-};
-
-const useMoratorium = (deps: any[]) => {
-  const beforeRef = useRef<null | boolean>(null);
-  useUpdateEffect(() => {
-    if (beforeRef.current == null) beforeRef.current = false;
-    if (!beforeRef.current) beforeRef.current = true;
-  }, deps);
-  return { isFired: () => beforeRef.current };
-};
-
-const useLimitGetEffect = () => {
-  const [{ isGettingTweets }, dispatch] = useTracked();
-  const { isFired } = useMoratorium([isGettingTweets]);
-
-  useUpdateEffect(() => {
-    console.log("usemlimit", { isFired: isFired() });
-    if (!isFired()) return;
-    console.log("get_late");
-    dispatch({ type: "GET_RATE" });
-  }, [isGettingTweets]);
-};
-
-const useWriteEffect = () => {
-  const [state, dispatch] = useTracked();
-  const {
-    isAuthorized,
-    currentList,
-    listIds,
-    limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
-    isInitializing,
-    windowLength,
-  } = state;
-  const { isFired } = useMoratorium([isInitializing]);
-  useEffect(() => {
-    if (!isFired()) return;
-    console.log("effect");
-    dispatch({ type: "WRITE_CONFIG" });
-  }, [
-    isAuthorized,
-    currentList,
-    listIds,
-    limitData,
-    newestTweetDataIdMap,
-    newestUniqIdMap,
-    oldestUniqIdMap,
-    windowLength,
+const useGlobalData = () => {
+  const { globalState } = useGlobal();
+  console.log(globalState);
+  const isLoading = useMemo(() => globalState.isLoadingFromDB, [
+    globalState.isLoadingFromDB,
   ]);
+  const isAuthorized = useMemo(() => globalState.globalData.isAuthorized, [
+    globalState.globalData.isAuthorized,
+  ]);
+  return { isLoading, isAuthorized };
 };
 
 export const LoadContainer = () => {
-  const [{ isInitializing, isAuthorized }] = useTracked();
-  const [Component, dispatch] = useReducerAsync(
-    reducer,
-    undefined,
-    asyncReducer,
-  );
-
-  useWriteEffect();
-  useLimitGetEffect();
-
+  const [Component, setComponent] = useState<React.FC | undefined>(undefined);
+  const { loadAuthTask, loadMainTask } = useLoadTasks(setComponent);
+  const { isAuthorized, isLoading } = useGlobalData();
   useEffect(() => {
-    if (isInitializing == null || isInitializing) return;
-    if (isAuthorized) dispatch({ type: "LOAD_MAIN" });
-    else dispatch({ type: "LOAD_AUTH" });
-  }, [isAuthorized, isInitializing]);
+    if (isLoading == null || isLoading) return;
+    console.log(isAuthorized);
+    if (isAuthorized) {
+      loadMainTask.start();
+      return;
+    }
+    loadAuthTask.start();
+  }, [isAuthorized, isLoading]);
 
-  if (isInitializing == null) return <div>Starting</div>;
-  if (isInitializing) return <div>Loading</div>;
   if (Component != null) return <Component />;
-  return <div>unknown error</div>;
+  return <div>Loading</div>;
 };

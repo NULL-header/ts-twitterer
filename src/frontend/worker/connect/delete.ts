@@ -1,28 +1,24 @@
-import { State } from "frontend/globalState/types";
+import {
+  TweetsDetailObj,
+  TweetsDetail,
+} from "frontend/components/main/Timeline/TweetsDetail";
 import { db } from "./db";
 
-export const deleteCacheConfig = async () => {
-  const promise = db.configs.clear();
-  const initValue = {
-    currentList: undefined,
-    limitData: undefined,
-    listIds: [] as string[],
-    tweets: [] as Tweet[],
-    newestTweetDataIdMap: new Map(),
-    newestUniqIdMap: new Map(),
-    oldestUniqIdMap: new Map(),
-  } as State;
-  await promise;
-  return initValue;
-};
-
-export const deleteCacheTweetsAll = async () => {
+export const deleteCacheTweetsAll = async ({
+  tweetsDetailObj,
+}: {
+  tweetsDetailObj: TweetsDetailObj;
+}) => {
   const promise = db.tweets.clear();
+  const nextDetailObj = new TweetsDetail()
+    .load(tweetsDetailObj)
+    .merge({
+      newestDataidMap: {},
+      newestUniqidMap: {},
+      oldestUniqidMap: {},
+      tweets: [],
+    } as any)
+    .toJS();
   await promise;
-  return {
-    newestTweetDataIdMap: new Map(),
-    newestUniqIdMap: new Map(),
-    oldestUniqIdMap: new Map(),
-    tweets: [] as Tweet[],
-  } as State;
+  return nextDetailObj;
 };

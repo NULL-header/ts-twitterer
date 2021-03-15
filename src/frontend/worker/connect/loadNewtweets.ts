@@ -1,9 +1,8 @@
-import { State } from "frontend/globalState/types";
+import { CurrentListInitError, ShouldUnupdateError } from "frontend/errors";
 import {
-  CurrentListInitError,
-  ShouldUnupdateError,
-} from "frontend/globalState/errors";
-import { Work } from "./types";
+  TweetsDetailObj,
+  TweetsDetail,
+} from "frontend/components/main/Timeline/TweetsDetail";
 import { db } from "./db";
 
 const loadTweetsFromDB = (
@@ -25,37 +24,23 @@ const loadTweetsAllFromDB = (listId: string, windowLength: number) =>
     .limit(windowLength)
     .toArray((e) => e.map((tweetData) => tweetData.tweet));
 
-const makeNextTweets = (allTweets: Tweet[], windowLength: number) =>
-  allTweets.length > windowLength
-    ? allTweets.slice(allTweets.length - windowLength - 1)
-    : allTweets;
-
-export const loadNewTweets: Work = async ({
-  oldestUniqIdMap,
-  newestUniqIdMap,
+export const loadNewTweets = async ({
   currentList,
-  tweets,
-  windowLength,
+  tweetsDetailObj,
+}: {
+  currentList: string | undefined;
+  tweetsDetailObj: TweetsDetailObj;
 }) => {
-  console.log(windowLength);
   if (currentList == null) throw new CurrentListInitError();
-  const uniqid = newestUniqIdMap.get(currentList);
+  const tweetsDetail = new TweetsDetail().load(tweetsDetailObj);
+  const { windowLength } = tweetsDetail;
+  const uniqid = tweetsDetail.newestUniqidMap.get(currentList);
   let newTweets: Tweet[];
-  console.log(uniqid);
   if (uniqid == null)
     newTweets = await loadTweetsAllFromDB(currentList, windowLength);
   else
     newTweets = await loadTweetsFromDB(uniqid, currentList, windowLength / 2);
   if (newTweets.length === 0) throw new ShouldUnupdateError();
-  const nextTweets = makeNextTweets(tweets.concat(newTweets), windowLength);
-  console.log(newTweets);
-  const newUniqid = nextTweets[nextTweets.length - 1].uniqid;
-  newestUniqIdMap.set(currentList, newUniqid);
-  const oldUniqId = nextTweets[0].uniqid;
-  oldestUniqIdMap.set(currentList, oldUniqId);
-  return {
-    tweets: nextTweets,
-    oldestUniqIdMap,
-    newestUniqIdMap,
-  } as State;
+  const nextDetail = tweetsDetail.addTweets(newTweets);
+  return nextDetail.toJS();
 };
