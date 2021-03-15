@@ -1,6 +1,6 @@
 import React from "react";
 import { HiOutlineCog, HiOutlineCube, HiOutlineHome } from "react-icons/hi";
-import { TabGroup } from "../TabContainer";
+import { TabGroup } from "frontend/components/ScreenContainer/TabContainer";
 import { ScreenContainer } from "../ScreenContainer";
 import { Timeline } from "./Timeline";
 import { Config } from "./Config";
