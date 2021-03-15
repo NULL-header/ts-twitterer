@@ -71,3 +71,9 @@ export class NoLastConfigError extends TypeError {
     super("The last config data is nothing");
   }
 }
+
+export class NoLastGlobalDataError extends TypeError {
+  constructor() {
+    super("The last global data is nothing");
+  }
+}
