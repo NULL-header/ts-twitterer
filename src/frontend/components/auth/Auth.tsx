@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useForm, FieldError } from "react-hook-form";
 import { useAsyncTask } from "react-hooks-async";
-import { useUpdate } from "frontend/globalState";
+import { useSetGlobalState } from "frontend/globalState";
 import { HeaddingCommon } from "../ConfigBase";
 
 const tokens = [
@@ -48,29 +48,27 @@ type Fields = { [P in typeof tokens[number]]: string };
 
 const AuthForm = () => {
   const dataRef = useRef<Record<string, string>>({});
-  const dispatch = useUpdate();
-  const task = useAsyncTask(
+  const setGlobalState = useSetGlobalState();
+  const authTask = useAsyncTask(
     useCallback(async ({ signal }) => {
-      console.log(
-        await fetch("/api/token/set", {
-          body: JSON.stringify(dataRef.current),
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
-      );
+      await fetch("/api/token/set", {
+        body: JSON.stringify(dataRef.current),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (signal.aborted) return;
-      dispatch({ type: "AUTHORISE" });
+      setGlobalState((state) => state.set("isAuthorized", true));
     }, []),
   );
   const { errors, register, handleSubmit } = useForm<Fields>();
-  const submit = React.useCallback(
+  const submit = useCallback(
     handleSubmit((data) => {
       Object.entries(data).forEach(([key, value]) => {
         dataRef.current[names[key as keyof Fields]] = value;
       });
-      task.start();
+      authTask.start();
     }),
     [handleSubmit],
   );
