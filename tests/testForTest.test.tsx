@@ -3,10 +3,13 @@ import "fake-indexeddb/auto";
 import React from "react";
 import Twitter from "twitter";
 import { mocked } from "ts-jest/utils";
-import { App as FrontApp } from "frontend/app";
 import { render, screen, waitFor } from "@testing-library/react";
+import { GlobalDetail } from "frontend/globalState/GlobalDetail";
+// import { App as FrontApp } from "../src/frontend/app";
 import "@testing-library/jest-dom";
 import { makeServer, makeSetUpTwitterMock } from "./utilForTest";
+
+console.log(GlobalDetail);
 
 jest.mock("twitter");
 const TwitterMocked = mocked(Twitter, true);
@@ -16,9 +19,13 @@ const setUpTwitterMock = makeSetUpTwitterMock(TwitterMocked);
 describe("front", () => {
   describe("Normal", () => {
     it("load contents", async () => {
-      render(<FrontApp />);
-      const loadingElement = screen.getByText("Loading");
-      expect(loadingElement).toBeInTheDocument();
+      // render(<FrontApp />);
+      const prepareElement = screen.getByText("preparation");
+      expect(prepareElement).toBeInTheDocument();
+      await waitFor(() => {
+        const loadingElement = screen.getByText("Loading");
+        expect(loadingElement).toBeInTheDocument();
+      });
       await waitFor(() => {
         const mainElement = screen.getByRole("main");
         expect(mainElement).toBeInTheDocument();
@@ -42,19 +49,6 @@ describe("backend", () => {
     it("/api/ping", async () => {
       const result = await fetch("/api/ping");
       expect(result).toEqual({ response: "pong!" });
-    });
-    it("/api/rate", async () => {
-      const limit = 100;
-      const remaining = 50;
-      setUpTwitterMock("application/rate_limit_status", {
-        resources: {
-          lists: { "/lists/statuses": { limit, remaining } },
-        },
-      });
-      const result = await fetch("/api/rate");
-      expect(result).toEqual({
-        lists: { limitRate: limit, remaining },
-      });
     });
     it("/api/tweet", async () => {
       const sampleListId = "sampleListId";

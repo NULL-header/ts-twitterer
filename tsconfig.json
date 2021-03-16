@@ -12,14 +12,17 @@
     "noImplicitAny": true,
     "downlevelIteration": true,
     "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "rootDir": ".",
     "baseUrl": ".",
+    "outDir": "public",
     "sourceMap": true,
     "paths": {
       "frontend/*": ["*", "src/frontend/*"],
       "backend/*": ["*", "src/backend/*"]
     }
   },
-  "include": ["./**/*.ts*", "./**/*.js", "./**/.*.ts", "./**/.*.js"]
+  "include": ["./**/*.ts*", "./**/*.js", "./**/.*.ts", "./**/.*.js"],
+  "exclude": ["node_modules"]
 }

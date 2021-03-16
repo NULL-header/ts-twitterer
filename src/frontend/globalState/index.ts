@@ -1,1 +1,1 @@
-export { Provider, useGlobal, useSetGlobalState } from "./globalState";
+export { Provider, useGlobal, useSetGlobalDetail } from "./globalState";

@@ -1,10 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "include": ["src"],
-  "exclude": ["public", "tests"],
-  "files": ["src/backend/index.ts"],
+  "exclude": ["public", "tests", "node_modules"],
+  "files": ["src/frontend/index.ts"],
   "compilerOptions": {
     "module": "ESNext",
-    "target": "ESNext"
+    "target": "ESNext",
+    "outDir": "./public"
   }
 }

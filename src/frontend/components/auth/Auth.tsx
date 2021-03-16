@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useForm, FieldError } from "react-hook-form";
 import { useAsyncTask } from "react-hooks-async";
-import { useSetGlobalState } from "frontend/globalState";
+import { useSetGlobalDetail } from "frontend/globalState";
 import { HeaddingCommon } from "../ConfigBase";
 
 const tokens = [
@@ -48,7 +48,7 @@ type Fields = { [P in typeof tokens[number]]: string };
 
 const AuthForm = () => {
   const dataRef = useRef<Record<string, string>>({});
-  const setGlobalState = useSetGlobalState();
+  const setGlobalDetail = useSetGlobalDetail();
   const authTask = useAsyncTask(
     useCallback(async ({ signal }) => {
       await fetch("/api/token/set", {
@@ -59,7 +59,7 @@ const AuthForm = () => {
         },
       });
       if (signal.aborted) return;
-      setGlobalState((state) =>
+      setGlobalDetail((state) =>
         state.set("globalData", state.globalData.set("isAuthorized", true)),
       );
     }, []),

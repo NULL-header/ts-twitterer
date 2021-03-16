@@ -53,6 +53,7 @@
     "@typescript-eslint/parser": "^4.15.1",
     "check-peer-dependencies": "^4.0.0",
     "comlink-loader": "^2.0.0",
+    "core-js": "^3.9.1",
     "core-js-bundle": "^3.9.0",
     "dexie": "^3.0.3",
     "dotenv-webpack": "^6.0.0",

@@ -52,10 +52,3 @@ type Configs = {
   listIds: string[];
   isAuthorized: boolean;
 };
-
-interface ConfigColumns {
-  id: 0;
-  last_data: Configs & {
-    tweetsDetail: import("frontend/globalState/models/TweetsDetail").TweetsDetailObj;
-  };
-}
