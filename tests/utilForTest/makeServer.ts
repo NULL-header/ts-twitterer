@@ -1,5 +1,6 @@
 import { app } from "backend/app";
 import nodeFetch, { RequestInit } from "node-fetch";
+import { FetchError } from "./error";
 
 export const makeServer = ({ port }: { port: number }) => {
   const serverPromise = new Promise<ReturnType<typeof app.listen>>(
@@ -19,7 +20,7 @@ export const makeServer = ({ port }: { port: number }) => {
       `http://localhost:${port}${additionalPath}`,
       init,
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    if (!response.ok) throw new FetchError(response);
     return await response.json();
   };
   return {
