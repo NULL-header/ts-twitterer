@@ -4,6 +4,7 @@ module.exports = {
   roots: ["./tests"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.mjs$": "babel-jest",
   },
   moduleDirectories: ["node_modules", __dirname],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
@@ -18,5 +19,5 @@ module.exports = {
     "^backend/(.*)$": "<rootDir>/src/backend/$1",
   },
   verbose: true,
-  transformIgnorePatterns: ["<rootDir>/node_modules/"],
+  transformIgnorePatterns: ["<rootDir>/node_modules/(?!node-fetch-cookies)"],
 };
