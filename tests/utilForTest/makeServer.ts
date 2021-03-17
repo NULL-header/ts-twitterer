@@ -37,7 +37,7 @@ export const makeServer = ({ port }: { port: number }) => {
 
 export const makeFetchWithCookie = () => {
   const jar = new CookieJar();
-  return async (additionalPath: string, init: RequestInit) => {
+  return async (additionalPath: string, init?: RequestInit) => {
     const response = await CookieFetch(jar, additionalPath, init);
     return getJson(response);
   };
