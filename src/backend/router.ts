@@ -93,7 +93,7 @@ export const router = express
       accessToken,
       accessTokenSecret,
     });
-    res.end();
+    res.send({ message: "token setted" });
   })
   .post("/api/token/delete", (req, res) => {
     Object.assign(req.session, {
@@ -102,5 +102,5 @@ export const router = express
       accessToken: undefined,
       accessTokenSecret: undefined,
     });
-    res.end();
+    res.send({ message: "token deleted" });
   });
