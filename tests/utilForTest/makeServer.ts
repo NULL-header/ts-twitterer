@@ -20,8 +20,9 @@ export const makeServer = ({ port }: { port: number }) => {
       `http://localhost:${port}${additionalPath}`,
       init,
     );
-    if (!response.ok) throw new FetchError(response);
-    return await response.json();
+    const json = await response.json();
+    if (!response.ok) throw new FetchError(response, json);
+    return json;
   };
   return {
     fetch,
