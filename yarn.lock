@@ -5921,6 +5921,13 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
+node-fetch-cookies@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/node-fetch-cookies/-/node-fetch-cookies-2.0.1.tgz#fb7156ab9bace3400ed39fdc0247c3e500f6fa67"
+  integrity sha512-15QzbAZTYBvTDJTdYo8JkS1QcsNEEQaftPnlec8DuVCxDJl/xqVUsRJVbHaJuBl/GwpWucesVVIfOGmOWOyShg==
+  dependencies:
+    node-fetch "^2.6.1"
+
 node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
