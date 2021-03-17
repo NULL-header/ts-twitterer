@@ -1,5 +1,3 @@
-import "node-fetch-cookies";
-
 declare module "node-fetch-cookies" {
   type NodeFetch = typeof import("node-fetch").default;
   export class CookieJar {}
