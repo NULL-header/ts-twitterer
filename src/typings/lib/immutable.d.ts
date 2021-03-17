@@ -6,6 +6,6 @@ declare module "immutable" {
     first(): T | undefined;
     first<A>(iniitalValue: A): A;
     last(): T | undefined;
-    last<A>(initialValue: A): A;
+    last(initialValue: T): T;
   }
 }
