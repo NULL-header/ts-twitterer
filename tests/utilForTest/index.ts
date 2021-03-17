@@ -1,2 +1,2 @@
-export { makeServer } from "./makeServer";
+export { makeServer, makeFetchWithCookie } from "./makeServer";
 export { makeSetUpTwitterMock } from "./makeSetUpTwitterMock";
