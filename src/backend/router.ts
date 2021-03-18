@@ -96,11 +96,6 @@ export const router = express
     res.send({ message: "token setted" });
   })
   .post("/api/token/delete", (req, res) => {
-    Object.assign(req.session, {
-      consumerToken: undefined,
-      consumerTokenSecret: undefined,
-      accessToken: undefined,
-      accessTokenSecret: undefined,
-    });
+    req.session = null as any;
     res.send({ message: "token deleted" });
   });
