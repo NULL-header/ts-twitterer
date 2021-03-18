@@ -15,6 +15,7 @@ export const makeServer = ({ port }: { port: number }) => {
       const httpServer = app.listen(port, () => resolve(httpServer));
     },
   );
+  const baseUrl = `http://localhost:${port}`;
   const server = {
     run: () => serverPromise,
     close: async (): Promise<void> => {
@@ -23,22 +24,19 @@ export const makeServer = ({ port }: { port: number }) => {
     },
   };
   const fetch = async (additionalPath: string, init?: RequestInit) => {
-    const response = await nodeFetch(
-      `http://localhost:${port}${additionalPath}`,
-      init,
-    );
+    const response = await nodeFetch(baseUrl + additionalPath, init);
     return getJson(response);
+  };
+  const makeFetchWithCookie = () => {
+    const jar = new CookieJar();
+    return async (additionalPath: string, init?: RequestInit) => {
+      const response = await CookieFetch(jar, baseUrl + additionalPath, init);
+      return getJson(response);
+    };
   };
   return {
     fetch,
     server,
-  };
-};
-
-export const makeFetchWithCookie = () => {
-  const jar = new CookieJar();
-  return async (additionalPath: string, init?: RequestInit) => {
-    const response = await CookieFetch(jar, additionalPath, init);
-    return getJson(response);
+    makeFetchWithCookie,
   };
 };
