@@ -16,7 +16,6 @@ type Tweet = {
     twitterId: string;
     iconUrl: string;
     bannerUrl: string;
-    profile: string;
     description: string;
   };
   createdAt: string;
