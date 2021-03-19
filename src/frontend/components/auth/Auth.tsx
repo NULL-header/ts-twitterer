@@ -7,6 +7,7 @@ import {
   VStack,
   Input,
   Button,
+  Box,
 } from "@chakra-ui/react";
 import { useForm, FieldError } from "react-hook-form";
 import { useAsyncTask } from "react-hooks-async";
@@ -74,8 +75,9 @@ const AuthForm = () => {
     }),
     [handleSubmit],
   );
+
   return (
-    <>
+    <Box aria-label="tokens">
       <HeaddingCommon header="Tokens" />
       <form onSubmit={submit}>
         <VStack spacing="5vw">
@@ -92,7 +94,7 @@ const AuthForm = () => {
           <Button type="submit">submit</Button>
         </VStack>
       </form>
-    </>
+    </Box>
   );
 };
 
