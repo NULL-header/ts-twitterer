@@ -1,23 +1,35 @@
-import React, { memo } from "react";
+import React, { memo, useMemo, useCallback } from "react";
 import { Select } from "@chakra-ui/react";
-import { List } from "immutable";
+import { useTimelineDetail } from "./context";
 
-export const ListSelector = memo<{
-  listids: List<string>;
-  currentList: string | undefined;
-  setCurrentList: (listId: string) => void;
-}>(({ currentList, listids, setCurrentList }) => (
-  <Select
-    variant="flushed"
-    placeholder="select listid"
-    onSelect={(e) => setCurrentList(e.currentTarget.value)}
-    defaultValue={currentList}
-  >
-    {listids.map((e) => (
-      <option value={e} key={e}>
-        {e}
-      </option>
-    ))}
-  </Select>
-));
+export const ListSelector = memo(() => {
+  const { setTimelineDetail, timelineDetail } = useTimelineDetail();
+  const currentList = useMemo(() => timelineDetail.currentList, [
+    timelineDetail.currentList,
+  ]);
+  const listids = useMemo(() => timelineDetail.listids, [
+    timelineDetail.listids,
+  ]);
+  const setCurrentList = useCallback(
+    (e: React.SyntheticEvent<HTMLSelectElement, Event>) =>
+      setTimelineDetail((detail) =>
+        detail.set("currentList", e.currentTarget.value),
+      ),
+    [],
+  );
+  return (
+    <Select
+      variant="flushed"
+      placeholder="select listid"
+      onSelect={setCurrentList}
+      defaultValue={currentList}
+    >
+      {listids.map((e) => (
+        <option value={e} key={e}>
+          {e}
+        </option>
+      ))}
+    </Select>
+  );
+});
 ListSelector.displayName = "ListSelector";
