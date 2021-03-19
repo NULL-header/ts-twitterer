@@ -15,6 +15,7 @@ import { CurrentListInitError } from "frontend/errors";
 import { TimelineDetail } from "./TimelineDetail";
 import { Tweet } from "./Tweet";
 import { ListSelector } from "./ListSelector";
+import { ToolButton } from "./ToolButton";
 
 // extract to pass key only
 const TweetBox = React.memo(({ tweet }: { tweet: Tweet }) => (
@@ -134,11 +135,12 @@ const Timeline = memo(() => {
         setCurrentList={setCurrentList}
         listids={listids}
       />
-      <Box padding="3vw" overflowY="scroll" height="100%" ref={ref}>
+      <Box padding="3vw" overflowY="scroll" height="auto" ref={ref}>
         <Empty />
         <Tweets tweets={tweets} />
         <Empty />
       </Box>
+      <ToolButton />
     </>
   );
 });
