@@ -6,11 +6,11 @@ const initValue = {
   globalData: new GlobalData(),
 };
 
-export interface GlobalStateObj {
+export interface GlobalDetailObj {
   isLoadingFromDB: boolean | undefined;
   globalData: GlobalDataObj;
 }
 
 const BaseRecord = Immutable.Record(initValue);
 
-export class GlobalState extends BaseRecord {}
+export class GlobalDetail extends BaseRecord {}

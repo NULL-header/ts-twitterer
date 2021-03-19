@@ -1,5 +1,13 @@
 import { app } from "backend/app";
-import nodeFetch, { RequestInit } from "node-fetch";
+import nodeFetch, { RequestInit, Response } from "node-fetch";
+import { fetch as CookieFetch, CookieJar } from "node-fetch-cookies";
+import { FetchError } from "./error";
+
+const getJson = async (res: Response) => {
+  const json = await res.json();
+  if (!res.ok) throw new FetchError(res, json);
+  return json;
+};
 
 export const makeServer = ({ port }: { port: number }) => {
   const serverPromise = new Promise<ReturnType<typeof app.listen>>(
@@ -7,6 +15,7 @@ export const makeServer = ({ port }: { port: number }) => {
       const httpServer = app.listen(port, () => resolve(httpServer));
     },
   );
+  const baseUrl = `http://localhost:${port}`;
   const server = {
     run: () => serverPromise,
     close: async (): Promise<void> => {
@@ -15,15 +24,19 @@ export const makeServer = ({ port }: { port: number }) => {
     },
   };
   const fetch = async (additionalPath: string, init?: RequestInit) => {
-    const response = await nodeFetch(
-      `http://localhost:${port}${additionalPath}`,
-      init,
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return await response.json();
+    const response = await nodeFetch(baseUrl + additionalPath, init);
+    return getJson(response);
+  };
+  const makeFetchWithCookie = () => {
+    const jar = new CookieJar();
+    return async (additionalPath: string, init?: RequestInit) => {
+      const response = await CookieFetch(jar, baseUrl + additionalPath, init);
+      return getJson(response);
+    };
   };
   return {
     fetch,
     server,
+    makeFetchWithCookie,
   };
 };

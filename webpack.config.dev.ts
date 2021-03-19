@@ -1,9 +1,5 @@
 import path from "path";
-import {
-  Configuration,
-  DefinePlugin,
-  HotModuleReplacementPlugin,
-} from "webpack";
+import { Configuration, HotModuleReplacementPlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
@@ -56,10 +52,6 @@ const webpackConfig: Configuration = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
-    new DefinePlugin({
-      "process.env.getTweetsUrl": JSON.stringify("/sample/tweet"),
-      "process.env.getRateUrl": JSON.stringify("/sample/rate"),
-    }),
     new HotModuleReplacementPlugin(),
     new ReactRefreshWebpackPlugin(),
     new DotEnvPlugin(),

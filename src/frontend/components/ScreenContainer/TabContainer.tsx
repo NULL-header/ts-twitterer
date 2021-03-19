@@ -53,6 +53,7 @@ const AllTab = memo<Props>(({ tabs }) => {
           padding="1vw 1.5vw"
           justifyContent="right"
           key={e}
+          alia-label={`${e}Tab`}
         >
           <Icon as={tabs[e].Icon} boxSize="32" />
           <Collapse in={isShow} animateOpacity>

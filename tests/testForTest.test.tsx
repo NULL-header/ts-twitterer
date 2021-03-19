@@ -3,8 +3,8 @@ import "fake-indexeddb/auto";
 import React from "react";
 import Twitter from "twitter";
 import { mocked } from "ts-jest/utils";
-import { App as FrontApp } from "frontend/app";
 import { render, screen, waitFor } from "@testing-library/react";
+import { App as FrontApp } from "../src/frontend/app";
 import "@testing-library/jest-dom";
 import { makeServer, makeSetUpTwitterMock } from "./utilForTest";
 
@@ -14,21 +14,19 @@ const TwitterMocked = mocked(Twitter, true);
 const setUpTwitterMock = makeSetUpTwitterMock(TwitterMocked);
 
 describe("front", () => {
-  describe("Normal", () => {
-    it("load contents", async () => {
-      render(<FrontApp />);
-      const loadingElement = screen.getByText("Loading");
-      expect(loadingElement).toBeInTheDocument();
-      await waitFor(() => {
-        const mainElement = screen.getByRole("main");
-        expect(mainElement).toBeInTheDocument();
-      });
+  it("load contents", async () => {
+    render(<FrontApp />);
+    const loadingElement = screen.getByText("Loading");
+    expect(loadingElement).toBeInTheDocument();
+    await waitFor(() => {
+      const mainElement = screen.getByRole("main");
+      expect(mainElement).toBeInTheDocument();
     });
   });
 });
 
 describe("backend", () => {
-  const { fetch, server } = makeServer({ port: 3000 });
+  const { fetch, server, makeFetchWithCookie } = makeServer({ port: 3000 });
   beforeAll(async () => {
     await server.run();
   });
@@ -38,33 +36,59 @@ describe("backend", () => {
   afterAll(async () => {
     await server.close();
   });
-  describe("Normal", () => {
-    it("/api/ping", async () => {
-      const result = await fetch("/api/ping");
-      expect(result).toEqual({ response: "pong!" });
+  it("/api/ping", async () => {
+    const result = await fetch("/api/ping");
+    expect(result).toEqual({ response: "pong!" });
+  });
+  it("/api/token/ set and delete", async () => {
+    const setResult = await fetch("/api/token/set", {
+      method: "POST",
+      body: JSON.stringify({
+        consumer_token: "consumer_token",
+        consumer_token_secret: "consumer_token_secret",
+        access_token: "access_token",
+        access_token_secret: "access_token_secret",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
-    it("/api/rate", async () => {
-      const limit = 100;
-      const remaining = 50;
-      setUpTwitterMock("application/rate_limit_status", {
-        resources: {
-          lists: { "/lists/statuses": { limit, remaining } },
+    expect(setResult).toBeTruthy();
+    const deleteResult = await fetch("/api/token/delete", { method: "POST" });
+    expect(deleteResult).toBeTruthy();
+  });
+  describe("with cookie", () => {
+    let fetchWithCookie: ReturnType<typeof makeFetchWithCookie>;
+    beforeEach(async () => {
+      fetchWithCookie = makeFetchWithCookie();
+      await fetchWithCookie("/api/token/set", {
+        method: "POST",
+        body: JSON.stringify({
+          access_token: "access_token",
+          access_token_secret: "access_token_secret",
+          consumer_token: "consumer_token",
+          consumer_token_secret: "consumer_token_secret",
+        }),
+        headers: {
+          "Content-Type": "application/json",
         },
       });
-      const result = await fetch("/api/rate");
-      expect(result).toEqual({
-        lists: { limitRate: limit, remaining },
-      });
+    });
+    afterEach(async () => {
+      await fetchWithCookie("/api/token/delete", { method: "POST" });
     });
     it("/api/tweet", async () => {
       const sampleListId = "sampleListId";
       const sampleCreatedAt = "sampleCreatedAt";
-      const sampleUsername = "sampleUsername";
-      const sampleUserid = "sampleUserid";
+      const sampleName = "sampleUsername";
+      const sampleTwitterid = "sampleUserid";
       const sampleDataid = "sampleDataid";
       const sampleIconUrl = "sampleIconUrl";
       const sampleContent = "sampleContent";
       const sampleIsRetweeted = false;
+      const sampleHasMedia = false;
+      const sampleBannerUrl = "sampleBannerUrl";
+      const sampleDescription = "sampleDescription";
       setUpTwitterMock("lists/statuses", [
         {
           created_at: sampleCreatedAt,
@@ -72,48 +96,56 @@ describe("backend", () => {
           full_text: sampleContent,
           retweeted_status: null as any,
           user: {
-            profile_image_url: sampleIconUrl,
-            name: sampleUsername,
-            screen_name: sampleUserid,
+            profile_image_url_https: sampleIconUrl,
+            name: sampleName,
+            screen_name: sampleTwitterid,
+            profile_banner_url: sampleBannerUrl,
+            description: sampleDescription,
           },
           extended_entities: null as any,
         },
       ]);
-      const result: TweetColumns[] = await fetch(
+      const result: TweetColumns[] = await fetchWithCookie(
         `/api/tweet?last_newest_tweet_data_id=000&list_id_str=${sampleListId}`,
       );
       expect(result[result.length - 1]).toEqual({
-        content: sampleContent,
-        dataid: sampleDataid,
-        created_at: sampleCreatedAt,
-        userid: sampleUserid,
-        username: sampleUsername,
-        icon_url: sampleIconUrl,
-        is_retweeted: sampleIsRetweeted,
-        list_id: sampleListId,
-      });
+        tweet: {
+          content: sampleContent,
+          dataid: sampleDataid,
+          createdAt: sampleCreatedAt,
+          isRetweeted: sampleIsRetweeted,
+          listId: sampleListId,
+          hasMedia: sampleHasMedia,
+          user: {
+            twitterId: sampleTwitterid,
+            name: sampleName,
+            iconUrl: sampleIconUrl,
+            bannerUrl: sampleBannerUrl,
+            description: sampleDescription,
+          },
+        },
+      } as TweetColumns);
       const stringInstance = expect.any(String);
       const booleanInstance = expect.any(Boolean);
       result.forEach((e) => {
         expect(e).toMatchObject({
-          dataid: stringInstance,
-          username: stringInstance,
-          userid: stringInstance,
-          icon_url: stringInstance,
-          content: stringInstance,
-          created_at: stringInstance,
-          list_id: sampleListId,
-          is_retweeted: booleanInstance,
-        });
+          tweet: {
+            dataid: stringInstance,
+            user: {
+              name: stringInstance,
+              twitterId: stringInstance,
+              iconUrl: stringInstance,
+              bannerUrl: stringInstance,
+              description: stringInstance,
+            },
+            content: stringInstance,
+            createdAt: stringInstance,
+            listId: sampleListId,
+            isRetweeted: booleanInstance,
+            hasMedia: booleanInstance,
+          },
+        } as TweetColumns);
       });
-    });
-  });
-  describe("Exception", () => {
-    it("sample", async () => {
-      const wrongFetchPromise = fetch(
-        "/sample/tweet?last_newest_tweet_data_id=111&list_id_str=111",
-      );
-      await expect(wrongFetchPromise).rejects.toThrow();
     });
   });
 });

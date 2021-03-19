@@ -1,19 +1,24 @@
-const { pathsToModuleNameMapper } = require("ts-jest/utils");
-const { compilerOptions } = require("./tsconfig.json");
-
 module.exports = {
   preset: "ts-jest",
+  testEnvironment: "jsdom",
   roots: ["./tests"],
-  testMatch: ["**/?(*.)+(spec|test).+(ts|tsx|js)"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.mjs$": "babel-jest",
   },
-  moduleFileExtensions: ["ts", "tsx", "js"],
+  setupFilesAfterEnv: ["./jest.setup.ts"],
   moduleDirectories: ["node_modules", __dirname],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.json",
+      tsconfig: "<rootDir>/tsconfig.json",
+      diagnostics: true,
     },
   },
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
+  moduleNameMapper: {
+    "^frontend/(.*)$": "<rootDir>/src/frontend/$1",
+    "^backend/(.*)$": "<rootDir>/src/backend/$1",
+  },
+  verbose: true,
+  transformIgnorePatterns: ["<rootDir>/node_modules/(?!node-fetch-cookies)"],
 };

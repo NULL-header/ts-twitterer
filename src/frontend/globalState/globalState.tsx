@@ -8,7 +8,7 @@ import React, {
   useMemo,
   SetStateAction,
 } from "react";
-import { GlobalState } from "./GlobalState";
+import { GlobalDetail } from "./GlobalDetail";
 
 // const reducer: GlobalReducer = (state, action) => {
 //   switch (action.type) {
@@ -135,24 +135,24 @@ import { GlobalState } from "./GlobalState";
 
 const context = createContext(
   (null as any) as {
-    globalState: GlobalState;
-    setGlobalState: Dispatch<SetStateAction<GlobalState>>;
+    globalState: GlobalDetail;
+    setGlobalDetail: Dispatch<SetStateAction<GlobalDetail>>;
   },
 );
 export const Provider = memo(({ children }) => {
-  const [globalState, setGlobalState] = useState(new GlobalState());
+  const [globalState, setGlobalDetail] = useState(new GlobalDetail());
   const value = useMemo(
     () => ({
       globalState,
-      setGlobalState,
+      setGlobalDetail,
     }),
     [globalState],
   );
   return <context.Provider value={value}>{children}</context.Provider>;
 });
 export const useGlobal = () => useContext(context);
-export const useSetGlobalState = () => {
+export const useSetGlobalDetail = () => {
   const globalValue = useContext(context);
-  const setter = useMemo(() => globalValue.setGlobalState, []);
+  const setter = useMemo(() => globalValue.setGlobalDetail, []);
   return setter;
 };

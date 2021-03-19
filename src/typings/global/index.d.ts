@@ -16,7 +16,6 @@ type Tweet = {
     twitterId: string;
     iconUrl: string;
     bannerUrl: string;
-    profile: string;
     description: string;
   };
   createdAt: string;
@@ -52,10 +51,3 @@ type Configs = {
   listIds: string[];
   isAuthorized: boolean;
 };
-
-interface ConfigColumns {
-  id: 0;
-  last_data: Configs & {
-    tweetsDetail: import("frontend/globalState/models/TweetsDetail").TweetsDetailObj;
-  };
-}

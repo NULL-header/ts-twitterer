@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from "react";
 import { useMount } from "react-use";
-import { useSetGlobalState } from "frontend/globalState";
+import { useSetGlobalDetail } from "frontend/globalState";
 import { initializeGlobal } from "frontend/worker/connect";
 import { useAsyncTask } from "react-hooks-async";
 import { NoLastGlobalDataError } from "frontend/errors";
@@ -19,17 +19,17 @@ const getLastData = async () => {
 };
 
 export const EffectContainer = memo(({ children }) => {
-  const setGlobalState = useSetGlobalState();
+  const setGlobalDetail = useSetGlobalDetail();
   const initTask = useAsyncTask(
     useCallback(async ({ signal }) => {
-      setGlobalState((state) => state.set("isLoadingFromDB", true));
+      setGlobalDetail((state) => state.set("isLoadingFromDB", true));
       const result = await getLastData();
       if (signal.aborted) return;
       if (result == null) {
-        setGlobalState((state) => state.set("isLoadingFromDB", false));
+        setGlobalDetail((state) => state.set("isLoadingFromDB", false));
         return;
       }
-      setGlobalState((state) =>
+      setGlobalDetail((state) =>
         state.merge({
           globalData: state.globalData.load(result),
           isLoadingFromDB: false,

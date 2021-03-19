@@ -1,5 +1,5 @@
 import path from "path";
-import { Configuration, DefinePlugin } from "webpack";
+import { Configuration } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import DotEnvPlugin from "dotenv-webpack";
@@ -44,10 +44,6 @@ const webpackConfig: Configuration = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/frontend/index.html" }),
-    new DefinePlugin({
-      "process.env.getTweetsUrl": JSON.stringify("/api/tweet"),
-      "process.env.getRateUrl": JSON.stringify("/api/rate"),
-    }),
     new DotEnvPlugin(),
   ],
   externals: {

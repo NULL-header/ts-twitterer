@@ -1,13 +1,11 @@
 import { MockedObjectDeep } from "ts-jest/dist/utils/testing";
-import sampleRate from "samples/sample-rate-raw-test.json";
-import sampleTweets from "samples/sample-tweet-raw-test.json";
 import { PartialDeep } from "type-fest";
 import { mergeDeep } from "timm";
+import sampleTweets from "samples/tweet-sample.json";
 
 type Twitter = typeof import("twitter");
 
 const defaultApiValue = {
-  "application/rate_limit_status": sampleRate,
   "lists/statuses": sampleTweets,
 };
 type DefaultApiValue = typeof defaultApiValue;
