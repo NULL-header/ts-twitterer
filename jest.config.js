@@ -6,6 +6,7 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
     "^.+\\.mjs$": "babel-jest",
   },
+  setupFilesAfterEnv: ["./jest.setup.ts"],
   moduleDirectories: ["node_modules", __dirname],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   globals: {
