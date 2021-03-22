@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo, useRef } from "react";
 import {
   Box,
   Text,
@@ -50,17 +50,21 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
   ({ isOpen, onClose }) => {
     const { setTimelineDetail, timelineDetail } = useTimelineDetail();
     const { handleSubmit, errors, register } = useForm<{ listid: string }>();
+    const listids = useMemo(() => timelineDetail.listids, [
+      timelineDetail.listids,
+    ]);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    register(useValidate(listids))(inputRef.current);
     const submitData = useCallback(
       handleSubmit((data) => {
         setTimelineDetail((detail) =>
           detail.set("listids", detail.listids.push(data.listid)),
         );
+        if (inputRef.current == null) return;
+        inputRef.current.value = "";
       }),
       [],
     );
-    const listids = useMemo(() => timelineDetail.listids, [
-      timelineDetail.listids,
-    ]);
     const deleteListid = useCallback(
       (listid: string) =>
         setTimelineDetail((detail) => detail.removeListid(listid)),
@@ -76,7 +80,7 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
             <FormControl isInvalid={errors.listid != null}>
               <Input
                 name="listid"
-                ref={register(useValidate(listids))}
+                ref={inputRef}
                 placeholder="Put ids you wanna add any lists"
               />
             </FormControl>
