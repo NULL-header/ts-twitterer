@@ -28,4 +28,14 @@ export class TimelineDetail extends BaseRecord {
   load(obj: TimelineDetailObj) {
     return this.merge(obj as any);
   }
+
+  removeListid(listid: string) {
+    const result = this.merge({
+      listids: this.listids.remove(this.listids.indexOf(listid)),
+      tweetsDetail: this.tweetsDetail.removeListid(listid),
+    });
+    if (this.currentList === listid)
+      return result.set("currentList", undefined);
+    return result;
+  }
 }

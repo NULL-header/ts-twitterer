@@ -55,6 +55,14 @@ export class TweetsDetail extends BaseRecord {
       );
   }
 
+  removeListid(listid: string) {
+    return this.merge({
+      newestDataidMap: this.newestDataidMap.remove(listid),
+      newestUniqidMap: this.newestUniqidMap.remove(listid),
+      oldestUniqidMap: this.oldestUniqidMap.remove(listid),
+    });
+  }
+
   load(obj: TweetsDetailObj): TweetsDetail {
     return this.merge(obj as any);
   }
