@@ -1,1 +1,1 @@
-export * from "./ToolButton";
+export { ToolContainer as ToolButton } from "./ToolContainer";
