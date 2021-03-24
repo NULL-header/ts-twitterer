@@ -17,8 +17,10 @@ const ListidItem = memo<{
   listid: string;
   deleteListid: (listid: string) => void;
 }>(({ deleteListid, listid }) => (
-  <Box display="flex">
-    <Text>{listid}</Text>
+  <Box display="flex" width="100%">
+    <Text margin="auto auto auto 0" textAlign="center">
+      {listid}
+    </Text>
     <Button onClick={() => deleteListid(listid)}>DELETE</Button>
   </Box>
 ));
