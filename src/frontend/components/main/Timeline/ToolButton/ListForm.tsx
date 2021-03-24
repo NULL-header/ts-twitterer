@@ -18,7 +18,7 @@ const ListidItem = memo<{
   deleteListid: (listid: string) => void;
 }>(({ deleteListid, listid }) => (
   <Box display="flex" width="100%">
-    <Text margin="auto auto auto 0" textAlign="center">
+    <Text width="70%" margin="auto auto auto 0" textAlign="left">
       {listid}
     </Text>
     <Button onClick={() => deleteListid(listid)}>DELETE</Button>
@@ -90,21 +90,23 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
           {listids.map((e) => (
             <ListidItem deleteListid={deleteListid} listid={e} key={e} />
           ))}
-          <form onSubmit={submitData}>
-            <FormControl isInvalid={errors.listid != null}>
-              <Input
-                name="listid"
-                ref={useCallback((e) => {
-                  register(e, validateOptions);
-                  inputRef.current = e;
-                }, [])}
-                placeholder="Put ids you wanna add any lists"
-              />
-              <FormErrorMessage>
-                <Text>{errors.listid?.message}</Text>
-              </FormErrorMessage>
-            </FormControl>
-          </form>
+          <Box width="70%" margin="auto auto auto 0">
+            <form onSubmit={submitData}>
+              <FormControl isInvalid={errors.listid != null}>
+                <Input
+                  name="listid"
+                  ref={useCallback((e) => {
+                    register(e, validateOptions);
+                    inputRef.current = e;
+                  }, [])}
+                  placeholder="Put ids you wanna add any lists"
+                />
+                <FormErrorMessage>
+                  <Text>{errors.listid?.message}</Text>
+                </FormErrorMessage>
+              </FormControl>
+            </form>
+          </Box>
         </VStack>
       </Modal>
     );
