@@ -15,9 +15,9 @@ const CircleWithColorMode = memo<{ children: ReactNode }>(({ children }) => {
   const { colorMode } = useColorMode();
   const commonSetting = {
     size: 10,
-    position: "absolute" as any,
-    right: "10",
-    bottom: "10",
+    // position: "absolute" as any,
+    // right: "10",
+    // bottom: "10",
   };
   if (colorMode === "dark")
     return (
@@ -47,16 +47,16 @@ export const ToolButton = memo<{
   );
 
   return (
-    <CircleWithColorMode>
-      <Menu isLazy>
-        <MenuButton>
+    <Menu isLazy>
+      <MenuButton position="absolute" right="10" bottom="10">
+        <CircleWithColorMode>
           <Icon as={HiMenu} />
-        </MenuButton>
-        <MenuList transformOrigin="right bottom !important">
-          <MenuItem onClick={openListTool}>List ids</MenuItem>
-        </MenuList>
-      </Menu>
-    </CircleWithColorMode>
+        </CircleWithColorMode>
+      </MenuButton>
+      <MenuList>
+        <MenuItem onClick={openListTool}>List ids</MenuItem>
+      </MenuList>
+    </Menu>
   );
 });
 
