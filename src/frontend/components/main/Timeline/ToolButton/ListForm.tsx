@@ -32,18 +32,14 @@ const validateListIdsLength = (length: number) =>
        ${CONSTVALUE.LIST_LIMIT}
     `;
 
-const useValidate = (listids: List<string>) =>
-  useMemo(
-    () => ({
-      pattern: {
-        value: /^[0-9]+$/,
-        message: "This is wrong pattern. use number only.",
-      },
-      validate: () => validateListIdsLength(listids.size),
-      required: "This is required. Do not submit without putting the id.",
-    }),
-    [listids.size],
-  );
+const useValidate = (listids: List<string>) => ({
+  pattern: {
+    value: /^[0-9]+$/,
+    message: "This is wrong pattern. use number only.",
+  },
+  validate: () => validateListIdsLength(listids.size),
+  required: "This is required. Do not submit without putting the id.",
+});
 
 export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
   ({ isOpen, onClose }) => {
@@ -68,7 +64,7 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
         setTimelineDetail((detail) => detail.removeListid(listid)),
       [],
     );
-    register(useValidate(listids))(inputRef.current);
+    register({ name: "listid", type: "custom" }, useValidate(listids));
     return (
       <Modal isOpen={isOpen} onClose={onClose} header="Ids of a list">
         <VStack>
@@ -79,7 +75,10 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
             <FormControl isInvalid={errors.listid != null}>
               <Input
                 name="listid"
-                ref={inputRef}
+                ref={useCallback((e) => {
+                  register(e, useValidate(listids));
+                  inputRef.current = e;
+                }, [])}
                 placeholder="Put ids you wanna add any lists"
               />
               <FormErrorMessage>
