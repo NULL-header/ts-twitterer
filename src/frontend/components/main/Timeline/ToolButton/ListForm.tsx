@@ -8,8 +8,7 @@ import {
   FormErrorMessage,
   Input,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
-import { List } from "immutable";
+import { useForm, RegisterOptions } from "react-hook-form";
 import { CONSTVALUE } from "frontend/CONSTVALUE";
 import { useTimelineDetail } from "../context";
 import { Modal } from "./Modal";
@@ -25,21 +24,39 @@ const ListidItem = memo<{
 ));
 ListidItem.displayName = "ListidItem";
 
-const validateListIdsLength = (length: number) =>
+const validateListIdsLength = (length: number) => () =>
   length <= CONSTVALUE.LIST_LIMIT ||
   `
       Listids is too many. delete list id until it is under
        ${CONSTVALUE.LIST_LIMIT}
     `;
 
-const useValidate = (listids: List<string>) => ({
-  pattern: {
-    value: /^[0-9]+$/,
-    message: "This is wrong pattern. use number only.",
-  },
-  validate: () => validateListIdsLength(listids.size),
-  required: "This is required. Do not submit without putting the id.",
-});
+type Listids = ReturnType<
+  typeof useTimelineDetail
+>["timelineDetail"]["listids"];
+
+const validateDuplicateListid = (listids: Listids) => ({
+  listid,
+}: {
+  listid: string;
+}) => !listids.includes(listid) || "The listid is duplicated.";
+
+const useValidate = (listids: Listids) =>
+  useMemo(
+    () =>
+      ({
+        pattern: {
+          value: /^[0-9]+$/,
+          message: "This is wrong pattern. use number only.",
+        },
+        validate: {
+          listidsLength: validateListIdsLength(listids.size),
+          duplicate: validateDuplicateListid(listids),
+        },
+        required: "This is required. Do not submit without putting the id.",
+      } as RegisterOptions),
+    [listids],
+  );
 
 export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
   ({ isOpen, onClose }) => {
@@ -64,7 +81,7 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
         setTimelineDetail((detail) => detail.removeListid(listid)),
       [],
     );
-    register({ name: "listid", type: "custom" }, useValidate(listids));
+    const validateOptions = useValidate(listids);
     return (
       <Modal isOpen={isOpen} onClose={onClose} header="Ids of a list">
         <VStack>
@@ -76,7 +93,7 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
               <Input
                 name="listid"
                 ref={useCallback((e) => {
-                  register(e, useValidate(listids));
+                  register(e, validateOptions);
                   inputRef.current = e;
                 }, [])}
                 placeholder="Put ids you wanna add any lists"
