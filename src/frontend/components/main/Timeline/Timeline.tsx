@@ -1,12 +1,10 @@
 import React, {
-  useState,
   useRef,
   useMemo,
   useLayoutEffect,
   MutableRefObject,
   useEffect,
   memo,
-  useCallback,
 } from "react";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { delayCall, useConstAsyncTask } from "frontend/util";
@@ -16,6 +14,7 @@ import { TimelineDetail } from "./TimelineDetail";
 import { Tweet } from "./Tweet";
 import { ListSelector } from "./ListSelector";
 import { ToolButton } from "./ToolButton";
+import { Provider, useTimelineDetail } from "./context";
 
 // extract to pass key only
 const TweetBox = React.memo(({ tweet }: { tweet: Tweet }) => (
@@ -94,8 +93,8 @@ const updateTweets = async (...args: Args<typeof loadNewTweets>) => {
   return result;
 };
 
-const Timeline = memo(() => {
-  const [timelineDetail, setTimelineDetail] = useState(new TimelineDetail());
+const TimelineContainer = memo(() => {
+  const { timelineDetail, setTimelineDetail } = useTimelineDetail();
   const loadTask = useConstAsyncTask(
     timelineDetail,
     async ({ signal, getState }) => {
@@ -111,17 +110,6 @@ const Timeline = memo(() => {
   const tweets = useMemo(() => timelineDetail.tweetsDetail.tweets, [
     timelineDetail.tweetsDetail.tweets,
   ]);
-  const currentList = useMemo(() => timelineDetail.currentList, [
-    timelineDetail.currentList,
-  ]);
-  const setCurrentList = useCallback(
-    (listid: string) =>
-      setTimelineDetail((detail) => detail.set("currentList", listid)),
-    [],
-  );
-  const listids = useMemo(() => timelineDetail.listids, [
-    timelineDetail.listids,
-  ]);
   const ref = useRef<HTMLDivElement | null>(null);
   useScrollEndEffect(ref as any, () => loadTask.start());
   useEffect(() => {
@@ -130,11 +118,7 @@ const Timeline = memo(() => {
   }, [tweets]);
   return (
     <>
-      <ListSelector
-        currentList={currentList}
-        setCurrentList={setCurrentList}
-        listids={listids}
-      />
+      <ListSelector />
       <Box padding="3vw" overflowY="scroll" height="auto" ref={ref}>
         <Empty />
         <Tweets tweets={tweets} />
@@ -144,5 +128,11 @@ const Timeline = memo(() => {
     </>
   );
 });
+
+const Timeline = memo(() => (
+  <Provider>
+    <TimelineContainer />
+  </Provider>
+));
 
 export { Timeline };
