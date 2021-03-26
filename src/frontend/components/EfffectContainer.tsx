@@ -1,10 +1,18 @@
-import React, { memo, useCallback } from "react";
-import { useMount } from "react-use";
-import { useSetGlobalDetail } from "frontend/globalState";
-import { initializeGlobal } from "frontend/worker/connect";
+import React, { memo, useCallback, useRef } from "react";
+import { useMount, useUpdateEffect } from "react-use";
+import { useGlobal } from "frontend/globalState";
+import { initializeGlobal, saveLastData } from "frontend/worker/connect";
 import { useAsyncTask } from "react-hooks-async";
 import { NoLastGlobalDataError } from "frontend/errors";
 import { AsyncReturnType } from "type-fest";
+
+const useEffectWithWaitTwoTimes = (effect: () => void, deps: any[]) => {
+  const ref = useRef<boolean>(false);
+  useUpdateEffect(() => {
+    if (!ref.current) ref.current = true;
+    else effect();
+  }, deps);
+};
 
 const getLastData = async () => {
   let result: AsyncReturnType<typeof initializeGlobal> | undefined;
@@ -19,7 +27,7 @@ const getLastData = async () => {
 };
 
 export const EffectContainer = memo(({ children }) => {
-  const setGlobalDetail = useSetGlobalDetail();
+  const { globalState, setGlobalDetail } = useGlobal();
   const initTask = useAsyncTask(
     useCallback(async ({ signal }) => {
       setGlobalDetail((state) => state.set("isLoadingFromDB", true));
@@ -40,5 +48,10 @@ export const EffectContainer = memo(({ children }) => {
   useMount(() => {
     initTask.start();
   });
+
+  useEffectWithWaitTwoTimes(() => {
+    saveLastData({ globalDetailObj: globalState.globalData.toJS() });
+  }, [globalState.globalData, globalState.isLoadingFromDB]);
+
   return <>{children}</>;
 });
