@@ -7,4 +7,8 @@ declare module "immutable" {
     last(): T | undefined;
     last(initialValue: T): T;
   }
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  interface Record<TProps extends Object> {
+    toJS(): TProps;
+  }
 }
