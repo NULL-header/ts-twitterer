@@ -1,44 +1,32 @@
 import Immutable from "immutable";
 
-type ArrayBranch = "ArrayBranch";
-type MapBranch = "MapBranch";
+type RecordImmutable<T> = {
+  [P in keyof T]: T[P] extends Immutable.Record<infer A>
+    ? RecordImmutable<A>
+    : T[P] extends Immutable.List<infer A>
+    ? ListImmutable<A>
+    : T[P] extends Immutable.Map<infer K, infer V>
+    ? MapImmutable<K, V>
+    : T[P];
+};
 
-type RecursiveImmutable<
-  T extends
-    | Record<string, any>
-    | Record<ArrayBranch, any>
-    | Record<MapBranch, any>
-> = T extends Record<ArrayBranch, infer A>
-  ? A extends Immutable.Record<infer B>
-    ? RecursiveImmutable<B>
-    : A extends Immutable.List<infer B>
-    ? RecursiveImmutable<Record<ArrayBranch, B>>[]
-    : A extends Immutable.Map<infer B, infer C>
-    ? B extends string
-      ? Record<B, RecursiveImmutable<Record<MapBranch, C>>>
-      : never
-    : A
-  : T extends Record<MapBranch, infer A>
-  ? A extends Immutable.Record<infer B>
-    ? RecursiveImmutable<B>
-    : A extends Immutable.List<infer B>
-    ? RecursiveImmutable<Record<MapBranch, B>>[]
-    : A extends Immutable.Map<infer B, infer C>
-    ? B extends string
-      ? Record<B, RecursiveImmutable<Record<MapBranch, C>>>
-      : never
-    : A
-  : {
-      [P in keyof T]: T[P] extends Immutable.Record<infer A>
-        ? RecursiveImmutable<A>
-        : T[P] extends Immutable.List<infer A>
-        ? RecursiveImmutable<Record<ArrayBranch, A>>[]
-        : T[P] extends Immutable.Map<infer A, infer B>
-        ? A extends string
-          ? Record<A, RecursiveImmutable<Record<MapBranch, B>>>
-          : never
-        : T[P];
-    };
+type ListImmutable<T> = T extends Immutable.Record<infer A>
+  ? RecordImmutable<A>[]
+  : T extends Immutable.List<infer A>
+  ? ListImmutable<A>[]
+  : T extends Immutable.Map<infer K, infer V>
+  ? MapImmutable<K, V>[]
+  : T[];
+
+type MapImmutable<K, V> = K extends string
+  ? V extends Immutable.Record<infer A>
+    ? Record<K, RecordImmutable<A>>
+    : V extends Immutable.List<infer A>
+    ? Record<K, ListImmutable<A>>
+    : V extends Immutable.Map<infer KA, infer VA>
+    ? Record<K, MapImmutable<KA, VA>>
+    : Record<K, V>
+  : never;
 
 declare module "immutable" {
   interface List<T> {
@@ -49,9 +37,6 @@ declare module "immutable" {
   }
   // eslint-disable-next-line @typescript-eslint/ban-types
   interface Record<TProps extends Object> {
-    // toJS(): {
-    // [P in keyof TProps]: TProps[P] extends List<infer A> ? A[] : TProps[P];
-    // };
-    toJS(): RecursiveImmutable<TProps>;
+    toJS(): RecordImmutable<TProps>;
   }
 }
