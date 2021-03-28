@@ -23,10 +23,6 @@ export interface TweetsDetailObj {
 const BaseRecord = Immutable.Record(initValue);
 
 export class TweetsDetail extends BaseRecord {
-  toJS() {
-    return super.toJS() as TweetsDetailObj;
-  }
-
   // 古い順に渡す
   addTweets(tweets: Tweet[]) {
     // 配列がゼロである可能性を潰して、nextTweets.firstとnextTweets.lastがundefinedである可能性を潰す
