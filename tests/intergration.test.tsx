@@ -12,6 +12,7 @@ import {
   getByText,
   act,
 } from "@testing-library/react";
+import { db } from "frontend/worker/connect/db";
 import { makeServer, makeSetUpTwitterMock } from "./utilForTest";
 import "@testing-library/jest-dom";
 
@@ -38,6 +39,8 @@ describe("intergration", () => {
     await server.run();
   });
   beforeEach(async () => {
+    await db.tweets.clear();
+    await db.globalData.clear();
     jest.clearAllMocks();
     renderResult = render(<FrontApp />);
     await waitFor(() => {
@@ -70,6 +73,20 @@ describe("intergration", () => {
       });
     });
     fireEvent.submit(inputs[0]);
+    expect(await findArticleFromName("Timeline")).toBeInTheDocument();
+  });
+  it("show timeline directly", async () => {
+    const tokenForm = screen.getByLabelText("tokens");
+    const inputs = tokenForm.getElementsByTagName("input");
+    act(() => {
+      Array.from(inputs).forEach((e) => {
+        e.value = "tokens";
+      });
+    });
+    fireEvent.submit(inputs[0]);
+    await waitFor(() => {
+      expect(queryArticleFromName("Timeline")).not.toBeInTheDocument();
+    });
     expect(await findArticleFromName("Timeline")).toBeInTheDocument();
   });
   describe("with cookie", () => {
