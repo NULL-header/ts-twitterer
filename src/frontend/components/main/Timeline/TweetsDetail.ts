@@ -3,8 +3,8 @@ import Immutable from "immutable";
 const initValue = {
   tweets: Immutable.List<Tweet>(),
   newestDataidMap: Immutable.Map<string, string>(),
-  newestUniqidMap: Immutable.Map<string, number>(),
-  oldestUniqidMap: Immutable.Map<string, number>(),
+  newestUniqidMap: Immutable.Map<string, number | undefined>(),
+  oldestUniqidMap: Immutable.Map<string, number | undefined>(),
   windowLength: 30,
   currentList: undefined as string | undefined,
   listids: Immutable.List<string>(),
@@ -13,8 +13,8 @@ const initValue = {
 export interface TweetsDetailObj {
   tweets: Tweet[];
   newestDataidMap: Record<string, string>;
-  newestUniqidMap: Record<string, number>;
-  oldestUniqidMap: Record<string, number>;
+  newestUniqidMap: Record<string, number | undefined>;
+  oldestUniqidMap: Record<string, number | undefined>;
   listids: string[];
   windowLength: number;
   currentList: string | undefined;
@@ -56,6 +56,14 @@ export class TweetsDetail extends BaseRecord {
       newestDataidMap: this.newestDataidMap.remove(listid),
       newestUniqidMap: this.newestUniqidMap.remove(listid),
       oldestUniqidMap: this.oldestUniqidMap.remove(listid),
+    });
+  }
+
+  addListid(listid: string) {
+    return this.merge({
+      newestDataidMap: this.newestDataidMap.set(listid, "0"),
+      newestUniqidMap: this.newestUniqidMap.set(listid, undefined),
+      oldestUniqidMap: this.oldestUniqidMap.set(listid, undefined),
     });
   }
 

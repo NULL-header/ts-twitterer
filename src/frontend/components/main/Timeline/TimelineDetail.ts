@@ -13,6 +13,7 @@ const initValue = {
   currentList: undefined as string | undefined,
   limitData: undefined as LimitData | undefined,
   tweetsDetail: new TweetsDetail(),
+  isLoadingFromDB: undefined as boolean | undefined,
 };
 
 export interface TimelineDetailObj {
@@ -37,5 +38,12 @@ export class TimelineDetail extends BaseRecord {
     if (this.currentList === listid)
       return result.set("currentList", undefined);
     return result;
+  }
+
+  addListid(listid: string) {
+    return this.merge({
+      listids: this.listids.push(listid),
+      tweetsDetail: this.tweetsDetail.addListid(listid),
+    });
   }
 }
