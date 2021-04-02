@@ -1,5 +1,6 @@
 import Dexie from "dexie";
 import { GlobalDataObj } from "frontend/globalState/GlobalData";
+import { TimelineDetail } from "frontend/components/main/Timeline/TimelineDetail";
 
 const tweetColumnsFirst = [
   "++tweet.uniqid",
@@ -12,6 +13,8 @@ const tweetColumnsFirst = [
   "tweet.isRetweeted",
 ];
 
+const timelineDetailColumnsFirst = ["uniqid", "lastData"];
+
 const globalDataFirst = ["uniqid", "lastData"];
 
 const makeSchema = (columns: string[]) => columns.join(", ");
@@ -21,12 +24,18 @@ class MyDB extends Dexie {
 
   globalData!: Dexie.Table<{ uniqid: 0; lastData: GlobalDataObj }, 0>;
 
+  timelineDetail!: Dexie.Table<{
+    uniqid: 0;
+    lastData: ReturnType<typeof TimelineDetail.prototype.toJS>;
+  }>;
+
   constructor() {
     super("ts-twitterer");
 
     this.version(1).stores({
       tweets: makeSchema(tweetColumnsFirst),
       globalData: makeSchema(globalDataFirst),
+      timelineDetail: makeSchema(timelineDetailColumnsFirst),
     });
   }
 }
