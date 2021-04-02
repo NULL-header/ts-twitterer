@@ -4,12 +4,19 @@ import React, {
   useLayoutEffect,
   MutableRefObject,
   useEffect,
+  useCallback,
   memo,
 } from "react";
 import { Divider, Box, VStack } from "@chakra-ui/react";
 import { delayCall, useConstAsyncTask } from "frontend/util";
-import { loadNewTweets } from "frontend/worker/connect";
+import {
+  loadNewTweets,
+  saveTimelineDetail,
+  loadTimelineDetail,
+} from "frontend/worker/connect";
 import { CurrentListInitError } from "frontend/errors";
+import { useMount } from "react-use";
+import { useAsyncTask } from "react-hooks-async";
 import { TimelineDetail } from "./TimelineDetail";
 import { Tweet } from "./Tweet";
 import { ListSelector } from "./ListSelector";
@@ -99,13 +106,34 @@ const TimelineContainer = memo(() => {
     timelineDetail,
     async ({ signal, getState }) => {
       const { currentList, tweetsDetail } = getState();
-      const nextTweetsDetail = await updateTweets({
+      const newTweets = await updateTweets({
         currentList,
         tweetsDetailObj: tweetsDetail.toJS(),
       });
-      if (signal.aborted || nextTweetsDetail == null) return;
-      setTimelineDetail((detail) => detail.merge(nextTweetsDetail as any));
+      if (signal.aborted || newTweets == null) return;
+      setTimelineDetail((detail) =>
+        detail.set(
+          "tweetsDetail",
+          detail.tweetsDetail.mergeDeep(newTweets as any),
+        ),
+      );
     },
+  );
+  const initLoadTask = useAsyncTask(
+    useCallback(async ({ signal }) => {
+      setTimelineDetail((detail) => detail.set("isLoadingFromDB", true));
+      const nextTimelineDetail = await loadTimelineDetail();
+      if (signal.aborted) return;
+      if (nextTimelineDetail == null) {
+        setTimelineDetail((detail) => detail.set("isLoadingFromDB", false));
+        return;
+      }
+      setTimelineDetail((detail) =>
+        detail
+          .mergeDeep(nextTimelineDetail as any)
+          .set("isLoadingFromDB", false),
+      );
+    }, []),
   );
   const tweets = useMemo(() => timelineDetail.tweetsDetail.tweets, [
     timelineDetail.tweetsDetail.tweets,
@@ -116,6 +144,20 @@ const TimelineContainer = memo(() => {
     if (tweets.size !== 0) return;
     loadTask.start();
   }, [tweets]);
+  useEffect(() => {
+    if (
+      timelineDetail.isLoadingFromDB == null ||
+      timelineDetail.isLoadingFromDB
+    ) {
+      return;
+    }
+    console.log("save timelineDetail");
+    saveTimelineDetail(timelineDetail.toJS());
+  }, [timelineDetail]);
+  useMount(() => {
+    initLoadTask.start();
+  });
+
   return (
     <>
       <ListSelector />
