@@ -101,7 +101,7 @@ const updateTweets = async (...args: Args<typeof loadNewTweets>) => {
 };
 
 const TimelineContainer = memo(() => {
-  const { timelineDetail, setTimelineDetail } = useTimelineDetail();
+  const [timelineDetail, setTimelineDetail] = useTimelineDetail();
   const loadTask = useConstAsyncTask(
     timelineDetail,
     async ({ signal, getState }) => {

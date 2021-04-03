@@ -33,9 +33,7 @@ const validateListIdsLength = (length: number) => () =>
        ${CONSTVALUE.LIST_LIMIT}
     `;
 
-type Listids = ReturnType<
-  typeof useTimelineDetail
->["timelineDetail"]["listids"];
+type Listids = ReturnType<typeof useTimelineDetail>[0]["listids"];
 
 const validateDuplicateListid = (listids: Listids) => ({
   listid,
@@ -62,7 +60,7 @@ const useValidate = (listids: Listids) =>
 
 export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
   ({ isOpen, onClose }) => {
-    const { setTimelineDetail, timelineDetail } = useTimelineDetail();
+    const [timelineDetail, setTimelineDetail] = useTimelineDetail();
     const { handleSubmit, errors, register } = useForm<{ listid: string }>();
     const listids = useMemo(() => timelineDetail.listids, [
       timelineDetail.listids,

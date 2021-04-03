@@ -27,7 +27,7 @@ const getLastData = async () => {
 };
 
 export const EffectContainer = memo(({ children }) => {
-  const { globalState, setGlobalDetail } = useGlobal();
+  const [globalState, setGlobalDetail] = useGlobal();
   const initTask = useAsyncTask(
     useCallback(async ({ signal }) => {
       setGlobalDetail((state) => state.set("isLoadingFromDB", true));

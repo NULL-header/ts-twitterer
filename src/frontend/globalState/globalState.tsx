@@ -8,6 +8,7 @@ import React, {
   useMemo,
   SetStateAction,
 } from "react";
+import { createContainer } from "react-tracked";
 import { GlobalDetail } from "./GlobalDetail";
 
 // const reducer: GlobalReducer = (state, action) => {
@@ -133,26 +134,8 @@ import { GlobalDetail } from "./GlobalDetail";
 //   },
 // };
 
-const context = createContext(
-  (null as any) as {
-    globalState: GlobalDetail;
-    setGlobalDetail: Dispatch<SetStateAction<GlobalDetail>>;
-  },
-);
-export const Provider = memo(({ children }) => {
-  const [globalState, setGlobalDetail] = useState(new GlobalDetail());
-  const value = useMemo(
-    () => ({
-      globalState,
-      setGlobalDetail,
-    }),
-    [globalState],
-  );
-  return <context.Provider value={value}>{children}</context.Provider>;
-});
-export const useGlobal = () => useContext(context);
-export const useSetGlobalDetail = () => {
-  const globalValue = useContext(context);
-  const setter = useMemo(() => globalValue.setGlobalDetail, []);
-  return setter;
-};
+export const {
+  Provider,
+  useTracked: useGlobal,
+  useUpdate: useSetGlobalDetail,
+} = createContainer(() => useState(new GlobalDetail()));

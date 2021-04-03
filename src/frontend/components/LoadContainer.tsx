@@ -64,7 +64,7 @@ const useLoadTasks = (setState: (state: any) => void) => {
 };
 
 const useGlobalData = () => {
-  const { globalState } = useGlobal();
+  const [globalState] = useGlobal();
   console.log(globalState);
   const isLoading = useMemo(() => globalState.isLoadingFromDB, [
     globalState.isLoadingFromDB,

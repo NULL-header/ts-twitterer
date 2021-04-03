@@ -3,7 +3,7 @@ import { Select } from "@chakra-ui/react";
 import { useTimelineDetail } from "./context";
 
 export const ListSelector = memo(() => {
-  const { setTimelineDetail, timelineDetail } = useTimelineDetail();
+  const [timelineDetail, setTimelineDetail] = useTimelineDetail();
   const currentList = useMemo(() => timelineDetail.currentList, [
     timelineDetail.currentList,
   ]);
