@@ -1,5 +1,5 @@
 import Dexie from "dexie";
-import { GlobalDataObj } from "frontend/globalState/GlobalData";
+import { AuthManager } from "frontend/globalState/AuthManager";
 import { TimelineDetail } from "frontend/components/main/Timeline/TimelineDetail";
 
 const tweetColumnsFirst = [
@@ -22,7 +22,10 @@ const makeSchema = (columns: string[]) => columns.join(", ");
 class MyDB extends Dexie {
   tweets!: Dexie.Table<TweetColumns, number>;
 
-  globalData!: Dexie.Table<{ uniqid: 0; lastData: GlobalDataObj }, 0>;
+  globalData!: Dexie.Table<
+    { uniqid: 0; lastData: ReturnType<AuthManager["toJS"]> },
+    0
+  >;
 
   timelineDetail!: Dexie.Table<{
     uniqid: 0;
