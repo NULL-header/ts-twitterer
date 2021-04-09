@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { useEffect, Reducer, useRef } from "react";
 import { createContainer } from "react-tracked";
 import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";

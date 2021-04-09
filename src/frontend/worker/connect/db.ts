@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 import { AuthManager } from "frontend/globalState/AuthManager";
-import { TimelineDetail } from "frontend/components/main/Timeline/TimelineDetail";
+import { TweetsManager } from "frontend/components/main/Timeline/TweetsManager";
 
 const tweetColumnsFirst = [
   "++tweet.uniqid",
@@ -29,7 +29,7 @@ class MyDB extends Dexie {
 
   timelineDetail!: Dexie.Table<{
     uniqid: 0;
-    lastData: ReturnType<typeof TimelineDetail.prototype.toJS>;
+    lastData: ReturnType<TweetsManager["toJS"]>;
   }>;
 
   constructor() {

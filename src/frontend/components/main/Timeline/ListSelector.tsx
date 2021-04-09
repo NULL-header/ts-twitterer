@@ -1,20 +1,20 @@
-import React, { memo, useMemo, useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import { Select } from "@chakra-ui/react";
-import { useTimelineDetail } from "./context";
+import { useDispatch, useSelector } from "./context";
 
 export const ListSelector = memo(() => {
-  const [timelineDetail, setTimelineDetail] = useTimelineDetail();
-  const currentList = useMemo(() => timelineDetail.currentList, [
-    timelineDetail.currentList,
-  ]);
-  const listids = useMemo(() => timelineDetail.listids, [
-    timelineDetail.listids,
-  ]);
+  const dispatch = useDispatch();
+  const currentList = useSelector((state) => state.tweetsManager.currentList);
+  const listids = useSelector((state) => state.tweetsManager.listids);
   const setCurrentList = useCallback(
     (e: React.SyntheticEvent<HTMLSelectElement, Event>) =>
-      setTimelineDetail((detail) =>
-        detail.set("currentList", e.currentTarget.value),
-      ),
+      dispatch({
+        type: "DISPATCH_ASYNC",
+        updater: (state) =>
+          state.update("tweetsManager", (manager) =>
+            manager.set("currentList", e.currentTarget.value),
+          ),
+      }),
     [],
   );
   return (

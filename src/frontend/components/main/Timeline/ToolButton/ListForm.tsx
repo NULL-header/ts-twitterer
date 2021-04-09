@@ -33,7 +33,9 @@ const validateListIdsLength = (length: number) => () =>
        ${CONSTVALUE.LIST_LIMIT}
     `;
 
-type Listids = ReturnType<typeof useTimelineDetail>[0]["listids"];
+type Listids = ReturnType<
+  typeof useTimelineDetail
+>[0]["tweetsManager"]["listids"];
 
 const validateDuplicateListid = (listids: Listids) => ({
   listid,
@@ -60,17 +62,21 @@ const useValidate = (listids: Listids) =>
 
 export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
   ({ isOpen, onClose }) => {
-    const [timelineDetail, setTimelineDetail] = useTimelineDetail();
+    const [timelineDetail, dispatch] = useTimelineDetail();
     const { handleSubmit, errors, register } = useForm<{ listid: string }>();
-    const listids = useMemo(() => timelineDetail.listids, [
-      timelineDetail.listids,
+    const listids = useMemo(() => timelineDetail.tweetsManager.listids, [
+      timelineDetail.tweetsManager.listids,
     ]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const submitData = useCallback(
       handleSubmit((data) => {
-        setTimelineDetail((detail) =>
-          detail.set("listids", detail.listids.push(data.listid)),
-        );
+        dispatch({
+          type: "DISPATCH_ASYNC",
+          updater: (state) =>
+            state.update("tweetsManager", (manager) =>
+              manager.addListid(data.listid),
+            ),
+        });
         if (inputRef.current == null) return;
         inputRef.current.value = "";
       }),
@@ -78,7 +84,13 @@ export const ListForm = memo<{ isOpen: boolean; onClose: () => void }>(
     );
     const deleteListid = useCallback(
       (listid: string) =>
-        setTimelineDetail((detail) => detail.removeListid(listid)),
+        dispatch({
+          type: "DISPATCH_ASYNC",
+          updater: (state) =>
+            state.update("tweetsManager", (manager) =>
+              manager.removeListid(listid),
+            ),
+        }),
       [],
     );
     const validateOptions = useValidate(listids);

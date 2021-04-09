@@ -1,49 +1,56 @@
 import Immutable from "immutable";
-import { TweetsDetailObj, TweetsDetail } from "./TweetsDetail";
-
-interface Limit {
-  limitRate: number;
-  remaining: number;
-}
-
-type LimitData = Record<"lists", Limit>;
+import {
+  saveTimelineDetail,
+  loadTimelineDetail,
+  deleteCacheTweetsAll,
+} from "frontend/worker/connect";
+import { TweetsManager } from "./TweetsManager";
 
 const initValue = {
-  listids: Immutable.List<string>(),
-  currentList: undefined as string | undefined,
-  limitData: undefined as LimitData | undefined,
-  tweetsDetail: new TweetsDetail(),
+  tweetsManager: new TweetsManager(),
   isLoadingFromDB: undefined as boolean | undefined,
 };
-
-export interface TimelineDetailObj {
-  listids: string[];
-  currentList: string | undefined;
-  limitData: LimitData | undefined;
-  tweetsDetail: TweetsDetailObj;
-}
 
 const BaseRecord = Immutable.Record(initValue);
 
 export class TimelineDetail extends BaseRecord {
-  load(obj: TimelineDetailObj) {
-    return this.merge(obj as any);
-  }
-
-  removeListid(listid: string) {
-    const result = this.merge({
-      listids: this.listids.remove(this.listids.indexOf(listid)),
-      tweetsDetail: this.tweetsDetail.removeListid(listid),
-    });
-    if (this.currentList === listid)
-      return result.set("currentList", undefined);
-    return result;
-  }
-
-  addListid(listid: string) {
+  async preload() {
     return this.merge({
-      listids: this.listids.push(listid),
-      tweetsDetail: this.tweetsDetail.addListid(listid),
+      tweetsManager: this.tweetsManager.mergeDeep(
+        (await loadTimelineDetail()) as any,
+      ),
+      isLoadingFromDB: false,
     });
+  }
+
+  load() {
+    const prev = this.set("isLoadingFromDB", true);
+    const after = prev.preload();
+    return [prev, after];
+  }
+
+  async deleteCache() {
+    const promise = deleteCacheTweetsAll();
+    const deleted = this.update("tweetsManager", (manager) =>
+      manager.deleteAll(),
+    );
+    await promise;
+    return deleted;
+  }
+
+  getVoids() {
+    return {
+      save: async () => {
+        await saveTimelineDetail(this.tweetsManager.toJS());
+      },
+    };
+  }
+
+  async updateAsync<T extends keyof ReturnType<TimelineDetail["toJS"]>>(
+    key: T,
+    updater: (prop: TimelineDetail[T]) => Promise<TimelineDetail[T]>,
+  ) {
+    const result = await updater(this[key]);
+    return this.set(key, result);
   }
 }
