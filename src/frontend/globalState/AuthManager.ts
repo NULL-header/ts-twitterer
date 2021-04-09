@@ -1,4 +1,5 @@
 import Immutable from "immutable";
+import { authorize, unauthorize } from "frontend/worker/connect";
 
 const initValue = {
   isAuthorized: false,
@@ -16,18 +17,12 @@ export class AuthManager extends BaseRecord {
       string
     >,
   ) {
-    await fetch("/api/token/set", {
-      body: JSON.stringify(tokens),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    await authorize(tokens);
     return this.set("isAuthorized", true);
   }
 
   async unauth() {
-    await fetch("/api/token/delete", { method: "POST" });
+    await unauthorize();
     return this.set("isAuthorized", false);
   }
 
