@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   FormControl,
   FormLabel,
@@ -10,23 +10,18 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { useForm, FieldError } from "react-hook-form";
-import { useAsyncTask } from "react-hooks-async";
-import { useSetGlobalDetail } from "frontend/globalState";
+import { useDispatch } from "frontend/globalState";
 import { HeaddingCommon } from "../ConfigBase";
 
-const tokens = [
-  "CONSUMER_TOKEN",
-  "CONSUMER_TOKEN_SECRET",
-  "ACCESS_TOKEN",
-  "ACCESS_TOKEN_SECRET",
-] as const;
-
 const names = {
-  ACCESS_TOKEN: "access_token",
-  ACCESS_TOKEN_SECRET: "access_token_secret",
-  CONSUMER_TOKEN: "consumer_token",
-  CONSUMER_TOKEN_SECRET: "consumer_token_secret",
-} as Record<typeof tokens[number], string>;
+  "ACCESS TOKEN": "accessToken",
+  "ACCESS TOKEN SECRET": "accessTokenSecret",
+  "CONSUMER TOKEN": "consumerToken",
+  "CONSUMER TOKEN SECRET": "consumerTokenSecret",
+} as const;
+
+type Names = typeof names;
+type TokenNames = keyof Names;
 
 const Item = React.memo(
   React.forwardRef<
@@ -45,33 +40,28 @@ const Item = React.memo(
   )),
 );
 
-type Fields = { [P in typeof tokens[number]]: string };
+type Fields = { [P in keyof typeof names]: string };
+
+// [keyof typeof names
 
 const AuthForm = () => {
-  const dataRef = useRef<Record<string, string>>({});
-  const setGlobalDetail = useSetGlobalDetail();
-  const authTask = useAsyncTask(
-    useCallback(async ({ signal }) => {
-      await fetch("/api/token/set", {
-        body: JSON.stringify(dataRef.current),
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (signal.aborted) return;
-      setGlobalDetail((state) =>
-        state.set("globalData", state.globalData.set("isAuthorized", true)),
-      );
-    }, []),
-  );
+  const dispatch = useDispatch();
   const { errors, register, handleSubmit } = useForm<Fields>();
   const submit = useCallback(
     handleSubmit((data) => {
-      Object.entries(data).forEach(([key, value]) => {
-        dataRef.current[names[key as keyof Fields]] = value;
+      const dataTransformed = {} as Record<Names[TokenNames], string>;
+      (Object.entries(data) as [TokenNames, string][]).forEach(
+        ([key, value]) => {
+          dataTransformed[names[key]] = value;
+        },
+      );
+      dispatch({
+        type: "DISPATCH_ASYNC",
+        updater: (state) =>
+          state.updateAsync("authManager", (manager) =>
+            manager.auth(dataTransformed),
+          ),
       });
-      authTask.start();
     }),
     [handleSubmit],
   );
@@ -81,7 +71,7 @@ const AuthForm = () => {
       <HeaddingCommon header="Tokens" />
       <form onSubmit={submit}>
         <VStack spacing="5vw">
-          {tokens.map((e) => (
+          {(Object.keys(names) as TokenNames[]).map((e) => (
             <Item
               key={e}
               name={e}

@@ -1,8 +1,8 @@
 import Immutable from "immutable";
+import { loadNewTweets } from "frontend/worker/connect";
 
 const initValue = {
   tweets: Immutable.List<Tweet>(),
-  newestDataidMap: Immutable.Map<string, string>(),
   newestUniqidMap: Immutable.Map<string, number | undefined>(),
   oldestUniqidMap: Immutable.Map<string, number | undefined>(),
   windowLength: 30,
@@ -10,23 +10,19 @@ const initValue = {
   listids: Immutable.List<string>(),
 };
 
-export interface TweetsDetailObj {
-  tweets: Tweet[];
-  newestDataidMap: Record<string, string>;
-  newestUniqidMap: Record<string, number | undefined>;
-  oldestUniqidMap: Record<string, number | undefined>;
-  listids: string[];
-  windowLength: number;
-  currentList: string | undefined;
-}
-
 const BaseRecord = Immutable.Record(initValue);
 
-export class TweetsDetail extends BaseRecord {
-  // 古い順に渡す
-  addTweets(tweets: Tweet[]) {
+export class TweetsManager extends BaseRecord {
+  async getTweets() {
+    if (this.currentList == null)
+      throw new Error("The current list is undefined.");
+    const tweets = await loadNewTweets({
+      currentList: this.currentList,
+      windowLength: this.windowLength,
+      newestUniqid: this.newestUniqidMap.get(this.currentList),
+    });
     // 配列がゼロである可能性を潰して、nextTweets.firstとnextTweets.lastがundefinedである可能性を潰す
-    if (tweets.length === 0) return this;
+    if (tweets.length === 0) throw new Error("The new tweets are nothing.");
     const { tweets: oldTweets } = this;
     const allTweets = oldTweets.push(...tweets);
     const nextTweets =
@@ -36,38 +32,43 @@ export class TweetsDetail extends BaseRecord {
     const newestTweet = nextTweets.last() as Tweet;
     const oldestTweet = nextTweets.first() as Tweet;
     const currentList = newestTweet.listId;
-    return this.set("tweets", nextTweets)
-      .set(
-        "newestDataidMap",
-        this.newestDataidMap.set(currentList, newestTweet.dataid),
-      )
-      .set(
-        "newestUniqidMap",
-        this.newestUniqidMap.set(currentList, newestTweet.uniqid),
-      )
-      .set(
-        "oldestUniqidMap",
-        this.oldestUniqidMap.set(currentList, oldestTweet.uniqid),
-      );
+    return this.set("tweets", nextTweets).mergeDeep({
+      newestDataidMap: {
+        [currentList]: newestTweet.dataid,
+      },
+      newestUniqidMap: {
+        [currentList]: newestTweet.uniqid,
+      },
+      oldestUniqidMap: {
+        [currentList]: oldestTweet.uniqid,
+      },
+    } as any);
   }
 
   removeListid(listid: string) {
-    return this.merge({
-      newestDataidMap: this.newestDataidMap.remove(listid),
+    const result = this.merge({
       newestUniqidMap: this.newestUniqidMap.remove(listid),
       oldestUniqidMap: this.oldestUniqidMap.remove(listid),
+      listids: this.listids.remove(this.listids.indexOf(listid)),
     });
+    if (this.currentList === listid)
+      return result.set("currentList", undefined);
+    return result;
   }
 
   addListid(listid: string) {
     return this.merge({
-      newestDataidMap: this.newestDataidMap.set(listid, "0"),
       newestUniqidMap: this.newestUniqidMap.set(listid, undefined),
       oldestUniqidMap: this.oldestUniqidMap.set(listid, undefined),
+      listids: this.listids.push(listid),
     });
   }
 
-  load(obj: TweetsDetailObj): TweetsDetail {
-    return this.merge(obj as any);
+  deleteAll() {
+    return this.merge({
+      newestUniqidMap: {},
+      oldestUniqidMap: {},
+      tweets: [],
+    } as any);
   }
 }

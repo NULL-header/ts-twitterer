@@ -1,158 +1,94 @@
-/* eslint-disable camelcase */
-import React, {
-  Dispatch,
-  useContext,
-  createContext,
-  memo,
-  useState,
-  useMemo,
-  SetStateAction,
-} from "react";
+import { useEffect, Reducer, useRef } from "react";
+import { createContainer } from "react-tracked";
+import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";
+import { useMount } from "react-use";
 import { GlobalDetail } from "./GlobalDetail";
 
-// const reducer: GlobalReducer = (state, action) => {
-//   switch (action.type) {
-//     case "MODIFY": {
-//       return { ...state, ...action.state };
-//     }
-//     default: {
-//       throw new Error("An error occurred to modify the global state");
-//     }
-//   }
-// };
-
-// interface ReducerArgs {
-//   dispatch: Dispatch<Action>;
-//   signal: AbortSignal;
-//   getState: () => State;
-// }
-
-// const manageDispatch = async (
-//   { dispatch, signal }: ReducerArgs,
-//   effect: () => Promise<Partial<State>>,
-// ) => {
-//   const result = await effect();
-//   if (signal.aborted) return;
-//   dispatch({ type: "MODIFY", state: result });
-// };
-
-// const adjustFlag = async (
-//   flagName: keyof Flags,
-//   { dispatch, signal, getState }: ReducerArgs,
-//   effect: () => Promise<Partial<State> | undefined>,
-// ) => {
-//   const currentFlag = getState()[flagName];
-//   if (currentFlag) {
-//     return;
-//   }
-//   dispatch({ type: "MODIFY", state: { [flagName]: true } });
-//   const result = (await effect()) || {};
-//   if (signal.aborted) return;
-//   dispatch({ type: "MODIFY", state: { ...result, [flagName]: false } });
-// };
-
-// const asyncReducer: GlobalAsyncReducer = {
-//   LOAD_NEW_TWEETS: (args) => async () =>
-//     await adjustFlag("isLoadingTweets", args, async () => {
-//       const { currentList, tweetsDetail } = args.getState();
-//       return await loadNewTweets({
-//         currentList,
-//         tweetsDetailObj: tweetsDetail.toJS(),
-//       });
-//     }),
-//   INITIALIZE: (args) => async () =>
-//     await adjustFlag("isInitializing", args, async () => {
-//       try {
-//         const lastData = ((await initialize()) as any) as State;
-
-//         if (lastData.tweetsDetail != null)
-//           lastData.tweetsDetail = args
-//             .getState()
-//             .tweetsDetail.load(lastData.tweetsDetail);
-//         return lastData;
-//       } catch (e) {}
-//     }),
-//   GET_TWEETS: (args) => async () =>
-//     await adjustFlag("isGettingTweets", args, async () => {
-//       const { listIds, limitData, tweetsDetail } = args.getState();
-//       const obj = await saveTweets({
-//         listIds,
-//         limitData,
-//         newestDataidMapObj: tweetsDetail.newestDataidMap.toJS(),
-//       });
-//       return {
-//         tweetsDetail: tweetsDetail.set("newestDataidMap", Immutable.Map(obj)),
-//       };
-//     }),
-//   DELETE_CACHE_TWEETS: (args) => async () =>
-//     await adjustFlag("isDeletingTweets", args, async () => {
-//       const { tweetsDetail } = args.getState();
-//       const result = await deleteCacheTweetsAll({
-//         tweetsDetailObj: tweetsDetail.toJS(),
-//       });
-//       return { tweetsDetail: tweetsDetail.load(result) };
-//     }),
-//   DELETE_CACHE_CONFIG: (args) => async () =>
-//     await adjustFlag("isDeletingConfigs", args, async () => {
-//       const { tweetsDetail } = args.getState();
-//       const { nextState, tweetsDetailObj } = await deleteCacheConfig();
-//       return { ...nextState, tweetsDetail: tweetsDetail.load(tweetsDetailObj) };
-//     }),
-//   WRITE_CONFIG: (args) => async () =>
-//     await adjustFlag("isWritingConfig", args, async () => {
-//       const state = args.getState();
-//       console.log(state);
-//       saveConfigs(state);
-//       return undefined;
-//     }),
-//   GET_RATE: (args) => async () =>
-//     await manageDispatch(args, async () => {
-//       const response = await fetch(CONSTVALUE.GET_RATE_URL);
-//       const limitData = (await response.json()) as LimitData;
-//       return { limitData };
-//     }),
-//   ADD_LISTIDS: (args) => async ({ listId }) =>
-//     await manageDispatch(args, async () => {
-//       const { listIds } = args.getState();
-//       return {
-//         listIds: [...listIds, listId],
-//       } as State;
-//     }),
-//   DELETE_LISTIDS: (args) => async ({ listId }) => {
-//     await manageDispatch(args, async () => {
-//       const { listIds } = args.getState();
-//       const newListIds = listIds.filter((e) => e !== listId);
-//       return {
-//         listIds: newListIds,
-//       };
-//     });
-//   },
-//   AUTHORISE: ({ getState, dispatch }) => async () => {
-//     const { isAuthorized } = getState();
-//     dispatch({ type: "MODIFY", state: { isAuthorized: !isAuthorized } });
-//   },
-// };
-
-const context = createContext(
-  (null as any) as {
-    globalState: GlobalDetail;
-    setGlobalDetail: Dispatch<SetStateAction<GlobalDetail>>;
-  },
-);
-export const Provider = memo(({ children }) => {
-  const [globalState, setGlobalDetail] = useState(new GlobalDetail());
-  const value = useMemo(
-    () => ({
-      globalState,
-      setGlobalDetail,
-    }),
-    [globalState],
-  );
-  return <context.Provider value={value}>{children}</context.Provider>;
-});
-export const useGlobal = () => useContext(context);
-export const useSetGlobalDetail = () => {
-  const globalValue = useContext(context);
-  const setter = useMemo(() => globalValue.setGlobalDetail, []);
-  return setter;
+const reducer: Reducer<
+  GlobalDetail,
+  { type: "UPDATE"; nextValue: GlobalDetail }
+> = (_, action) => {
+  switch (action.type) {
+    case "UPDATE": {
+      return action.nextValue;
+    }
+    default: {
+      throw new Error("unknown error");
+    }
+  }
 };
+
+type Result = GlobalDetail;
+type AsyncResult =
+  | Promise<GlobalDetail>
+  | (GlobalDetail | Promise<GlobalDetail>)[];
+
+type AsyncAction =
+  | {
+      type: "DISPATCH_ASYNC";
+      updater: (state: GlobalDetail) => Result | AsyncResult;
+    }
+  | {
+      type: "CALL_ASYNC";
+      caller: (voids: ReturnType<GlobalDetail["getVoids"]>) => Promise<void>;
+    };
+
+const asyncReducer: AsyncActionHandlers<typeof reducer, AsyncAction> = {
+  DISPATCH_ASYNC: ({ dispatch, getState, signal }) => async (action) => {
+    const result = action.updater(getState());
+    if (result instanceof GlobalDetail) {
+      dispatch({ type: "UPDATE", nextValue: result });
+    } else if (Array.isArray(result)) {
+      let i = 0;
+      while (i < result.length) {
+        const target = result[i];
+        if (target instanceof GlobalDetail) {
+          dispatch({ type: "UPDATE", nextValue: target });
+        } else {
+          // eslint-disable-next-line no-await-in-loop
+          const awaited = await target;
+          if (signal.aborted) return;
+          dispatch({ type: "UPDATE", nextValue: awaited });
+        }
+        i += 1;
+      }
+    } else {
+      const awaited = await result;
+      if (signal.aborted) return;
+      dispatch({ type: "UPDATE", nextValue: awaited });
+    }
+  },
+  CALL_ASYNC: ({ getState }) => async (action) => {
+    console.log(getState());
+    await action.caller(getState().getVoids());
+  },
+};
+
+export const {
+  Provider,
+  useTracked: useGlobal,
+  useUpdate: useDispatch,
+} = createContainer(() => {
+  const [state, dispatch] = useReducerAsync(
+    reducer,
+    new GlobalDetail(),
+    asyncReducer,
+  );
+  const waiterRef = useRef(false);
+  useEffect(() => {
+    if (state.isLoadingFromDB == null || state.isLoadingFromDB) return;
+    if (!waiterRef.current) {
+      waiterRef.current = true;
+      return;
+    }
+    dispatch({ type: "CALL_ASYNC", caller: (voids) => voids.save() });
+  }, [state]);
+  useMount(() => {
+    dispatch({
+      type: "DISPATCH_ASYNC",
+      updater: (nextState) => nextState.load(),
+    });
+  });
+  // todo usemount load
+  return [state, dispatch] as const;
+});

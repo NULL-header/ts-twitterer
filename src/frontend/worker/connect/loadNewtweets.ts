@@ -1,8 +1,4 @@
 import { CurrentListInitError, ShouldUnupdateError } from "frontend/errors";
-import {
-  TweetsDetailObj,
-  TweetsDetail,
-} from "frontend/components/main/Timeline/TweetsDetail";
 import { db } from "./db";
 
 const loadTweetsFromDB = (
@@ -26,21 +22,23 @@ const loadTweetsAllFromDB = (listId: string, windowLength: number) =>
 
 export const loadNewTweets = async ({
   currentList,
-  tweetsDetailObj,
+  windowLength,
+  newestUniqid,
 }: {
   currentList: string | undefined;
-  tweetsDetailObj: TweetsDetailObj;
+  windowLength: number;
+  newestUniqid: number | undefined;
 }) => {
   if (currentList == null) throw new CurrentListInitError();
-  const tweetsDetail = new TweetsDetail().load(tweetsDetailObj);
-  const { windowLength } = tweetsDetail;
-  const uniqid = tweetsDetail.newestUniqidMap.get(currentList);
   let newTweets: Tweet[];
-  if (uniqid == null)
+  if (newestUniqid == null)
     newTweets = await loadTweetsAllFromDB(currentList, windowLength);
   else
-    newTweets = await loadTweetsFromDB(uniqid, currentList, windowLength / 2);
+    newTweets = await loadTweetsFromDB(
+      newestUniqid,
+      currentList,
+      windowLength / 2,
+    );
   if (newTweets.length === 0) throw new ShouldUnupdateError();
-  const nextDetail = tweetsDetail.addTweets(newTweets);
-  return nextDetail.toJS();
+  return newTweets;
 };

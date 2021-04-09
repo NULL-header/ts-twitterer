@@ -8,15 +8,7 @@ import React, {
   memo,
 } from "react";
 import { Divider, Box, VStack } from "@chakra-ui/react";
-import { delayCall, useConstAsyncTask } from "frontend/util";
-import {
-  loadNewTweets,
-  saveTimelineDetail,
-  loadTimelineDetail,
-} from "frontend/worker/connect";
-import { CurrentListInitError } from "frontend/errors";
-import { useMount } from "react-use";
-import { useAsyncTask } from "react-hooks-async";
+import { delayCall } from "frontend/util";
 import { TimelineDetail } from "./TimelineDetail";
 import { Tweet } from "./Tweet";
 import { ListSelector } from "./ListSelector";
@@ -66,7 +58,7 @@ const useScrollEndEffect = (
 
 const Empty = memo(() => <Box marginTop="50vh" />);
 
-const Tweets = memo<{ tweets: TimelineDetail["tweetsDetail"]["tweets"] }>(
+const Tweets = memo<{ tweets: TimelineDetail["tweetsManager"]["tweets"] }>(
   ({ tweets }) => {
     // firstがundefinedである可能性を潰す
     if (tweets.size === 0) return <>{undefined}</>;
@@ -86,77 +78,26 @@ const Tweets = memo<{ tweets: TimelineDetail["tweetsDetail"]["tweets"] }>(
   },
 );
 
-type Args<T> = T extends (...args: infer A) => any ? A : never;
-
-const updateTweets = async (...args: Args<typeof loadNewTweets>) => {
-  let result;
-  try {
-    result = await loadNewTweets(...args);
-  } catch (e) {
-    if (e instanceof CurrentListInitError) {
-      result = undefined;
-    }
-  }
-  return result;
-};
-
 const TimelineContainer = memo(() => {
-  const { timelineDetail, setTimelineDetail } = useTimelineDetail();
-  const loadTask = useConstAsyncTask(
-    timelineDetail,
-    async ({ signal, getState }) => {
-      const { currentList, tweetsDetail } = getState();
-      const newTweets = await updateTweets({
-        currentList,
-        tweetsDetailObj: tweetsDetail.toJS(),
-      });
-      if (signal.aborted || newTweets == null) return;
-      setTimelineDetail((detail) =>
-        detail.set(
-          "tweetsDetail",
-          detail.tweetsDetail.mergeDeep(newTweets as any),
-        ),
-      );
-    },
+  const [timelineDetail, dispatch] = useTimelineDetail();
+  const loadTweets = useCallback(
+    () =>
+      dispatch({
+        type: "DISPATCH_ASYNC",
+        updater: (state) =>
+          state.updateAsync("tweetsManager", (manager) => manager.getTweets()),
+      }),
+    [],
   );
-  const initLoadTask = useAsyncTask(
-    useCallback(async ({ signal }) => {
-      setTimelineDetail((detail) => detail.set("isLoadingFromDB", true));
-      const nextTimelineDetail = await loadTimelineDetail();
-      if (signal.aborted) return;
-      if (nextTimelineDetail == null) {
-        setTimelineDetail((detail) => detail.set("isLoadingFromDB", false));
-        return;
-      }
-      setTimelineDetail((detail) =>
-        detail
-          .mergeDeep(nextTimelineDetail as any)
-          .set("isLoadingFromDB", false),
-      );
-    }, []),
-  );
-  const tweets = useMemo(() => timelineDetail.tweetsDetail.tweets, [
-    timelineDetail.tweetsDetail.tweets,
+  const tweets = useMemo(() => timelineDetail.tweetsManager.tweets, [
+    timelineDetail.tweetsManager.tweets,
   ]);
   const ref = useRef<HTMLDivElement | null>(null);
-  useScrollEndEffect(ref as any, () => loadTask.start());
+  useScrollEndEffect(ref as any, () => loadTweets());
   useEffect(() => {
     if (tweets.size !== 0) return;
-    loadTask.start();
+    loadTweets();
   }, [tweets]);
-  useEffect(() => {
-    if (
-      timelineDetail.isLoadingFromDB == null ||
-      timelineDetail.isLoadingFromDB
-    ) {
-      return;
-    }
-    console.log("save timelineDetail");
-    saveTimelineDetail(timelineDetail.toJS());
-  }, [timelineDetail]);
-  useMount(() => {
-    initLoadTask.start();
-  });
 
   return (
     <>

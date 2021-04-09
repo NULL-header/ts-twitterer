@@ -1,7 +1,7 @@
-import { TimelineDetail } from "frontend/components/main/Timeline/TimelineDetail";
+import { TweetsManager } from "frontend/components/main/Timeline/TweetsManager";
 import { db } from "./db";
 
-type TimelineObj = ReturnType<typeof TimelineDetail.prototype.toJS>;
+type TimelineObj = ReturnType<typeof TweetsManager.prototype.toJS>;
 
 export const saveTimelineDetail = async (obj: TimelineObj) => {
   await db.timelineDetail.put({ uniqid: 0, lastData: obj });
@@ -9,5 +9,6 @@ export const saveTimelineDetail = async (obj: TimelineObj) => {
 
 export const loadTimelineDetail = async () => {
   const result = await db.timelineDetail.get(0);
-  return result?.lastData;
+  if (result == null) throw new Error("The last tweet data is nothing.");
+  return result.lastData;
 };

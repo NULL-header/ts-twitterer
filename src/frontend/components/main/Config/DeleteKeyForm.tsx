@@ -1,26 +1,20 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useBool } from "frontend/util";
-import { useAsyncTask } from "react-hooks-async";
 import { Box, Button } from "@chakra-ui/react";
 import { useUpdateEffect } from "react-use";
 import { HeaddingCommon } from "frontend/components/ConfigBase";
-import { useSetGlobalDetail } from "frontend/globalState";
+import { useDispatch } from "frontend/globalState";
 
 export const DeleteKeyForm = React.memo(() => {
   const [isFired, fire] = useBool(false);
-  const setGlobalDetail = useSetGlobalDetail();
-  const authTask = useAsyncTask(
-    useCallback(async ({ signal }) => {
-      await fetch("/api/auth/delete", { method: "POST" });
-      if (signal.aborted) return;
-      setGlobalDetail((state) =>
-        state.set("globalData", state.globalData.set("isAuthorized", false)),
-      );
-    }, []),
-  );
+  const dispatch = useDispatch();
   useUpdateEffect(() => {
     if (!isFired) return;
-    authTask.start();
+    dispatch({
+      type: "DISPATCH_ASYNC",
+      updater: (state) =>
+        state.updateAsync("authManager", (manager) => manager.unauth()),
+    });
   }, [isFired]);
   return (
     <Box>
